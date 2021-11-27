@@ -36,6 +36,8 @@ function Example() {
     const draw = (p: p5Types) => {
         p.background('#8B4513'); //brown background hex #8B4513
 
+        const w = img.w
+
         for (let i = 0; i < 10; i++) {
             const xRand = p.random(0, canvasSize * 0.9);
             const yRand = p.random(0, canvasSize * 0.9);
