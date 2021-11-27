@@ -24,19 +24,12 @@ function Example() {
         p.noLoop();
     };
 
-    const drawTarget = (p, xloc, yloc, size, num) => {
-        const grayvalues = 255 / num;
-        const steps = size / num;
-        for (let i = 0; i < num; i++) {
-            p.fill(i * grayvalues);
-            p.ellipse(xloc, yloc, size - i * steps, size - i * steps);
-        }
-    };
-
     const draw = (p: p5Types) => {
         p.background('#8B4513'); //brown background hex #8B4513
 
-        const w = img.w
+        const w = img.width;
+        const h = img.height;
+        
 
         for (let i = 0; i < 10; i++) {
             const xRand = p.random(0, canvasSize * 0.9);
