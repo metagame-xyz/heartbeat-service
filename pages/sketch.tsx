@@ -8,7 +8,7 @@ const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
 });
 
 function Example() {
-    const canvasSize = 600;
+    const canvasSize = 800;
     let x = 50;
     const y = 50;
     let img: p5Types.Image;
@@ -27,14 +27,14 @@ function Example() {
     const draw = (p: p5Types) => {
         p.background('#8B4513'); //brown background hex #8B4513
 
-        const w = img.width;
-        const h = img.height;
-        
+        const sizer = 4;
+        const w = img.width / sizer;
+        const h = img.height / sizer;
 
         for (let i = 0; i < 10; i++) {
             const xRand = p.random(0, canvasSize * 0.9);
             const yRand = p.random(0, canvasSize * 0.9);
-            p.image(img, xRand, yRand, img.width / 6, img.height / 6);
+            p.image(img, xRand, yRand, w, h);
         }
     };
     return (
