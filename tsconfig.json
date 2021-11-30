@@ -22,6 +22,6 @@
             "@utils": ["utils/index.ts"]
         }
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/api/v1/dev/three-png.ts"],
     "exclude": ["node_modules"]
 }

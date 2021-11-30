@@ -11,10 +11,10 @@ function Example() {
     const canvasSize = 800;
     let x = 50;
     const y = 50;
-    let img: p5Types.Image;
+    let flowerImg: p5Types.Image;
 
     const preload = (p: p5Types) => {
-        img = p.loadImage('/Flower.png');
+        flowerImg = p.loadImage('/Flower.png');
     };
 
     //See annotations in JS for more information
@@ -24,19 +24,26 @@ function Example() {
         p.noLoop();
     };
 
+    const drawFlower = (p: p5Types, xRand, yRand, w, h) => {
+        p.image(flowerImg, xRand, yRand, w, h);
+    };
+
     const draw = (p: p5Types) => {
         p.background('#8B4513'); //brown background hex #8B4513
 
         const sizer = 4;
-        const w = img.width / sizer;
-        const h = img.height / sizer;
+        const w = flowerImg.width / sizer;
+        console.log(w);
+        const h = flowerImg.height / sizer;
+        console.log(h);
 
         for (let i = 0; i < 10; i++) {
             const xRand = p.random(0, canvasSize * 0.9);
             const yRand = p.random(0, canvasSize * 0.9);
-            p.image(img, xRand, yRand, w, h);
+            drawFlower(p, xRand, yRand, w, h);
         }
     };
+
     return (
         <Box align="center" m="4">
             <Sketch setup={setup} draw={draw} preload={preload} />
