@@ -15,6 +15,8 @@ import { useEthereum } from '@providers/EthereumProvider';
 
 import { Etherscan, Logo, Opensea, Twitter } from '@components/Icons';
 
+import { copy } from '@utils/content';
+
 function Navbar(props) {
     const { userName, openWeb3Modal, avatarUrl } = useEthereum();
 
@@ -34,7 +36,7 @@ function Navbar(props) {
                     <Logo boxSize={10} />
                     {showName && (
                         <Heading as="h1" fontSize="34px">
-                            Birthblock
+                            {copy.title}
                         </Heading>
                     )}
                 </HStack>

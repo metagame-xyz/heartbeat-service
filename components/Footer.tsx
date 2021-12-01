@@ -21,7 +21,8 @@ export default function Footer(props) {
                         {`code & art by `}
                         <Link isExternal href="https://www.twitter.com/brennerspear">
                             brenner.eth
-                        </Link>
+                        </Link>{' '}
+                        {` & damngraham.eth`}
                     </Text>
                 </Flex>
                 <Stack

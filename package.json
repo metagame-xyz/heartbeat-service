@@ -6,7 +6,8 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "vercel-build": "yum install libuuid-devel libmount-devel wget && cp /lib64/{libuuid,libmount,libblkid}.so.1 node_modules/canvas/build/Release/ && ./setup.sh && npm run build"
     },
     "dependencies": {
         "@chakra-ui/icons": "^1.0.16",
