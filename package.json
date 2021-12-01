@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
-        "start": "next start",
+        "start": "next start --port ${PORT-3000}",
         "lint": "next lint",
         "vercel-install": "yum update -y && yum install xserver-xorg-dev libxi-dev libxext-dev -y && yarn install"
     },
@@ -30,7 +30,6 @@
         "glslify-loader": "^2.0.0",
         "ioredis": "^4.27.9",
         "next": "11.1.2",
-        "node-canvas-webgl": "^0.2.6",
         "node-fetch-retry": "^2.0.0",
         "node-p5": "^1.0.4",
         "p5": "^1.4.0",
