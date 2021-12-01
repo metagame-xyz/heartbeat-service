@@ -5,9 +5,8 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
-        "start": "next start --port ${PORT-3000}",
-        "lint": "next lint",
-        "vercel-install": "yum update -y && yum install xserver-xorg-dev libxi-dev libxext-dev -y && yarn install"
+        "start": "next start",
+        "lint": "next lint"
     },
     "dependencies": {
         "@chakra-ui/icons": "^1.0.16",
