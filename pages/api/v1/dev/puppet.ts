@@ -1,42 +1,40 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import chrome from 'chrome-aws-lambda';
+import { writeFileSync } from 'fs';
+// import type { NextApiRequest, NextApiResponse } from 'next';
+import puppeteer from 'puppeteer-core';
 
-const puppeteer = require('puppeteer-core');
-const chrome = require('chrome-aws-lambda');
+export default async function handler(req, res) {
+    const url = `https://www.birthblock.art/`;
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    // const browser = await puppeteer.launch(
-    //     process.env.NODE_ENV === 'production'
-    //         ? {
-    //               args: chrome.args,
-    //               executablePath: await chrome.executablePath,
-    //               headless: chrome.headless,
-    //           }
-    //         : {},
-    // );
+    const browser = await puppeteer.launch(
+        process.env.NODE_ENV === 'production'
+            ? {
+                  args: chrome.args,
+                  executablePath: await chrome.executablePath,
+                  headless: chrome.headless,
+              }
+            : {},
+    );
 
-    // const page = await browser.newPage();
-    // page.setUserAgent(
-    //     'Opera/9.80 (J2ME/MIDP; Opera Mini/5.1.21214/28.2725; U; ru) Presto/2.8.119 Version/11.10',
-    // );
-    // await page.goto(`https://m.youtube.com/${slug}/videos`);
+    const page = await browser.newPage();
+    page.setUserAgent(
+        'Opera/9.80 (J2ME/MIDP; Opera Mini/5.1.21214/28.2725; U; ru) Presto/2.8.119 Version/11.10',
+    );
 
-    // let content = await page.content();
-    // var $ = cheerio.load(content);
-    // $.prototype.exists = function (selector) {
-    //     return this.find(selector).length > 0;
-    // };
+    await page.goto(url);
+    await page.waitForTimeout(600);
+    let img = await page.screenshot({
+        // Screenshot the website using defined options
+        fullPage: true,
+        type: 'jpeg',
+        quality: 80,
+    });
+    await page.close(); // Close the website so app won't get crashed due to memory overload
 
-    let id = null;
-    // const isLive = $('body').exists('[data-style="LIVE"]');
-    // if (isLive) {
-    //     const url = $('ytm-compact-video-renderer .compact-media-item-image').attr('href');
-    //     const arr = url.split('?v=');
-    //     id = arr[1];
-    // }
-
-    // await browser.close();
+    await browser.close();
 
     res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ id }));
+    res.setHeader('Content-Type', 'image/png');
+    // writeFileSync('threejs-cube.png', img);
+    res.send(img);
 }
