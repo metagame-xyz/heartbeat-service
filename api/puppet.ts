@@ -37,7 +37,4 @@ module.exports = async (req, res) => {
         'Content-Length': Buffer.byteLength(img),
     });
     res.end(img);
-
-    // writeFileSync('threejs-cube.png', img);
-    res.end(img);
 };
