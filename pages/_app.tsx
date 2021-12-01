@@ -2,6 +2,7 @@ import { ChakraProvider, extendTheme, Flex } from '@chakra-ui/react';
 import '@fontsource/courier-prime';
 import '@fontsource/lato';
 import type { AppProps } from 'next/app';
+import { useRouter } from 'next/router';
 
 import Layout from '@components/Layout';
 
@@ -43,7 +44,12 @@ const theme = extendTheme({
 const bgSize = ['100px', '120px', '220px', '300px'];
 
 function App({ Component, pageProps }: AppProps): JSX.Element {
-    return (
+    const { route } = useRouter();
+    console.log('router', route);
+
+    const Page = route.includes('viewer') ? (
+        <Component {...pageProps} />
+    ) : (
         <ChakraProvider theme={theme}>
             <EthereumProvider>
                 <Flex
@@ -69,6 +75,7 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
             </EthereumProvider>
         </ChakraProvider>
     );
+    return Page;
 }
 
 export default App;
