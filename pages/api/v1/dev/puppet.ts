@@ -1,12 +1,12 @@
 import chrome from 'chrome-aws-lambda';
 import { writeFileSync } from 'fs';
+
 // import type { NextApiRequest, NextApiResponse } from 'next';
-import puppeteer from 'puppeteer-core';
 
 export default async function handler(req, res) {
     const url = `https://www.birthblock.art/`;
 
-    const browser = await puppeteer.launch(
+    const browser = await chrome.puppeteer.launch(
         process.env.NODE_ENV === 'production'
             ? {
                   args: chrome.args,
