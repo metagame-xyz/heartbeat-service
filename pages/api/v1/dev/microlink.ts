@@ -14,7 +14,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const imgdataResponse = await fetch((data as any).screenshot.url);
     const imgdata = await imgdataResponse.buffer();
-    fs.writeFileSync('test.png', imgdata);
+
+    // fs.writeFileSync('test.png', imgdata);
     res.setHeader('Content-Type', 'image/jpg');
     res.send(imgdata);
 }
