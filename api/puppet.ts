@@ -15,7 +15,6 @@ module.exports = async (req, res) => {
               }
             : {},
     );
-
     const page = await browser.newPage();
     page.setUserAgent(
         'Opera/9.80 (J2ME/MIDP; Opera Mini/5.1.21214/28.2725; U; ru) Presto/2.8.119 Version/11.10',
@@ -33,8 +32,12 @@ module.exports = async (req, res) => {
 
     await browser.close();
 
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'image/png');
+    res.writeHead(200, {
+        'Content-Type': 'image/png',
+        'Content-Length': Buffer.byteLength(img),
+    });
+    res.end(img);
+
     // writeFileSync('threejs-cube.png', img);
-    res.send(img);
+    res.end(img);
 };
