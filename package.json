@@ -7,7 +7,7 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "vercel-install": "yum install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev && yarn install"
+        "vercel-install": "yum update -y && yum install xserver-xorg-dev libxi-dev libxext-dev -y && yarn install"
     },
     "dependencies": {
         "@chakra-ui/icons": "^1.0.16",
@@ -30,6 +30,7 @@
         "glslify-loader": "^2.0.0",
         "ioredis": "^4.27.9",
         "next": "11.1.2",
+        "node-canvas-webgl": "^0.2.6",
         "node-fetch-retry": "^2.0.0",
         "node-p5": "^1.0.4",
         "p5": "^1.4.0",
