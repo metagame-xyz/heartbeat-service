@@ -5,9 +5,11 @@ import { writeFileSync } from 'fs';
 
 module.exports = async (req, res) => {
     const url = `https://www.birthblock.art/`;
+    const NODE_ENV = process.env.NODE_ENV;
+    console.log(NODE_ENV);
 
     const browser = await chrome.puppeteer.launch(
-        process.env.NODE_ENV === 'production'
+        NODE_ENV === 'production' || 'staging'
             ? {
                   args: chrome.args,
                   executablePath: await chrome.executablePath,
