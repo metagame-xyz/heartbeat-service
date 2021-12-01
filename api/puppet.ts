@@ -3,7 +3,7 @@ import { writeFileSync } from 'fs';
 
 // import type { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
     const url = `https://www.birthblock.art/`;
 
     const browser = await chrome.puppeteer.launch(
@@ -37,4 +37,4 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'image/png');
     // writeFileSync('threejs-cube.png', img);
     res.send(img);
-}
+};
