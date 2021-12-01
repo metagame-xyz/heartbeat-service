@@ -99,6 +99,7 @@ export class Viewer {
         this.renderer.outputEncoding = sRGBEncoding;
         this.renderer.setClearColor(0xcccccc);
         this.renderer.setPixelRatio(window.devicePixelRatio);
+        console.log('el', el, el.clientHeight, el.clientWidth);
         this.renderer.setSize(el.clientWidth, el.clientHeight);
 
         this.pmremGenerator = new PMREMGenerator(this.renderer);
@@ -147,7 +148,7 @@ export class Viewer {
     }
 
     resize() {
-        console.log('resize', this.el.parentElement);
+        console.log('resize', this.el);
         const { clientHeight, clientWidth } = this.el.parentElement;
 
         this.defaultCamera.aspect = clientWidth / clientHeight;
