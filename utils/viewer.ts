@@ -77,8 +77,6 @@ export class Viewer {
         ambientColor: number;
         directIntensity: number;
         directColor: number;
-        bgColor1: string;
-        bgColor2: string;
     };
 
     prevTime: number;
@@ -116,8 +114,6 @@ export class Viewer {
             ambientColor: 0xffffff,
             directIntensity: 0.8 * Math.PI, // TODO(#116)
             directColor: 0xffffff,
-            bgColor1: '#ffffff',
-            bgColor2: '#353535',
         };
 
         this.prevTime = 0;
@@ -406,8 +402,6 @@ export class Viewer {
         const dispFolder = gui.addFolder('Display');
         dispFolder.add(this.controls, 'autoRotate');
         dispFolder.add(this.controls, 'screenSpacePanning');
-        const bgColor1Ctrl = dispFolder.addColor(this.state, 'bgColor1');
-        const bgColor2Ctrl = dispFolder.addColor(this.state, 'bgColor2');
         // Lighting controls.
         const lightFolder = gui.addFolder('Lighting');
         const encodingCtrl = lightFolder.add(this.state, 'textureEncoding', ['sRGB', 'Linear']);
