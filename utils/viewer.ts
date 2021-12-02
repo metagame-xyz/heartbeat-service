@@ -63,7 +63,6 @@ export class Viewer {
     lights: Light[];
     content: Group | Object3D<Event>;
     mixer: AnimationMixer;
-    clips: AnimationClip[];
     gui: GUI;
     state: {
         camera: string;
@@ -96,7 +95,6 @@ export class Viewer {
         this.lights = [];
         this.content = null;
         this.mixer = null;
-        this.clips = [];
         this.gui = null;
 
         this.state = {
@@ -195,7 +193,6 @@ export class Viewer {
                 `/${modelName}.glb`,
                 (gltf) => {
                     const scene = gltf.scene || gltf.scenes[0];
-                    const clips = gltf.animations || [];
 
                     if (!scene) {
                         // Valid, but not supported by this viewer.
@@ -204,7 +201,7 @@ export class Viewer {
                                 ' it may contain individual 3D resources.',
                         );
                     }
-                    this.setContent(scene, clips);
+                    this.setContent(scene);
                     resolve(gltf);
                 },
                 undefined,
@@ -212,12 +209,8 @@ export class Viewer {
             );
         });
     }
-
-    /**
-     * @param {THREE.Object3D} object
-     * @param {Array<THREE.AnimationClip} clips
-     */
-    setContent(object: Object3D<Event> | Group, clips: AnimationClip[]) {
+    
+    setContent(object: Object3D<Event> | Group) {
         this.clear();
 
         const box = new Box3().setFromObject(object);
@@ -264,8 +257,6 @@ export class Viewer {
             }
         });
 
-        this.setClips(clips);
-
         this.updateLights();
         this.updateTextureEncoding();
 
@@ -278,29 +269,6 @@ export class Viewer {
         console.group(' <' + node.type + '> ' + node.name);
         node.children.forEach((child: any) => this.printGraph(child));
         console.groupEnd();
-    }
-
-    /**
-     * @param {Array<THREE.AnimationClip} clips
-     */
-    setClips(clips: AnimationClip[]) {
-        if (this.mixer) {
-            this.mixer.stopAllAction();
-            this.mixer.uncacheRoot(this.mixer.getRoot());
-            this.mixer = null;
-        }
-
-        this.clips = clips;
-        if (!clips.length) return;
-
-        this.mixer = new AnimationMixer(this.content);
-    }
-
-    playAllClips() {
-        this.clips.forEach((clip: AnimationClip) => {
-            this.mixer.clipAction(clip).reset().play();
-            this.state.actionStates[clip.name] = true;
-        });
     }
 
     updateTextureEncoding() {
