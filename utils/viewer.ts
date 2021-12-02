@@ -82,7 +82,6 @@ export class Viewer {
     prevTime: number;
     scene: Scene;
     defaultCamera: PerspectiveCamera;
-    activeCamera: any;
     renderer: WebGLRenderer;
     pmremGenerator: PMREMGenerator;
     controls: OrbitControls;
@@ -127,7 +126,6 @@ export class Viewer {
             0.01,
             1000,
         );
-        this.activeCamera = this.defaultCamera;
         this.scene.add(this.defaultCamera);
         // const canvas = createCanvas(el.clientWidth, el.clientHeight);
 
@@ -143,9 +141,6 @@ export class Viewer {
         this.pmremGenerator.compileEquirectangularShader();
 
         this.controls = new OrbitControls(this.defaultCamera, this.renderer.domElement);
-        this.controls.autoRotate = false;
-        this.controls.autoRotateSpeed = -10;
-        this.controls.screenSpacePanning = true;
 
         this.el.appendChild(this.renderer.domElement);
 
@@ -173,7 +168,7 @@ export class Viewer {
     }
 
     render() {
-        this.renderer.render(this.scene, this.activeCamera);
+        this.renderer.render(this.scene, this.defaultCamera);
     }
 
     resize() {
@@ -250,8 +245,6 @@ export class Viewer {
             this.defaultCamera.lookAt(center);
         }
 
-        this.setCamera(DEFAULT_CAMERA);
-
         this.controls.saveState();
 
         this.scene.add(object);
@@ -274,7 +267,6 @@ export class Viewer {
         this.setClips(clips);
 
         this.updateLights();
-        this.updateGUI();
         this.updateTextureEncoding();
 
         window.content = this.content;
@@ -309,24 +301,6 @@ export class Viewer {
             this.mixer.clipAction(clip).reset().play();
             this.state.actionStates[clip.name] = true;
         });
-    }
-
-    /**
-     * @param {string} name
-     */
-    setCamera(name: string) {
-        if (name === DEFAULT_CAMERA) {
-            this.controls.enabled = true;
-            this.activeCamera = this.defaultCamera;
-        } else {
-            this.controls.enabled = false;
-            // @ts-ignore
-            this.content.traverse((node: { isCamera: any; name: any }) => {
-                if (node.isCamera && node.name === name) {
-                    this.activeCamera = node;
-                }
-            });
-        }
     }
 
     updateTextureEncoding() {
@@ -397,11 +371,6 @@ export class Viewer {
 
     addGUI() {
         const gui = (this.gui = new GUI({ autoPlace: false, width: 260, hideable: true }));
-
-        // Display controls.
-        const dispFolder = gui.addFolder('Display');
-        dispFolder.add(this.controls, 'autoRotate');
-        dispFolder.add(this.controls, 'screenSpacePanning');
         // Lighting controls.
         const lightFolder = gui.addFolder('Lighting');
         const encodingCtrl = lightFolder.add(this.state, 'textureEncoding', ['sRGB', 'Linear']);
@@ -432,27 +401,6 @@ export class Viewer {
         guiWrap.classList.add('gui-wrap');
         guiWrap.appendChild(gui.domElement);
         gui.open();
-    }
-
-    updateGUI() {
-        this.cameraFolder.domElement.style.display = 'none';
-
-        const cameraNames = [];
-        // @ts-ignore
-        this.content.traverse((node: { isCamera: any; name: string }) => {
-            if (node.isCamera) {
-                node.name = node.name || `VIEWER__camera_${cameraNames.length + 1}`;
-                cameraNames.push(node.name);
-            }
-        });
-
-        if (cameraNames.length) {
-            this.cameraFolder.domElement.style.display = '';
-            if (this.cameraCtrl) this.cameraCtrl.remove();
-            const cameraOptions = [DEFAULT_CAMERA].concat(cameraNames);
-            this.cameraCtrl = this.cameraFolder.add(this.state, 'camera', cameraOptions);
-            this.cameraCtrl.onChange((name: any) => this.setCamera(name));
-        }
     }
 
     clear() {
