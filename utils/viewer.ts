@@ -13,6 +13,7 @@ import {
     LinearEncoding,
     LoaderUtils,
     LoadingManager,
+    Mesh,
     Object3D,
     PerspectiveCamera,
     PMREMGenerator,
@@ -20,7 +21,6 @@ import {
     Scene,
     sRGBEncoding,
     TextureEncoding,
-    UnsignedByteType,
     Vector3,
     WebGLRenderer,
 } from 'three';
@@ -30,9 +30,6 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-
-import { environments } from './environment/index.js';
-import { createBackground } from './lib/three-vignette.js';
 
 declare global {
     interface Window {
@@ -70,7 +67,6 @@ export class Viewer {
     gui: GUI;
     state: {
         camera: string;
-        environment: string;
         background: boolean;
         playbackSpeed: number;
         actionStates: { [key: string]: boolean };
@@ -92,7 +88,7 @@ export class Viewer {
     renderer: WebGLRenderer;
     pmremGenerator: PMREMGenerator;
     controls: OrbitControls;
-    vignette: any;
+
     cameraCtrl: any;
     cameraFolder: any;
 
@@ -107,11 +103,7 @@ export class Viewer {
         this.gui = null;
 
         this.state = {
-            environment:
-                options.preset === Preset.ASSET_GENERATOR
-                    ? environments.find((e) => e.id === 'footprint-court').name
-                    : environments[1].name,
-            background: true,
+            background: false,
             playbackSpeed: 1.0,
             actionStates: {},
             camera: DEFAULT_CAMERA,
@@ -141,7 +133,6 @@ export class Viewer {
         );
         this.activeCamera = this.defaultCamera;
         this.scene.add(this.defaultCamera);
-
         // const canvas = createCanvas(el.clientWidth, el.clientHeight);
 
         this.renderer = window.renderer = new WebGLRenderer({ antialias: true });
@@ -159,14 +150,6 @@ export class Viewer {
         this.controls.autoRotate = false;
         this.controls.autoRotateSpeed = -10;
         this.controls.screenSpacePanning = true;
-
-        this.vignette = createBackground({
-            aspect: this.defaultCamera.aspect,
-            grainScale: 0.001,
-            colors: [this.state.bgColor1, this.state.bgColor2],
-        });
-        this.vignette.name = 'Vignette';
-        this.vignette.renderOrder = -1;
 
         this.el.appendChild(this.renderer.domElement);
 
@@ -203,7 +186,6 @@ export class Viewer {
 
         this.defaultCamera.aspect = clientWidth / clientHeight;
         this.defaultCamera.updateProjectionMatrix();
-        this.vignette.style({ aspect: this.defaultCamera.aspect });
         this.renderer.setSize(clientWidth, clientHeight);
     }
 
@@ -282,10 +264,10 @@ export class Viewer {
         this.state.addLights = true;
 
         this.content.traverse((node) => {
-            if ((<THREE.Light> node).isLight) {
+            if ((<Light> node).isLight) {
                 this.state.addLights = false;
 
-            } else if ((<THREE.Mesh> node).isMesh) {
+            } else if ((<Mesh> node).isMesh) {
                 // TODO(https://github.com/mrdoob/three.js/pull/18235): Clean up.
 
                 // @ts-ignore
@@ -297,7 +279,6 @@ export class Viewer {
 
         this.updateLights();
         this.updateGUI();
-        this.updateEnvironment();
         this.updateTextureEncoding();
 
         window.content = this.content;
@@ -418,48 +399,6 @@ export class Viewer {
         this.lights.length = 0;
     }
 
-    updateEnvironment() {
-        const environment = environments.filter(
-            (entry) => entry.name === this.state.environment,
-        )[0];
-
-        this.getCubeMapTexture(environment).then(({ envMap }) => {
-            if ((!envMap || !this.state.background) && this.activeCamera === this.defaultCamera) {
-                this.scene.add(this.vignette);
-            } else {
-                this.scene.remove(this.vignette);
-            }
-
-            this.scene.environment = envMap;
-            this.scene.background = this.state.background ? envMap : null;
-        });
-    }
-
-    getCubeMapTexture(environment: { id?: string; name?: string; path: any; format?: string }) {
-        const { path } = environment;
-
-        // no envmap
-        if (!path) return Promise.resolve({ envMap: null });
-
-        return new Promise((resolve, reject) => {
-            new RGBELoader().setDataType(UnsignedByteType).load(
-                path,
-                (texture) => {
-                    const envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
-                    this.pmremGenerator.dispose();
-
-                    resolve({ envMap });
-                },
-                undefined,
-                reject,
-            );
-        });
-    }
-
-    updateBackground() {
-        this.vignette.style({ colors: [this.state.bgColor1, this.state.bgColor2] });
-    }
-
     addGUI() {
         const gui = (this.gui = new GUI({ autoPlace: false, width: 260, hideable: true }));
 
@@ -469,9 +408,6 @@ export class Viewer {
         dispFolder.add(this.controls, 'screenSpacePanning');
         const bgColor1Ctrl = dispFolder.addColor(this.state, 'bgColor1');
         const bgColor2Ctrl = dispFolder.addColor(this.state, 'bgColor2');
-        bgColor1Ctrl.onChange(() => this.updateBackground());
-        bgColor2Ctrl.onChange(() => this.updateBackground());
-
         // Lighting controls.
         const lightFolder = gui.addFolder('Lighting');
         const encodingCtrl = lightFolder.add(this.state, 'textureEncoding', ['sRGB', 'Linear']);
@@ -484,12 +420,6 @@ export class Viewer {
                     material.needsUpdate = true;
                 });
             });
-        const envMapCtrl = lightFolder.add(
-            this.state,
-            'environment',
-            environments.map((env) => env.name),
-        );
-        envMapCtrl.onChange(() => this.updateEnvironment());
         [
             lightFolder.add(this.state, 'exposure', 0, 2),
             lightFolder.add(this.state, 'addLights').listen(),
