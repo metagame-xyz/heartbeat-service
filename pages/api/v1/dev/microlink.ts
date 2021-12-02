@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
     console.log(data);
 
-    const imgdataResponse = await fetch((data as any).screenshot.url);
+    const imgdataResponse = await fetch(data.screenshot.url);
     const imgdata = await imgdataResponse.buffer();
 
     // fs.writeFileSync('test.png', imgdata);

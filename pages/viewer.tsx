@@ -32,12 +32,11 @@ function ViewerPage() {
         // sceneEl.appendChild(viewerEl);
         const options = {};
         let viewer = new Viewer(viewerEl, options);
-        viewer.load('Hydrangea');
+        viewer.load('Hydrangea2');
     }, []);
 
     return (
         <div>
-            <h1>Viewer</h1>
             <main className="wrap" style={wrapStyles}>
                 <div className="scene" style={sceneStyles}>
                     <div id="viewer" className="viewer" style={viewerStyles}></div>

@@ -45,9 +45,8 @@ const bgSize = ['100px', '120px', '220px', '300px'];
 
 function App({ Component, pageProps }: AppProps): JSX.Element {
     const { route } = useRouter();
-    console.log('router', route);
 
-    const Page = route.includes('viewer') ? (
+    return route.includes('viewer') ? (
         <Component {...pageProps} />
     ) : (
         <ChakraProvider theme={theme}>
@@ -75,7 +74,6 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
             </EthereumProvider>
         </ChakraProvider>
     );
-    return Page;
 }
 
 export default App;
