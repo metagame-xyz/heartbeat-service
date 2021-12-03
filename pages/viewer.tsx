@@ -27,12 +27,9 @@ function ViewerPage() {
         let spinnerEl = el.querySelector('.spinner');
         let sceneEl = el.querySelector('.scene');
         let viewerEl = document.getElementById('viewer');
-        // viewerEl.classList.add('viewer');
-        // sceneEl.innerHTML = '';
-        // sceneEl.appendChild(viewerEl);
-        const options = {};
-        let viewer = new Viewer(viewerEl, options);
+        let viewer = new Viewer(viewerEl);
         viewer.load('Hydrangea2');
+        viewer.load('lowPolyFlower');
     }, []);
 
     return (

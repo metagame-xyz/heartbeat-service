@@ -1,35 +1,22 @@
 import { GUI } from 'dat.gui';
 import {
     AmbientLight,
-    AnimationClip,
-    AnimationMixer,
     Box3,
     Cache,
     DirectionalLight,
     Event,
     Group,
-    HemisphereLight,
     Light,
-    LinearEncoding,
-    LoaderUtils,
     LoadingManager,
-    Mesh,
     Object3D,
     PerspectiveCamera,
-    PMREMGenerator,
-    REVISION,
     Scene,
     sRGBEncoding,
-    TextureEncoding,
     Vector3,
     WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
 declare global {
     interface Window {
@@ -38,37 +25,21 @@ declare global {
     }
 }
 
-const DEFAULT_CAMERA = '[default]';
-
-const MANAGER = new LoadingManager();
-const THREE_PATH = `https://unpkg.com/three@0.${REVISION}.x`;
-const DRACO_LOADER = new DRACOLoader(MANAGER).setDecoderPath(
-    `${THREE_PATH}/examples/js/libs/draco/gltf/`,
-);
-const KTX2_LOADER = new KTX2Loader(MANAGER).setTranscoderPath(
-    `${THREE_PATH}/examples/js/libs/basis/`,
-);
-
-const Preset = { ASSET_GENERATOR: 'assetgenerator' };
-
 Cache.enabled = true;
 
 export class Viewer {
     el: HTMLElement;
-    options: {
-        preset?: any;
-        kiosk?: any;
-        cameraPosition?: number[] | ArrayLike<number>;
-    };
+
+    scene: Scene;
+    camera: PerspectiveCamera;
+    renderer: WebGLRenderer;
+    controls: OrbitControls;
+
     lights: Light[];
-    content: Group | Object3D<Event>;
-    mixer: AnimationMixer;
     gui: GUI;
     state: {
-        camera: string;
         background: boolean;
         playbackSpeed: number;
-        actionStates: { [key: string]: boolean };
         addLights: boolean;
         exposure: number;
         textureEncoding: string; // should be TextureEncoding maybe
@@ -78,30 +49,14 @@ export class Viewer {
         directColor: number;
     };
 
-    prevTime: number;
-    scene: Scene;
-    defaultCamera: PerspectiveCamera;
-    renderer: WebGLRenderer;
-    pmremGenerator: PMREMGenerator;
-    controls: OrbitControls;
-
-    cameraCtrl: any;
-    cameraFolder: any;
-
-    constructor(el: HTMLElement, options: { preset?: any; kiosk?: any }) {
+    constructor(el: HTMLElement) {
         this.el = el;
-        this.options = options;
-
         this.lights = [];
-        this.content = null;
-        this.mixer = null;
         this.gui = null;
 
         this.state = {
             background: false,
             playbackSpeed: 1.0,
-            actionStates: {},
-            camera: DEFAULT_CAMERA,
 
             // Lights
             addLights: true,
@@ -113,81 +68,45 @@ export class Viewer {
             directColor: 0xffffff,
         };
 
-        this.prevTime = 0;
-
         this.scene = new Scene();
 
-        const fov = options.preset === Preset.ASSET_GENERATOR ? (0.8 * 180) / Math.PI : 60;
-        this.defaultCamera = new PerspectiveCamera(
-            fov,
-            el.clientWidth / el.clientHeight,
-            0.01,
-            1000,
-        );
-        this.scene.add(this.defaultCamera);
-        // const canvas = createCanvas(el.clientWidth, el.clientHeight);
+        this.camera = new PerspectiveCamera(60, el.clientWidth / el.clientHeight, 0.01, 1000);
+        this.scene.add(this.camera);
 
-        this.renderer = window.renderer = new WebGLRenderer({ antialias: true });
-        this.renderer.physicallyCorrectLights = true;
+        this.renderer = new WebGLRenderer({ antialias: true });
+        // this.renderer.physicallyCorrectLights = true;  // TODO add to options
         this.renderer.outputEncoding = sRGBEncoding;
-        this.renderer.setClearColor(0xcccccc);
+        this.renderer.setClearColor(0xcccccc); // background clear is grey instead of black
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        console.log('el', el, el.clientHeight, el.clientWidth);
         this.renderer.setSize(el.clientWidth, el.clientHeight);
+        // console.log('el', el, el.clientHeight, el.clientWidth);
 
-        this.pmremGenerator = new PMREMGenerator(this.renderer);
-        this.pmremGenerator.compileEquirectangularShader();
-
-        this.controls = new OrbitControls(this.defaultCamera, this.renderer.domElement);
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
         this.el.appendChild(this.renderer.domElement);
 
-        this.cameraCtrl = null;
-        this.cameraFolder = null;
-
         this.addGUI();
-        if (options.kiosk) this.gui.close();
+
+        this.updateLights();
 
         this.animate = this.animate.bind(this);
         requestAnimationFrame(this.animate);
-        window.addEventListener('resize', this.resize.bind(this), false);
     }
 
     animate(time: number) {
         requestAnimationFrame(this.animate);
-
-        const dt = (time - this.prevTime) / 1000;
-
         this.controls.update();
-        this.mixer && this.mixer.update(dt);
         this.render();
-
-        this.prevTime = time;
     }
 
     render() {
-        this.renderer.render(this.scene, this.defaultCamera);
-    }
-
-    resize() {
-        console.log('resize', this.el);
-        const { clientHeight, clientWidth } = this.el.parentElement;
-
-        this.defaultCamera.aspect = clientWidth / clientHeight;
-        this.defaultCamera.updateProjectionMatrix();
-        this.renderer.setSize(clientWidth, clientHeight);
+        this.renderer.render(this.scene, this.camera);
     }
 
     load(modelName: string) {
-        const baseURL = LoaderUtils.extractUrlBase(modelName);
-
         // Load.
         return new Promise((resolve, reject) => {
-            const loader = new GLTFLoader(MANAGER)
-                .setCrossOrigin('anonymous')
-                .setDRACOLoader(DRACO_LOADER)
-                .setKTX2Loader(KTX2_LOADER.detectSupport(this.renderer))
-                .setMeshoptDecoder(MeshoptDecoder);
+            const loader = new GLTFLoader(new LoadingManager());
 
             loader.load(
                 `/${modelName}.glb`,
@@ -209,13 +128,19 @@ export class Viewer {
             );
         });
     }
-    
+
     setContent(object: Object3D<Event> | Group) {
-        this.clear();
+        console.log('setContent', object);
+
+        const { x, y, z } = object.position;
+
+        console.log(`object position: ${x}, ${y}, ${z}`);
 
         const box = new Box3().setFromObject(object);
         const size = box.getSize(new Vector3()).length();
         const center = box.getCenter(new Vector3());
+        const { x: cx, y: cy, z: cz } = center;
+        console.log(`object center: ${cx}, ${cy}, ${cz}`);
 
         this.controls.reset();
 
@@ -223,68 +148,19 @@ export class Viewer {
         object.position.y += object.position.y - center.y;
         object.position.z += object.position.z - center.z;
         this.controls.maxDistance = size * 10;
-        this.defaultCamera.near = size / 100;
-        this.defaultCamera.far = size * 100;
-        this.defaultCamera.updateProjectionMatrix();
+        this.camera.near = size / 100;
+        this.camera.far = size * 100;
+        this.camera.updateProjectionMatrix();
 
-        if (this.options.cameraPosition) {
-            this.defaultCamera.position.fromArray(this.options.cameraPosition);
-            this.defaultCamera.lookAt(new Vector3());
-        } else {
-            this.defaultCamera.position.copy(center);
-            this.defaultCamera.position.x += size / 2.0;
-            this.defaultCamera.position.y += size / 5.0;
-            this.defaultCamera.position.z += size / 2.0;
-            this.defaultCamera.lookAt(center);
-        }
+        this.camera.position.copy(center);
+        this.camera.position.x += size / 2.0;
+        this.camera.position.y += size / 5.0;
+        this.camera.position.z += size / 2.0;
+        this.camera.lookAt(center);
 
         this.controls.saveState();
 
         this.scene.add(object);
-        this.content = object;
-
-        this.state.addLights = true;
-
-        this.content.traverse((node) => {
-            if ((<Light> node).isLight) {
-                this.state.addLights = false;
-
-            } else if ((<Mesh> node).isMesh) {
-                // TODO(https://github.com/mrdoob/three.js/pull/18235): Clean up.
-
-                // @ts-ignore
-                node.material.depthWrite = !node.material.transparent;
-            }
-        });
-
-        this.updateLights();
-        this.updateTextureEncoding();
-
-        window.content = this.content;
-        // console.info('[glTF Viewer] THREE.Scene exported as `window.content`.');
-        // this.printGraph(this.content);
-    }
-
-    printGraph(node: { type: string; name: string; children: any[] }) {
-        console.group(' <' + node.type + '> ' + node.name);
-        node.children.forEach((child: any) => this.printGraph(child));
-        console.groupEnd();
-    }
-
-    updateTextureEncoding() {
-        const encoding = this.state.textureEncoding === 'sRGB' ? sRGBEncoding : LinearEncoding;
-        traverseMaterials(
-            this.content,
-            (material: {
-                map: { encoding: TextureEncoding };
-                emissiveMap: { encoding: TextureEncoding };
-                needsUpdate: boolean;
-            }) => {
-                if (material.map) material.map.encoding = encoding;
-                if (material.emissiveMap) material.emissiveMap.encoding = encoding;
-                if (material.map || material.emissiveMap) material.needsUpdate = true;
-            },
-        );
     }
 
     updateLights() {
@@ -310,22 +186,14 @@ export class Viewer {
     addLights() {
         const state = this.state;
 
-        if (this.options.preset === Preset.ASSET_GENERATOR) {
-            const hemiLight = new HemisphereLight();
-            hemiLight.name = 'hemi_light';
-            this.scene.add(hemiLight);
-            this.lights.push(hemiLight);
-            return;
-        }
-
         const light1 = new AmbientLight(state.ambientColor, state.ambientIntensity);
         light1.name = 'ambient_light';
-        this.defaultCamera.add(light1);
+        this.camera.add(light1);
 
         const light2 = new DirectionalLight(state.directColor, state.directIntensity);
         light2.position.set(0.5, 0, 0.866); // ~60º
         light2.name = 'main_light';
-        this.defaultCamera.add(light2);
+        this.camera.add(light2);
 
         this.lights.push(light1, light2);
     }
@@ -341,16 +209,6 @@ export class Viewer {
         const gui = (this.gui = new GUI({ autoPlace: false, width: 260, hideable: true }));
         // Lighting controls.
         const lightFolder = gui.addFolder('Lighting');
-        const encodingCtrl = lightFolder.add(this.state, 'textureEncoding', ['sRGB', 'Linear']);
-        encodingCtrl.onChange(() => this.updateTextureEncoding());
-        lightFolder
-            .add(this.renderer, 'outputEncoding', { sRGB: sRGBEncoding, Linear: LinearEncoding })
-            .onChange(() => {
-                this.renderer.outputEncoding = Number(this.renderer.outputEncoding);
-                traverseMaterials(this.content, (material: { needsUpdate: boolean }) => {
-                    material.needsUpdate = true;
-                });
-            });
         [
             lightFolder.add(this.state, 'exposure', 0, 2),
             lightFolder.add(this.state, 'addLights').listen(),
@@ -360,57 +218,10 @@ export class Viewer {
             lightFolder.addColor(this.state, 'directColor'),
         ].forEach((ctrl) => ctrl.onChange(() => this.updateLights()));
 
-        // Camera controls.
-        this.cameraFolder = gui.addFolder('Cameras');
-        this.cameraFolder.domElement.style.display = 'none';
-
         const guiWrap = document.createElement('div');
         this.el.appendChild(guiWrap);
         guiWrap.classList.add('gui-wrap');
         guiWrap.appendChild(gui.domElement);
         gui.open();
     }
-
-    clear() {
-        if (!this.content) return;
-
-        this.scene.remove(this.content);
-
-        // dispose geometry
-        this.content.traverse((node) => {
-            // @ts-ignore
-            if (!node.isMesh) return;
-            
-            // @ts-ignore
-            node.geometry.dispose();
-        });
-
-        // glTF texture types. `envMap` is deliberately omitted, as it's used internally
-        // by the loader but not part of the glTF format.
-        const MAP_NAMES = [
-            'map',
-            'aoMap',
-            'emissiveMap',
-            'glossinessMap',
-            'metalnessMap',
-            'normalMap',
-            'roughnessMap',
-            'specularMap',
-        ];
-
-        // dispose textures
-        traverseMaterials(this.content, (material) => {
-            MAP_NAMES.forEach((map) => {
-                if (material[map]) material[map].dispose();
-            });
-        });
-    }
-}
-
-function traverseMaterials(object, callback) {
-    object.traverse((node) => {
-        if (!node.isMesh) return;
-        const materials = Array.isArray(node.material) ? node.material : [node.material];
-        materials.forEach(callback);
-    });
 }
