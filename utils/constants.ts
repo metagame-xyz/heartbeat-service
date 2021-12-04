@@ -56,3 +56,5 @@ function getNetworkString(network: string): NetworkStrings {
             };
     }
 }
+
+export const blackholeAddress = '0x0000000000000000000000000000000000000000';

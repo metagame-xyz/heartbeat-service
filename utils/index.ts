@@ -69,6 +69,11 @@ export const getOldestTransaction = async (address: string) =>
         `https://${networkStrings.etherscanAPI}etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=999999999&sort=asc&page=1&offset=1&apikey=${ETHERSCAN_API_KEY}`,
     );
 
+export const getERC721Transfers = async (address: string) =>
+    await fetcher(
+        `https://${networkStrings.etherscanAPI}etherscan.io/api?module=account&action=tokennfttx&address=${address}&startblock=0&endblock=999999999&sort=asc&page=1&offset=100&apikey=${ETHERSCAN_API_KEY}`,
+    );
+
 export const timestampToDate = (ts: number): Record<string, number> => {
     const date = new Date(ts * 1000);
     const dateObj = {

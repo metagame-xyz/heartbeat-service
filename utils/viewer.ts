@@ -42,7 +42,6 @@ export class Viewer {
         playbackSpeed: number;
         addLights: boolean;
         exposure: number;
-        textureEncoding: string; // should be TextureEncoding maybe
         ambientIntensity: number;
         ambientColor: number;
         directIntensity: number;
@@ -61,7 +60,6 @@ export class Viewer {
             // Lights
             addLights: true,
             exposure: 1.0,
-            textureEncoding: 'sRGB',
             ambientIntensity: 0.3,
             ambientColor: 0xffffff,
             directIntensity: 0.8 * Math.PI, // TODO(#116)
@@ -93,7 +91,7 @@ export class Viewer {
         requestAnimationFrame(this.animate);
     }
 
-    animate(time: number) {
+    animate() {
         requestAnimationFrame(this.animate);
         this.controls.update();
         this.render();
@@ -104,23 +102,13 @@ export class Viewer {
     }
 
     load(modelName: string) {
-        // Load.
         return new Promise((resolve, reject) => {
             const loader = new GLTFLoader(new LoadingManager());
 
             loader.load(
                 `/${modelName}.glb`,
                 (gltf) => {
-                    const scene = gltf.scene || gltf.scenes[0];
-
-                    if (!scene) {
-                        // Valid, but not supported by this viewer.
-                        throw new Error(
-                            'This model contains no scene, and cannot be viewed here. However,' +
-                                ' it may contain individual 3D resources.',
-                        );
-                    }
-                    this.setContent(scene);
+                    this.setContent(gltf.scene);
                     resolve(gltf);
                 },
                 undefined,
@@ -142,7 +130,6 @@ export class Viewer {
         const { x: cx, y: cy, z: cz } = center;
         console.log(`object center: ${cx}, ${cy}, ${cz}`);
 
-        this.controls.reset();
 
         object.position.x += object.position.x - center.x;
         object.position.y += object.position.y - center.y;
@@ -157,8 +144,6 @@ export class Viewer {
         this.camera.position.y += size / 5.0;
         this.camera.position.z += size / 2.0;
         this.camera.lookAt(center);
-
-        this.controls.saveState();
 
         this.scene.add(object);
     }

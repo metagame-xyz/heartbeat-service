@@ -10,7 +10,7 @@ import { useEthereum, wrongNetworkToast } from '@providers/EthereumProvider';
 
 import { maxW } from '@components/Layout';
 
-import { CONTRACT_ADDRESS, networkStrings } from '@utils/constants';
+import { blackholeAddress, CONTRACT_ADDRESS, networkStrings } from '@utils/constants';
 import { copy } from '@utils/content';
 import { debug, event } from '@utils/frontend';
 
@@ -40,8 +40,6 @@ const toastErrorData = (title: string, description: string) => ({
 function openseaLink(tokenId: number): string {
     return `https://${networkStrings.opensea}opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId}`;
 }
-
-const blackholeAddress = '0x0000000000000000000000000000000000000000';
 
 function Home() {
     const { provider, signer, userAddress, userName, eventParams, openWeb3Modal, toast } =
@@ -139,6 +137,7 @@ function Home() {
         } catch (error) {
             // const { reason, code, error, method, transaction } = error
             setMinting(false);
+
             if (error?.error?.message) {
                 const eventParamsWithError = {
                     ...eventParams,
