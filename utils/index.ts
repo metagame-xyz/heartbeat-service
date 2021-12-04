@@ -129,6 +129,35 @@ export const zodiac = (day: number, month: number) => {
     return day > last_day[month] ? zodiac[month * 1 + 1] : zodiac[month];
 };
 
+export const getUserName = async (provider, address) => {
+    let ensName = null;
+    try {
+        ensName = await provider.lookupAddress(address);
+    } catch (error) {
+        logger.error({ error });
+        logger.error({ message: 'ensName lookup failed' });
+    }
+    return ensName || address.substr(0, 6);
+};
+
+type NFTMintData = {
+    name?: string;
+    symbol: string;
+    count: number;
+    creator?: string;
+};
+
+export type TokenGardenMetadata = {
+    name: string;
+    description: string;
+    image: string; // tokengarden.art/api/v1/image/[tokenId]
+    external_url: string; // tokengarden.art/garden/[tokenId]
+    address: string;
+    uniqueNFTCount: number;
+    totalNFTCount: number;
+    NFTs: Array<NFTMintData>;
+};
+
 export type Metadata = {
     name: string;
     description: string;

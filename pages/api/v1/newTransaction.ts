@@ -7,11 +7,13 @@ import {
     formatDateObjToShortTime,
     getERC721Transfers,
     getOldestTransaction,
+    getUserName,
     ioredisClient,
     isValidEventForwarderSignature,
     logger,
     Metadata,
     timestampToDate,
+    TokenGardenMetadata,
     zodiac,
 } from '@utils';
 import {
@@ -56,12 +58,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         type Event = {
             tokenSymbol: string;
             from: string;
+            timeStamp: number;
         };
 
-        const mintEvents = result.filter((event: Event) => event.from === blackholeAddress);
+        const mintEvents: Array<Event> = result.filter(
+            (event: Event) => event.from === blackholeAddress,
+        );
         const mintSymbols: Array<string> = mintEvents.map((event: Event) => event.tokenSymbol);
 
-        const mintMap = mintSymbols.reduce((allSymbols, symbol) => {
+        const mintMap: Record<string, number> = mintSymbols.reduce((allSymbols, symbol) => {
             if (symbol in allSymbols) {
                 allSymbols[symbol]++;
             } else {
@@ -70,12 +75,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return allSymbols;
         }, {});
 
+        const userName = getUserName(etherscanProvider, minterAddress);
+
+        const dateObj = timestampToDate(mintEvents[0].timeStamp);
+
+        const specialNFTs = ['BBLOCK', 'LOOT'];
+        const creatorMap = {
+            BBLOCK: 'The Metagame',
+            LOOT: 'Dom Hoffman',
+        };
+
+        const NFTs = Object.entries(mintMap).map(([symbol, count]) => ({
+            symbol,
+            count,
+            ...(creatorMap[symbol] && { creator: creatorMap[symbol] }), // only add creator if it's in the map
+        }));
+
+        const metadata: TokenGardenMetadata = {
+            name: `${userName}'s Token Garden`,
+            description: `A garden that's been growning since ${dateObj.month} ${dateObj.year}`,
+            image: `https://${WEBSITE_URL}/api/v1/image/${tokenId}`,
+            external_url: `https://${WEBSITE_URL}/birthblock/${tokenId}`,
+            address: minterAddress,
+            uniqueNFTCount: Object.keys(mintMap).length,
+            totalNFTCount: Object.values(mintMap).reduce((t, n) => t + n),
+            NFTs,
+        };
+
         // const value = mintEvents[0].value;
 
         // console.log(value);
         // console.log(formatEther(value));
 
-        return res.status(200).send({ mintMap });
+        return res.status(200).send({ metadata });
 
         // return res.status(404).send({ error: '404' });
     }
