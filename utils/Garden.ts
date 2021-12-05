@@ -1,3 +1,4 @@
+import { t } from '@chakra-ui/styled-system/dist/declarations/src/utils';
 import { GUI } from 'dat.gui';
 import { Children } from 'react';
 import {
@@ -29,12 +30,26 @@ import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { NFTdata } from '@utils/frontend';
 
+declare global {
+    interface Window {
+        model: Object3D<Event>;
+    }
+}
+
 export default class GardenGrower {
     el: HTMLElement;
     scene: Scene;
     camera: PerspectiveCamera;
     renderer: WebGLRenderer;
     controls: OrbitControls;
+    gui: GUI;
+    lights: Light[];
+
+    state = {
+        //Lights
+        directionalIntensity: 4,
+        directionalColor: 0xd1d1d1,
+    };
 
     constructor(el: HTMLElement) {
         this.el = el;
@@ -43,6 +58,7 @@ export default class GardenGrower {
         this.camera = new PerspectiveCamera(60, el.clientWidth / el.clientHeight, 0.01, 1000);
         this.scene.add(this.camera);
         this.positionCamera();
+        this.initLights();
 
         this.renderer = new WebGLRenderer({ antialias: true });
         this.renderer.outputEncoding = sRGBEncoding;
@@ -64,6 +80,58 @@ export default class GardenGrower {
         this.renderer.render(this.scene, this.camera);
     }
 
+    positionCamera() {
+        this.camera.position.x = 4;
+        this.camera.position.y = 18;
+        this.camera.position.z = 12;
+        this.camera.lookAt(0, 1, 0);
+    }
+    initLights() {
+        this.lights = [];
+
+        const state = this.state;
+        const camPosition = this.camera.position;
+
+        const directionalLight = new DirectionalLight(
+            state.directionalColor,
+            state.directionalIntensity,
+        );
+        directionalLight.name = 'mainLight';
+        directionalLight.position.set(camPosition.x, camPosition.y, camPosition.z);
+        this.camera.add(directionalLight);
+        this.lights.push(directionalLight);
+    }
+
+    updateLights() {
+        const state = this.state;
+
+        this.lights.forEach((light: Light) => {
+            if (light.name === 'mainLight') {
+                light.intensity = state.directionalIntensity;
+                light.color.setHex(state.directionalColor);
+            }
+        });
+    }
+
+    addGUI() {
+        this.gui = new GUI({ autoPlace: true, width: 260, hideable: true, name: 'Garden' });
+        const lightFolder = this.gui.addFolder('Lighting');
+        lightFolder.open();
+
+        const lightControls = [
+            lightFolder.add(this.state, 'directionalIntensity', 0, 10, 1),
+            lightFolder.addColor(this.state, 'directionalColor'),
+        ];
+
+        lightControls.forEach((ctrl) => ctrl.onChange(() => this.updateLights()));
+
+        const guiDiv = document.createElement('div');
+        this.el.appendChild(guiDiv);
+        guiDiv.classList.add('gui');
+        guiDiv.appendChild(this.gui.domElement);
+        this.gui.open();
+    }
+
     getModel(modelName: string): Promise<Object3D<Event>> {
         return new Promise((resolve, reject) => {
             const loader = new GLTFLoader(new LoadingManager());
@@ -79,10 +147,29 @@ export default class GardenGrower {
         });
     }
 
-    async growFlower({ symbol, count, creator = null }: NFTdata, position: number) {
+    async growFlower({ symbol, count, creator = null }: NFTdata, modleName: string) {
         // console.log('growFlower', symbol, count, creator);
 
-        const scaleFactor = 0.05;
+        const getFlowerSize = (count) => {
+            switch (count) {
+                case 1:
+                    return 0.1;
+                case 2:
+                    return 0.12;
+                default:
+                    return 0.15;
+            }
+        };
+
+        const max = 6;
+        const min = max * -1;
+
+        const x = Math.floor(Math.random() * (max - min + 1)) + min;
+        const z = Math.floor(Math.random() * (max - min + 1)) + min;
+        console.log('x', x, 'z', z);
+
+        const scaleFactor = getFlowerSize(count);
+
         let size;
         let center;
         function getCenter(model: Object3D<Event>) {
@@ -95,26 +182,20 @@ export default class GardenGrower {
             return box.getSize(new Vector3());
         }
 
-        const model = await this.getModel('Hydrangea2');
+        const model = await this.getModel(modleName);
 
         // size = getSize(model);
-        // console.log('size', size);
+        // console.log(`size of ${modleName} before:`, size);
 
-        model.scale.setScalar(scaleFactor);
+        model.scale.setScalar(scaleFactor); //0.1
 
         // size = getSize(model);
-        // console.log('size', size);
+        // console.log(`size of ${modleName} after:`, size);
 
-        model.position.set(position, 0, position);
+        model.position.set(x, 0, z);
 
         this.scene.add(model);
-    }
-
-    positionCamera() {
-        this.camera.position.x = 2;
-        this.camera.position.y = 10;
-        this.camera.position.z = 10;
-        this.camera.lookAt(0, 0, 0);
+        window.model = model;
     }
 
     devHelper() {
@@ -129,5 +210,7 @@ export default class GardenGrower {
         for (const object of objects) {
             this.scene.add(new BoxHelper(object, new Color(0xff0000)));
         }
+
+        this.addGUI();
     }
 }

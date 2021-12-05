@@ -101,7 +101,6 @@ export class Viewer {
         this.renderer.render(this.scene, this.camera);
     }
 
-
     load(modelName: string) {
         return new Promise((resolve, reject) => {
             const loader = new GLTFLoader(new LoadingManager());
@@ -130,7 +129,6 @@ export class Viewer {
         const center = box.getCenter(new Vector3());
         const { x: cx, y: cy, z: cz } = center;
         console.log(`object center: ${cx}, ${cy}, ${cz}`);
-
 
         object.position.x += object.position.x - center.x;
         object.position.y += object.position.y - center.y;
