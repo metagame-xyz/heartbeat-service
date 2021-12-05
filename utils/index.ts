@@ -120,109 +120,23 @@ export type OpenSeaMetadata = {
             trait_type: 'address';
             value: string;
         },
-        {
-            trait_type: 'parent';
-            value: string;
-        },
-        {
-            trait_type: 'first recieved';
-            value: 'ether' | 'token(s)';
-        },
-        {
-            trait_type: 'tree rings';
-            value: string;
-        },
-        {
-            trait_type: 'birth time';
-            value: string;
-        },
-        {
-            trait_type: 'birthblock';
-            value: string;
-        },
-        {
-            trait_type: 'txn hash';
-            value: string;
-        },
-        {
-            trait_type: 'zodiac sign';
-            value: string;
-        },
-        // levels
-        {
-            trait_type: 'block age';
-            value: number;
-        },
-        {
-            trait_type: 'tree rings level';
-            value: number;
-        },
-        // Date
-        {
-            display_type: 'date';
-            trait_type: 'birthday';
-            value: number; // 1546360800
-        },
     ];
 };
 
-// export function metadataToOpenSeaMetadata(metadata: Metadata): OpenSeaMetadata {
-//     const openseaMetadata: OpenSeaMetadata = {
-//         name: metadata.name,
-//         description: metadata.description,
-//         image: metadata.image,
-//         external_url: metadata.external_url,
-//         attributes: [
-//             // properties
-//             {
-//                 trait_type: 'address',
-//                 value: metadata.address,
-//             },
-//             {
-//                 trait_type: 'parent',
-//                 value: metadata.parent,
-//             },
-//             {
-//                 trait_type: 'first recieved',
-//                 value: metadata.firstRecieved,
-//             },
-//             {
-//                 trait_type: 'tree rings',
-//                 value: Math.floor(metadata.blockAge / 10 ** 5).toString(),
-//             },
-//             {
-//                 trait_type: 'birth time',
-//                 value: formatDateObjToTime(timestampToDate(metadata.timestamp)),
-//             },
-//             {
-//                 trait_type: 'birthblock',
-//                 value: metadata.birthblock,
-//             },
-//             {
-//                 trait_type: 'txn hash',
-//                 value: metadata.txnHash,
-//             },
-//             {
-//                 trait_type: 'zodiac sign',
-//                 value: metadata.zodiacSign,
-//             },
-//             // levels
-//             {
-//                 trait_type: 'block age',
-//                 value: metadata.blockAge,
-//             },
-//             {
-//                 trait_type: 'tree rings level',
-//                 value: metadata.treeRingsLevel,
-//             },
-//             // Date
-//             {
-//                 display_type: 'date',
-//                 trait_type: 'birthday',
-//                 value: metadata.timestamp, // 1546360800
-//             },
-//         ],
-//     };
+export function metadataToOpenSeaMetadata(metadata: Metadata): OpenSeaMetadata {
+    const openseaMetadata: OpenSeaMetadata = {
+        name: metadata.name,
+        description: metadata.description,
+        image: metadata.image,
+        external_url: metadata.external_url,
+        attributes: [
+            // properties
+            {
+                trait_type: 'address',
+                value: metadata.address,
+            },
+        ],
+    };
 
-//     return openseaMetadata;
-// }
+    return openseaMetadata;
+}
