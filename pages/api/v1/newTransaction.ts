@@ -4,26 +4,14 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 import {
     fetcher,
-    formatDateObjToShortTime,
-    getERC721Transfers,
-    getOldestTransaction,
     getUserName,
     ioredisClient,
     isValidEventForwarderSignature,
     logger,
     Metadata,
-    timestampToDate,
-    TokenGardenMetadata,
-    zodiac,
+    tsToMonthAndYear,
 } from '@utils';
-import {
-    ALCHEMY_PROJECT_ID,
-    blackholeAddress,
-    CONTRACT_BIRTHBLOCK,
-    INFURA_PROJECT_ID,
-    networkStrings,
-    WEBSITE_URL,
-} from '@utils/constants';
+import { blackholeAddress, WEBSITE_URL } from '@utils/constants';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     logger.info(req.body);
@@ -35,12 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
          */
 
         const minterAddress = '0x3B3525F60eeea4a1eF554df5425912c2a532875D';
-        const tokenId = 1;
-
-        // const defaultProvider = getDefaultProvider(networkStrings.ethers, {
-        //     infura: INFURA_PROJECT_ID,
-        //     alchemy: ALCHEMY_PROJECT_ID,
-        // });
+        const tokenId = '1';
 
         const etherscanProvider = new EtherscanProvider('homestead');
 
@@ -75,11 +58,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return allSymbols;
         }, {});
 
-        const userName = getUserName(etherscanProvider, minterAddress);
+        const userName = await getUserName(etherscanProvider, minterAddress);
 
-        const dateObj = timestampToDate(mintEvents[0].timeStamp);
-
-        const specialNFTs = ['BBLOCK', 'LOOT'];
+        const dateStr = tsToMonthAndYear(mintEvents[0].timeStamp);
         const creatorMap = {
             BBLOCK: 'The Metagame',
             LOOT: 'Dom Hoffman',
@@ -91,21 +72,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             ...(creatorMap[symbol] && { creator: creatorMap[symbol] }), // only add creator if it's in the map
         }));
 
-        const metadata: TokenGardenMetadata = {
+        const uniqueNFTCount = Object.keys(mintMap).length;
+
+        const metadata: Metadata = {
             name: `${userName}'s Token Garden`,
-            description: `A garden that's been growning since ${dateObj.month} ${dateObj.year}`,
+            description: `A garden that's been growning since ${dateStr}. It has ${uniqueNFTCount} flowers so far.`,
             image: `https://${WEBSITE_URL}/api/v1/image/${tokenId}`,
             external_url: `https://${WEBSITE_URL}/birthblock/${tokenId}`,
             address: minterAddress,
-            uniqueNFTCount: Object.keys(mintMap).length,
+            uniqueNFTCount,
             totalNFTCount: Object.values(mintMap).reduce((t, n) => t + n),
             NFTs,
         };
 
-        // const value = mintEvents[0].value;
+        try {
+            // index by wallet address
+            await ioredisClient.hset(minterAddress, {
+                tokenId,
+                metadata: JSON.stringify(metadata),
+            });
+        } catch (error) {
+            logger.error({ error });
+            return res.status(500).send({ message: 'ioredis error', error });
+        }
 
-        // console.log(value);
-        // console.log(formatEther(value));
+        try {
+            // index by tokenId
+            await ioredisClient.hset(tokenId, {
+                address: minterAddress,
+                metadata: JSON.stringify(metadata),
+            });
+        } catch (error) {
+            logger.error({ error });
+            return res.status(500).send({ message: 'ioredis error 2', error });
+        }
 
         return res.status(200).send({ metadata });
 
