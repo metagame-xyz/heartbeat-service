@@ -101,6 +101,7 @@ export class Viewer {
         this.renderer.render(this.scene, this.camera);
     }
 
+
     load(modelName: string) {
         return new Promise((resolve, reject) => {
             const loader = new GLTFLoader(new LoadingManager());

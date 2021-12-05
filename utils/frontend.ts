@@ -23,3 +23,9 @@ export type EventParams = {
     errorReason?: string;
     errorMessage?: string;
 };
+
+export type NFTdata = {
+    symbol: string;
+    count: number;
+    creator?: string;
+};
