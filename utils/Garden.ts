@@ -1,6 +1,8 @@
 import { GUI } from 'dat.gui';
+import { Children } from 'react';
 import {
     AmbientLight,
+    AxesHelper,
     Box3,
     Box3Helper,
     BoxGeometry,
@@ -40,6 +42,7 @@ export default class GardenGrower {
 
         this.camera = new PerspectiveCamera(60, el.clientWidth / el.clientHeight, 0.01, 1000);
         this.scene.add(this.camera);
+        this.positionCamera();
 
         this.renderer = new WebGLRenderer({ antialias: true });
         this.renderer.outputEncoding = sRGBEncoding;
@@ -79,56 +82,52 @@ export default class GardenGrower {
     async growFlower({ symbol, count, creator = null }: NFTdata, position: number) {
         // console.log('growFlower', symbol, count, creator);
 
-        // const geometry = new BoxGeometry();
-        // const material = new MeshBasicMaterial({ color: 0x00ff00 });
-        // const cube = new Mesh(geometry, material);
+        const scaleFactor = 0.05;
+        let size;
+        let center;
+        function getCenter(model: Object3D<Event>) {
+            const box = new Box3().setFromObject(model);
+            return box.getCenter(new Vector3());
+        }
 
-        // const cubeBox = new Box3().setFromObject(cube);
-        // const cubSize = cubeBox.getSize(new Vector3()).length();
-        // console.log('cubeSize', cubSize);
-
-        // this.scene.add(cube);
-        // console.log(cube.getWorldPosition(new Vector3()));
-        // console.log('cube.position', cube.position);
-
-        // this.camera.position.z = 5;
+        function getSize(model: Object3D<Event>) {
+            const box = new Box3().setFromObject(model);
+            return box.getSize(new Vector3());
+        }
 
         const model = await this.getModel('Hydrangea2');
 
-        model.scale.set(0.01, 0.01, 0.01);
+        // size = getSize(model);
+        // console.log('size', size);
+
+        model.scale.setScalar(scaleFactor);
+
+        // size = getSize(model);
+        // console.log('size', size);
+
         model.position.set(position, 0, position);
 
-        const box = new Box3().setFromObject(model);
-        const helper = new Box3Helper(box, new Color(0xff0000)); // red hex #ff0000
-        const size = box.getSize(new Vector3()).length();
-        console.log('size', size);
-
-        this.scene.add(helper);
         this.scene.add(model);
-        this.scene.add(new GridHelper());
-        console.log(model.getWorldPosition(new Vector3()));
-        console.log('flower.position', model.position);
-        console.log(model);
+    }
 
-        // this.camera.lookAt(cube.position);
-        const center = box.getCenter(new Vector3());
-        // const { x: cx, y: cy, z: cz } = center;
-        // console.log(`model center: ${cx}, ${cy}, ${cz}`);
+    positionCamera() {
+        this.camera.position.x = 2;
+        this.camera.position.y = 10;
+        this.camera.position.z = 10;
+        this.camera.lookAt(0, 0, 0);
+    }
 
-        // model.position.x += model.position.x - center.x;
-        // model.position.y += model.position.y - center.y;
-        // model.position.z += model.position.z - center.z;
-        // this.controls.maxDistance = size * 10;
-        // this.camera.near = size / 100;
-        // this.camera.far = size * 100;
-        this.camera.updateProjectionMatrix();
+    devHelper() {
+        // Grid at the bottom
+        this.scene.add(new GridHelper(24, 24));
 
-        this.camera.position.copy(center);
-        this.camera.position.x += size / 2.0;
-        this.camera.position.y += size / 5.0;
-        this.camera.position.z += size / 2.0;
-        this.camera.lookAt(center);
+        var axesHelper = new AxesHelper(5);
+        this.scene.add(axesHelper);
 
-        // this.scene.add(model);
+        // red box around each model
+        const objects = this.scene.children.filter((child) => child instanceof Mesh);
+        for (const object of objects) {
+            this.scene.add(new BoxHelper(object, new Color(0xff0000)));
+        }
     }
 }
