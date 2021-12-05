@@ -19,14 +19,17 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
     useEffect(() => {
         async function growGarden() {
             let gardenEl = document.getElementById('garden');
+            while (gardenEl.firstChild) {
+                gardenEl.removeChild(gardenEl.firstChild);
+            }
             const metadata = JSON.parse(metadataStr);
             const NFTs = metadata.NFTs;
             const garden = new GardenGrower(gardenEl);
 
-            for (let i = 0; i < 12; i++) {
+            for (let i = 0; i < 24; i++) {
                 await garden.growFlower(NFTs[i], 'Hydrangea3');
             }
-            garden.devHelper();
+            garden.initDevHelper();
 
             // for (let nft of NFTs) {
             //     garden.growFlower(nft);

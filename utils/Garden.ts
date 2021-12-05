@@ -45,10 +45,17 @@ export default class GardenGrower {
     gui: GUI;
     lights: Light[];
 
+    axesHelper: AxesHelper;
+    gridHelper: GridHelper;
+
     state = {
         //Lights
         directionalIntensity: 4,
         directionalColor: 0xd1d1d1,
+        //Helpers
+        grid: true,
+        axes: true,
+        boxes: true,
     };
 
     constructor(el: HTMLElement) {
@@ -125,6 +132,13 @@ export default class GardenGrower {
 
         lightControls.forEach((ctrl) => ctrl.onChange(() => this.updateLights()));
 
+        const helperFolder = this.gui.addFolder('Helper');
+        helperFolder.open();
+
+        helperFolder.add(this.state, 'grid').onChange(() => this.updateGridHelper());
+        helperFolder.add(this.state, 'axes').onChange(() => this.updateAxesHelper());
+        helperFolder.add(this.state, 'boxes').onChange(() => this.updateBoxesHelper());
+
         const guiDiv = document.createElement('div');
         this.el.appendChild(guiDiv);
         guiDiv.classList.add('gui');
@@ -166,7 +180,7 @@ export default class GardenGrower {
 
         const x = Math.floor(Math.random() * (max - min + 1)) + min;
         const z = Math.floor(Math.random() * (max - min + 1)) + min;
-        console.log('x', x, 'z', z);
+        // console.log('x', x, 'z', z);
 
         const scaleFactor = getFlowerSize(count);
 
@@ -198,19 +212,42 @@ export default class GardenGrower {
         window.model = model;
     }
 
-    devHelper() {
-        // Grid at the bottom
-        this.scene.add(new GridHelper(24, 24));
-
-        var axesHelper = new AxesHelper(5);
-        this.scene.add(axesHelper);
-
-        // red box around each model
-        const objects = this.scene.children.filter((child) => child instanceof Mesh);
-        for (const object of objects) {
-            this.scene.add(new BoxHelper(object, new Color(0xff0000)));
-        }
-
+    initDevHelper() {
+        this.updateAxesHelper();
+        this.updateGridHelper();
+        this.updateBoxesHelper();
         this.addGUI();
+    }
+
+    updateAxesHelper() {
+        if (this.state.axes) {
+            this.axesHelper = new AxesHelper(5);
+            this.scene.add(this.axesHelper);
+        } else {
+            this.scene.remove(this.axesHelper);
+        }
+    }
+
+    updateGridHelper() {
+        if (this.state.grid) {
+            this.gridHelper = new GridHelper(48, 48);
+            this.scene.add(this.gridHelper);
+        } else {
+            this.scene.remove(this.gridHelper);
+        }
+    }
+
+    updateBoxesHelper() {
+        if (this.state.boxes) {
+            const objects = this.scene.children.filter((child) => child instanceof Mesh);
+            for (const object of objects) {
+                this.scene.add(new BoxHelper(object, new Color(0xff0000)));
+            }
+        } else {
+            const boxes = this.scene.children.filter((child) => child instanceof BoxHelper);
+            for (const box of boxes) {
+                this.scene.remove(box);
+            }
+        }
     }
 }
