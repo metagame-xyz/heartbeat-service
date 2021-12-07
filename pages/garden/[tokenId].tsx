@@ -26,8 +26,8 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
             const NFTs = metadata.NFTs;
             const garden = new GardenGrower(gardenEl);
 
-            for (let i = 0; i < 24; i++) {
-                await garden.growFlower(NFTs[i], 'Hydrangea3');
+            for (let i = 0; i < 59; i++) {
+                await garden.growFlower(NFTs[i]);
             }
             garden.initDevHelper();
 

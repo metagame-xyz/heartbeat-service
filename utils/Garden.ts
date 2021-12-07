@@ -36,6 +36,19 @@ declare global {
     }
 }
 
+const hydrangeaColors = [
+    'CYAN',
+    'DEEP BLUE',
+    'GREEN YELLOW',
+    'LIGHT BLUE',
+    'MAGENTA',
+    'PEACH',
+    'PINK',
+    'PURPLE',
+    'RED',
+    'YELLOW PINK',
+];
+
 export default class GardenGrower {
     el: HTMLElement;
     scene: Scene;
@@ -48,14 +61,17 @@ export default class GardenGrower {
     axesHelper: AxesHelper;
     gridHelper: GridHelper;
 
+    flowers: Record<string, Object3D>;
+    usedColors: Record<string, number>;
+
     state = {
         //Lights
         directionalIntensity: 4,
         directionalColor: 0xd1d1d1,
         //Helpers
         grid: true,
-        axes: true,
-        boxes: true,
+        axes: false,
+        boxes: false,
     };
 
     constructor(el: HTMLElement) {
@@ -76,6 +92,9 @@ export default class GardenGrower {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
         this.el.appendChild(this.renderer.domElement);
+
+        this.flowers = {};
+        this.usedColors = {};
 
         this.animate = this.animate.bind(this);
         requestAnimationFrame(this.animate);
@@ -161,58 +180,96 @@ export default class GardenGrower {
         });
     }
 
-    async growFlower({ symbol, count, creator = null }: NFTdata, modleName: string) {
+    async growFlower({ symbol, count, creator = null }: NFTdata) {
         // console.log('growFlower', symbol, count, creator);
 
         const getFlowerSize = (count) => {
+            const base = 1;
             switch (count) {
                 case 1:
-                    return 0.1;
+                    return base;
                 case 2:
-                    return 0.12;
+                    return base * 1.2;
                 default:
-                    return 0.15;
+                    return base * 1.5;
             }
         };
 
-        const max = 6;
-        const min = max * -1;
+        const getFlowerColor = (symbol: string, colorOptions: string[]) => {
+            // sum char codes of symbol, pseudo-randomly pick a color
+            const charCodeTotal = symbol.split('').reduce((a, char) => a + char.charCodeAt(0), 0);
+            const colorIndex = charCodeTotal % colorOptions.length;
 
-        const x = Math.floor(Math.random() * (max - min + 1)) + min;
-        const z = Math.floor(Math.random() * (max - min + 1)) + min;
-        // console.log('x', x, 'z', z);
+            // saving number of each flower color, maybe for metadata
+            if (this.usedColors[colorOptions[colorIndex]]) {
+                this.usedColors[colorOptions[colorIndex]] += 1;
+            } else {
+                this.usedColors[colorOptions[colorIndex]] = 1;
+            }
 
+            return colorOptions[colorIndex];
+        };
+
+        const getStemWord = (count) => {
+            if (count <= 3) {
+                return 'SHORT';
+            } else if (count >= 12) {
+                return 'LONG';
+            } else {
+                return 'NORMAL';
+            }
+        };
+
+        const getRandomPosition = (): [number, number, number] => {
+            const max = 6;
+            const min = max * -1;
+            const x = Math.floor(Math.random() * (max - min + 1)) + min;
+            const z = Math.floor(Math.random() * (max - min + 1)) + min;
+            // console.log('x', x, 'z', z);
+            return [x, 0, z];
+        };
+
+        const getSpecificPosition = (symbol: string): [number, number, number] | null => {
+            const specialNFTMapping = {
+                BBLOCK: [0, 0, 0],
+                LOOT: [1, 0, 1],
+                'The Proof of Attendance Protocol': [-1, 0, -1],
+                BLIT: [1, 0, -1],
+                CORRUPT: [-1, 0, 1],
+                NAUT: [2, 0, 2],
+            };
+            return specialNFTMapping[symbol];
+        };
+
+        const getPosition = (symbol: string): [number, number, number] => {
+            return getSpecificPosition(symbol) || getRandomPosition();
+        };
+
+        const color = getFlowerColor(symbol, hydrangeaColors);
+        const stem = getStemWord(count);
+
+        const modelString = `hydrangea/${stem}/Hydrangea OG ${stem} ${color}`;
+        let model;
+        if (this.flowers[modelString]) {
+            model = this.flowers[modelString].clone();
+        } else {
+            model = await this.getModel(modelString);
+            this.flowers[modelString] = model;
+        }
+
+        // set scale
         const scaleFactor = getFlowerSize(count);
-
-        let size;
-        let center;
-        function getCenter(model: Object3D<Event>) {
-            const box = new Box3().setFromObject(model);
-            return box.getCenter(new Vector3());
-        }
-
-        function getSize(model: Object3D<Event>) {
-            const box = new Box3().setFromObject(model);
-            return box.getSize(new Vector3());
-        }
-
-        const model = await this.getModel(modleName);
-
-        // size = getSize(model);
-        // console.log(`size of ${modleName} before:`, size);
-
         model.scale.setScalar(scaleFactor); //0.1
 
-        // size = getSize(model);
-        // console.log(`size of ${modleName} after:`, size);
-
-        model.position.set(x, 0, z);
+        // set position
+        model.position.set(...getPosition(symbol));
 
         this.scene.add(model);
         window.model = model;
     }
 
     initDevHelper() {
+        console.log(this.usedColors);
         this.updateAxesHelper();
         this.updateGridHelper();
         this.updateBoxesHelper();

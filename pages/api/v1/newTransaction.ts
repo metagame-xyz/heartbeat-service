@@ -1,6 +1,7 @@
-import { EtherscanProvider, Filter, getDefaultProvider } from '@ethersproject/providers';
-import { commify, formatEther, formatUnits } from '@ethersproject/units';
+import { EtherscanProvider } from '@ethersproject/providers';
+import mql from '@microlink/mql';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import fetch from 'node-fetch';
 
 import {
     fetcher,
@@ -11,7 +12,7 @@ import {
     Metadata,
     tsToMonthAndYear,
 } from '@utils';
-import { blackholeAddress, WEBSITE_URL } from '@utils/constants';
+import { blackholeAddress, MICROLINK_API_KEY, WEBSITE_URL } from '@utils/constants';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     logger.info(req.body);
@@ -36,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             offset: '1000',
         });
 
-        const { status, message, result } = await fetcher(etherscanURl);
+        let { status, message, result } = await fetcher(etherscanURl);
 
         type Event = {
             tokenSymbol: string;
@@ -106,6 +107,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             logger.error({ error });
             return res.status(500).send({ message: 'ioredis error 2', error });
         }
+
+        // const url = `https://dev.tokengarden.art/garden/1`;
+
+        // const { data, response } = await mql(url, {
+        //     apiKey: MICROLINK_API_KEY,
+        //     screenshot: true,
+        //     // @ts-ignore
+        //     // waitForSelector: '.gui',
+        //     waitForTimeout: 25000,
+        //     timeout: 28000,
+        //     ttl: '1m',
+        // });
+
+        // console.log(data);
+        // console.log(response.headers);
+
+        // const imgdataResponse = await fetch(data.screenshot.url);
+        // const imgdata = await imgdataResponse.buffer();
+
+        // res.setHeader('Content-Type', 'image/jpg');
+        // return res.status(200).send(imgdata);
 
         return res.status(200).send({ metadata });
 
