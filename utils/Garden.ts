@@ -184,7 +184,6 @@ export default class GardenGrower {
         flower.position.set(0, 0, 0);
 
         this.scene.add(flower);
-        window.model = flower;
     }
     async growFlower({ symbol, count, creator = null }: NFTdata) {
         // console.log('growFlower', symbol, count, creator);
