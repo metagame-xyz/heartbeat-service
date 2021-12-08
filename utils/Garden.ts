@@ -180,6 +180,12 @@ export default class GardenGrower {
         });
     }
 
+    injectFlower(flower: Object3D<Event>) {
+        flower.position.set(0, 0, 0);
+
+        this.scene.add(flower);
+        window.model = flower;
+    }
     async growFlower({ symbol, count, creator = null }: NFTdata) {
         // console.log('growFlower', symbol, count, creator);
 

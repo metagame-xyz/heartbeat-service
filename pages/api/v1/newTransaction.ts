@@ -108,28 +108,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(500).send({ message: 'ioredis error 2', error });
         }
 
-        // const url = `https://dev.tokengarden.art/garden/1`;
+        const url = `https://dev.tokengarden.art/garden/1`;
 
-        // const { data, response } = await mql(url, {
-        //     apiKey: MICROLINK_API_KEY,
-        //     screenshot: true,
-        //     // @ts-ignore
-        //     // waitForSelector: '.gui',
-        //     waitForTimeout: 25000,
-        //     timeout: 28000,
-        //     ttl: '1m',
-        // });
+        const { data, response } = await mql(url, {
+            apiKey: MICROLINK_API_KEY,
+            screenshot: true,
+            waitForSelector: '.gui',
+            waitForTimeout: 25000,
+            timeout: 28000,
+            ttl: '1m',
+        });
 
-        // console.log(data);
-        // console.log(response.headers);
+        console.log(data);
+        console.log(response.headers);
 
-        // const imgdataResponse = await fetch(data.screenshot.url);
-        // const imgdata = await imgdataResponse.buffer();
+        const imgdataResponse = await fetch(data.screenshot.url);
+        const imgdata = await imgdataResponse.buffer();
 
-        // res.setHeader('Content-Type', 'image/jpg');
-        // return res.status(200).send(imgdata);
+        res.setHeader('Content-Type', 'image/jpg');
+        return res.status(200).send(imgdata);
 
-        return res.status(200).send({ metadata });
+        // return res.status(200).send({ metadata });
 
         // return res.status(404).send({ error: '404' });
     }
