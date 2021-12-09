@@ -37,16 +37,16 @@ declare global {
 }
 
 const hydrangeaColors = [
-    'CYAN',
-    'DEEP BLUE',
-    'GREEN YELLOW',
-    'LIGHT BLUE',
-    'MAGENTA',
-    'PEACH',
-    'PINK',
-    'PURPLE',
-    'RED',
-    'YELLOW PINK',
+    'cyan',
+    'deepblue',
+    'greenyellow',
+    'lightblue',
+    'magenta',
+    'peach',
+    'pink',
+    'purple',
+    'red',
+    'yellowpink',
 ];
 
 export default class GardenGrower {
@@ -180,10 +180,52 @@ export default class GardenGrower {
         });
     }
 
-    injectFlower(flower: Object3D<Event>) {
-        flower.position.set(0, 0, 0);
+    getModelFromArrayBuffer(arrayBuffer: ArrayBuffer): Promise<Object3D<Event>> {
+        return new Promise((resolve, reject) => {
+            const loader = new GLTFLoader(new LoadingManager());
 
-        this.scene.add(flower);
+            loader.parse(
+                arrayBuffer,
+                '',
+                (gltf) => {
+                    resolve(gltf.scene.children[0]);
+                },
+                reject,
+            );
+        });
+    }
+
+    async getFlower(modelString: string): Promise<Object3D<Event>> {
+        console.log(modelString);
+        let model;
+
+        if (this.flowers[modelString]) {
+            model = this.flowers[modelString].clone();
+        } else {
+            model = await this.getModel(modelString);
+            this.flowers[modelString] = model;
+        }
+
+        return model;
+    }
+
+    async showFlowerExamples(color = 'peach') {
+        const stems = ['short', 'normal', 'long'];
+        const sizes = ['baby', 'OG', 'bush'];
+        for (let i = 0; i < stems.length; i++) {
+            for (let j = 0; j < sizes.length; j++) {
+                if (i === 0 && (j === 0 || j === 2)) {
+                    console.log('skipping');
+                } else {
+                    const modelString = `Hydrangea/${sizes[j]}/${stems[i]}/Hydrangea_${sizes[j]}_${stems[i]}_${color}`;
+                    console.log(`${stems[i]} ${sizes[j]}`);
+                    const model = await this.getFlower(modelString);
+                    model.position.set(i * 2, 0, j * 2);
+
+                    this.scene.add(model);
+                }
+            }
+        }
     }
     async growFlower({ symbol, count, creator = null }: NFTdata) {
         // console.log('growFlower', symbol, count, creator);
@@ -215,13 +257,29 @@ export default class GardenGrower {
             return colorOptions[colorIndex];
         };
 
+        const getFlowerName = (symbol: string) => {
+            return 'Hydrangea';
+        };
+
         const getStemWord = (count) => {
             if (count <= 3) {
-                return 'SHORT';
+                return 'normal'; // TODO update correct stem word
             } else if (count >= 12) {
-                return 'LONG';
+                return 'long';
             } else {
-                return 'NORMAL';
+                return 'normal';
+            }
+        };
+
+        const getSizeWord = (count) => {
+            switch (count) {
+                case 1:
+                    return 'baby';
+                case 2:
+                    console.log('2', count);
+                    return 'OG';
+                default:
+                    return 'bush';
             }
         };
 
@@ -251,10 +309,15 @@ export default class GardenGrower {
         };
 
         const color = getFlowerColor(symbol, hydrangeaColors);
+        const name = getFlowerName(symbol);
         const stem = getStemWord(count);
+        const size = getSizeWord(count);
 
-        const modelString = `hydrangea/${stem}/Hydrangea OG ${stem} ${color}`;
+        let modelString = `${name}/${size}/${stem}/${name}_${size}_${stem}_${color}`;
+
+        console.log('count', count, '', modelString);
         let model;
+
         if (this.flowers[modelString]) {
             model = this.flowers[modelString].clone();
         } else {
@@ -263,8 +326,8 @@ export default class GardenGrower {
         }
 
         // set scale
-        const scaleFactor = getFlowerSize(count);
-        model.scale.setScalar(scaleFactor); //0.1
+        // const scaleFactor = getFlowerSize(count);
+        // model.scale.setScalar(scaleFactor); //0.1
 
         // set position
         model.position.set(...getPosition(symbol));

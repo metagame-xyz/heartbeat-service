@@ -1,45 +1,49 @@
 import { Box } from '@chakra-ui/react';
 import { InferGetServerSidePropsType } from 'next';
 import React, { useEffect } from 'react';
-import { Event, LoadingManager, Object3D } from 'three';
-import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Event, Object3D } from 'three';
+import THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { ioredisClient } from '@utils';
 import GardenGrower from '@utils/Garden';
-
-function getModel(modelName: string): Promise<Object3D<Event>> {
-    return new Promise((resolve, reject) => {
-        const loader = new GLTFLoader(new LoadingManager());
-
-        loader.load(
-            `/${modelName}.glb`,
-            (gltf) => {
-                resolve(gltf.scene.children[0]);
-            },
-            undefined,
-            reject,
-        );
-    });
-}
 
 export const getServerSideProps = async (context) => {
     const { tokenId } = context.query;
     const metadata = await ioredisClient.hget(tokenId, 'metadata');
 
-    const model = await getModel('Hydrangea4');
+    // const gltfFile = await fetch(`https://tokengarden.loca.lt/Hydrangea4.glb`).then((res) =>
+    //     res.blob(),
+    // );
+    // const arrayBuffergltf = await gltfFile.arrayBuffer();
+
+    // function getModel(modelName: string): Promise<Object3D<Event>> {
+    //     return new Promise((resolve, reject) => {
+    //         const loader = new GLTFLoader();
+
+    //         // loader.load(
+    //         //     `/${modelName}.glb`,
+    //         //     (gltf) => {
+    //         //         resolve(gltf.scene.children[0]);
+    //         //     },
+    //         //     undefined,
+    //         //     reject,
+    //         // );
+    //     });
+    // }
+
+    // const model = await getModel('Hydrangea4');
+    // console.log(model);
 
     return {
         props: {
             metadata,
-            model,
+            // arrayBuffergltf,
         },
     };
 };
 
-function Garden({
-    metadata: metadataStr,
-    model,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     useEffect(() => {
         async function growGarden() {
             let gardenEl = document.getElementById('garden');
@@ -49,11 +53,15 @@ function Garden({
             const metadata = JSON.parse(metadataStr);
             const NFTs = metadata.NFTs;
             const garden = new GardenGrower(gardenEl);
-            garden.injectFlower(model);
+            // console.log(arrayBuffergltf);
+            // await garden.injectFlower(arrayBuffergltf);
 
             // for (let i = 0; i < 59; i++) {
             //     await garden.growFlower(NFTs[i]);
             // }
+
+            garden.showFlowerExamples();
+
             garden.initDevHelper();
 
             // for (let nft of NFTs) {
