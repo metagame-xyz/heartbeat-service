@@ -17,7 +17,7 @@ export const headMetadata: MetaProps = {
 export const copy = {
     title: 'Token Garden',
     nameLowercase: 'token-garden',
-    heroSubheading: 'An ever-growing 3D garden of flowers based on the NFTs you’ve minted',
+    heroSubheading: 'An ever-growing garden of flowers based on the NFTs you’ve minted',
     heading1: 'Continuously Growing',
     text1: 'Each time you mint an NFT, a flower will sprout or grow bigger in your garden.',
     heading2: 'Naturally Scarce',

@@ -100,7 +100,7 @@ type NFTMintData = {
 export type Metadata = {
     name: string;
     description: string;
-    image: string; // tokengarden.art/api/v1/image/[tokenId]
+    image: string; // 
     external_url: string; // tokengarden.art/garden/[tokenId]
     address: string;
     uniqueNFTCount: number;

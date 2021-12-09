@@ -6,6 +6,8 @@ export const LOGFLARE_API_KEY = process.env.LOGFLARE_API_KEY;
 export const LOGFLARE_SOURCE_UUID = process.env.LOGFLARE_SOURCE_UUID;
 export const EVENT_FORWARDER_AUTH_TOKEN = process.env.EVENT_FORWARDER_AUTH_TOKEN;
 export const MICROLINK_API_KEY = process.env.MICROLINK_API_KEY;
+export const INFURA_IPFS_PROJECT_ID = process.env.INFURA_IPFS_PROJECT_ID;
+export const INFURA_IPFS_SECRET = process.env.INFURA_IPFS_SECRET;
 
 /* Frontend Constants */
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
@@ -13,9 +15,10 @@ export const NETWORK = process.env.NEXT_PUBLIC_NETWORK.toLowerCase();
 export const INFURA_PROJECT_ID = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID;
 export const ALCHEMY_PROJECT_ID = process.env.NEXT_PUBLIC_ALCHEMY_PROJECT_ID;
 export const GOOGLE_ANALYTICS_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
-// birthblock.loca.lt, dev.birthblock.art, birthblock.art
+// tokengarden.loca.lt, dev.tokengarden.art, tokengarden.art
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL;
 export const networkStrings = getNetworkString(NETWORK);
+export const THE_METAGAME_ETH_ADDRESS = '0x902A37155438982884ca26A5DBccf73f5ae8194b';
 
 /* Events */
 export const connect_button_clicked = 'Connect Button Clicked';
