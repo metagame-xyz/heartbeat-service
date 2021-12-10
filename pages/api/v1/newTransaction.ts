@@ -97,6 +97,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let status, message, result;
     try {
         ({ status, message, result } = await fetcher(etherscanURl));
+        logger.info({ status, message, result });
     } catch (error) {
         logger.error({ status, message, result });
         return res.status(500).send({ status, message, result });
