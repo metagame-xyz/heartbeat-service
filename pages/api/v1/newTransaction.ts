@@ -94,7 +94,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         offset: '1000',
     });
 
-    let { status, message, result } = await fetcher(etherscanURl);
+    let status, message, result;
+    try {
+        ({ status, message, result } = await fetcher(etherscanURl));
+    } catch (error) {
+        logger.error({ status, message, result });
+        return res.status(500).send({ status, message, result });
+    }
 
     type Event = {
         tokenSymbol: string;
