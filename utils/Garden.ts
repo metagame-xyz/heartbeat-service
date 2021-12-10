@@ -161,6 +161,7 @@ export default class GardenGrower {
         const guiDiv = document.createElement('div');
         this.el.appendChild(guiDiv);
         guiDiv.classList.add('gui');
+        guiDiv.id = 'gui';
         guiDiv.appendChild(this.gui.domElement);
         this.gui.open();
     }

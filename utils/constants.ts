@@ -8,6 +8,8 @@ export const EVENT_FORWARDER_AUTH_TOKEN = process.env.EVENT_FORWARDER_AUTH_TOKEN
 export const MICROLINK_API_KEY = process.env.MICROLINK_API_KEY;
 export const INFURA_IPFS_PROJECT_ID = process.env.INFURA_IPFS_PROJECT_ID;
 export const INFURA_IPFS_SECRET = process.env.INFURA_IPFS_SECRET;
+export const URL_BOX_API_SECRET = process.env.URL_BOX_API_SECRET;
+export const URLBOX_API_KEY = process.env.URLBOX_API_KEY;
 
 /* Frontend Constants */
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
