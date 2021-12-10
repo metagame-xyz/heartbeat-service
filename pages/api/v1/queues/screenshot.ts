@@ -12,11 +12,13 @@ export default Queue(
     'api/v1/queues/screenshot', // 👈 the route it's reachable on
     async (job: Job) => {
         const { url, tokenId } = job;
-        const imageIFPSPath = await addToIPFS(url);
 
-        logger.info(`imageIFPSPath: ${imageIFPSPath}`);
-
-        logger.info(`'tokenId', tokenId: ${tokenId}`);
+        let imageIPFSPath = 'addToIPFS HAD AN ERROR';
+        try {
+            imageIPFSPath = await addToIPFS(url);
+        } catch (error) {
+            logger.error(error);
+        }
 
         try {
             const metadataStr = await ioredisClient.hget(tokenId, 'metadata');
@@ -25,7 +27,7 @@ export default Queue(
             /*********************/
             /* UPDATE METADATA   */
             /*********************/
-            metadata.image = imageIFPSPath;
+            metadata.image = imageIPFSPath;
             const address = metadata.address;
 
             try {
@@ -45,7 +47,7 @@ export default Queue(
                     metadata: JSON.stringify(metadata),
                 });
             } catch (error) {
-                logger.error({ error, extra: 'iosredis read error by tokenId' });
+                logger.error({ error, extra: 'iosredis write error by tokenId' });
             }
         } catch (error) {
             logger.error({ error, extra: 'iosredis read error' });

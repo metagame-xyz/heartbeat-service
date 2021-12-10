@@ -178,7 +178,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // send and forget
     fetch(forceImgUrl);
 
-    logger.info(imgUrl);
+    logger.info({ imgUrl });
 
     /************************/
     /*  QUEUE UPDATING IMG  */
@@ -193,7 +193,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 delay: '1m',
             },
         );
-        logger.info(jobData);
     } catch (error) {
         logger.error(error);
     }

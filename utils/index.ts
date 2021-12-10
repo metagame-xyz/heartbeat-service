@@ -21,9 +21,61 @@ const fetchOptions = {
     callback: (retry: any) => {
         logger.warn(`Retrying: ${retry}`);
     },
+    body: null,
 };
 
-export const fetcher = (url: string) => fetch(url, fetchOptions).then((r: any) => r.json());
+export class FetcherError extends Error {
+    status: any;
+    statusText: any;
+    url: any;
+    bodySent: any;
+    constructor({ message, status, statusText, url, bodySent }) {
+        super(message);
+        this.name = 'Fetcher Error';
+        this.status = status;
+        this.statusText = statusText;
+        this.url = url;
+        this.bodySent = bodySent;
+    }
+    toJSON() {
+        return {
+            name: this.name,
+            status: this.status,
+            statusText: this.statusText,
+            url: this.url,
+            bodySent: this.bodySent,
+        };
+    }
+}
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+export async function fetcher(url: string, options = fetchOptions) {
+    let retry = 3;
+    while (retry > 0) {
+        const response = await fetch(url, options);
+        if (response.ok) {
+            return response.json();
+        } else {
+            const error = {
+                status: response.status,
+                statusText: response.statusText,
+                url: response.url,
+                bodySent: options.body ? JSON.parse(options.body) : null,
+                message: await response.text(),
+            };
+            logger.error(error); // TODO logflare and slack?
+            retry--;
+            if (retry === 0) {
+                throw new FetcherError(error);
+            }
+            await sleep(2000);
+        }
+    }
+}
+
+// export const fetcher = (url: string) => fetch(url, fetchOptions).then((r: any) => r.json());
 
 export const isValidEventForwarderSignature = (request: NextApiRequest) => {
     const token = EVENT_FORWARDER_AUTH_TOKEN;
@@ -51,18 +103,31 @@ const { stream } = logflarePinoVercel({
     sourceToken: LOGFLARE_SOURCE_UUID,
 });
 
-// create pino loggger
-export const logger = pino(
-    {
-        base: {
-            env: process.env.VERCEL_ENV || 'unknown-env',
-            revision: process.env.VERCEL_GITHUB_COMMIT_SHA,
-        },
-    },
-    stream,
-);
+class LocalLogger {
+    info(message: any) {
+        console.log(message);
+    }
+    error(message: any) {
+        console.error(message);
+    }
+    warn(message: any) {
+        console.warn(message);
+    }
+}
 
-export const localLogger = pino({}, stream);
+// create pino loggger
+export const logger =
+    process.env.NODE_ENV === 'production'
+        ? pino(
+              {
+                  base: {
+                      env: process.env.VERCEL_ENV || 'unknown-env',
+                      revision: process.env.VERCEL_GITHUB_COMMIT_SHA,
+                  },
+              },
+              stream,
+          )
+        : new LocalLogger();
 
 export const tsToMonthAndYear = (ts: number): string => {
     const date = new Date(ts * 1000);
@@ -100,7 +165,7 @@ type NFTMintData = {
 export type Metadata = {
     name: string;
     description: string;
-    image: string; // 
+    image: string; //
     external_url: string; // tokengarden.art/garden/[tokenId]
     address: string;
     uniqueNFTCount: number;
