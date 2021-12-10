@@ -15,20 +15,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const url = `https://dev.tokengarden.art/garden/${tokenId}`;
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
 
-    // Set your options
-    const options = {
+    const baseOptions = {
         url,
         format: 'png',
         quality: 100,
+    };
+    // Set your options
+    const optionsWithForce = {
+        ...baseOptions,
         full_page: true,
         force: true,
         wait_for: '.gui',
         fail_if_selector_missing: true,
     };
 
-    const imgUrl = urlbox.buildUrl(options);
+    const forceImgUrl = urlbox.buildUrl(optionsWithForce);
+    const imgUrl = urlbox.buildUrl(baseOptions);
 
-    fetch(imgUrl);
+    fetch(forceImgUrl);
+
+    logger.info(imgUrl);
 
     logger.info(`Quirrel base url: ${process.env.QUIRREL_BASE_URL}`);
 
