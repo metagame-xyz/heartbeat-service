@@ -3,12 +3,13 @@ import fetch from 'node-fetch';
 import { performance } from 'perf_hooks';
 import Urlbox from 'urlbox';
 
+import { logger } from '@utils';
 import { URL_BOX_API_SECRET, URLBOX_API_KEY } from '@utils/constants';
 
 import ScreenshotQueue from '../queues/screenshot';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    console.log('hello');
+    logger.info('hello');
 
     const tokenId = '2';
     const url = `https://dev.tokengarden.art/garden/${tokenId}`;
@@ -26,23 +27,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
 
     const imgUrl = urlbox.buildUrl(options);
-    console.log(imgUrl);
 
-    const startTime = performance.now();
     fetch(imgUrl);
-    const duration = performance.now() - startTime;
-    console.log(`Duration: ${duration / 1000} seconds`);
 
-    const jobData = await ScreenshotQueue.enqueue(
-        {
-            url: imgUrl,
-            tokenId,
-        },
-        {
-            delay: '1m',
-        },
-    );
-    console.log(jobData);
+    logger.info(`Quirrel base url: ${process.env.QUIRREL_BASE_URL}`);
+
+    try {
+        const jobData = await ScreenshotQueue.enqueue(
+            {
+                url: imgUrl,
+                tokenId,
+            },
+            {
+                delay: '1m',
+            },
+        );
+        logger.info(jobData);
+    } catch (error) {
+        logger.error(error);
+    }
     // const imgdata = await imgdataResponse.buffer();
 
     // const img = await
