@@ -60,14 +60,17 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
             //     await garden.growFlower(NFTs[i]);
             // }
 
-            garden.showFlowerExamples();
+            // await garden.showFlowerExamples();
 
+            const promises = [];
+
+            for (let nft of NFTs) {
+                promises.push(garden.growFlower(nft));
+            }
+
+            await Promise.all(promises);
+            console.log(metadata);
             garden.initDevHelper();
-
-            // for (let nft of NFTs) {
-            //     garden.growFlower(nft);
-            // }
-            // console.log(metadata);
         }
         growGarden();
     }, []);

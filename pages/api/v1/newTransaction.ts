@@ -137,7 +137,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         NFTs,
     };
 
+    console.log('metadata', metadata);
+
     await insertMetadata(res, minterAddress, tokenId, metadata);
+
+    console.log('metadata inserted');
 
     /************************/
     /* SCREENSHOT NFT IMAGE */
@@ -153,13 +157,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ttl: '1m',
     });
 
-    // console.log(data);
+    console.log(data);
     // console.log(response.headers);
 
     // const imgdataResponse = await fetch(data.screenshot.url);
     // const imgdata = await imgdataResponse.buffer();
 
     const imageIFPSPath = await addToIPFS(data.screenshot.url);
+
+    console.log('imageIFPSPath', imageIFPSPath);
 
     /*********************/
     /* UPDATE METADATA   */
@@ -168,6 +174,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await insertMetadata(res, minterAddress, tokenId, metadata);
 
+    console.log('metadata updated');
+
     // res.status(504).end();
-    res.status(200).send({});
+    res.status(200).send({
+        minterAddress,
+        tokenId,
+        ensName: userName,
+        status: 1,
+        message: 'success',
+        result: { minterAddress, tokenId, ensName: userName },
+    });
 }
