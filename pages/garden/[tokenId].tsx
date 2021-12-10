@@ -11,34 +11,9 @@ import GardenGrower from '@utils/Garden';
 export const getServerSideProps = async (context) => {
     const { tokenId } = context.query;
     const metadata = await ioredisClient.hget(tokenId, 'metadata');
-
-    // const gltfFile = await fetch(`https://tokengarden.loca.lt/Hydrangea4.glb`).then((res) =>
-    //     res.blob(),
-    // );
-    // const arrayBuffergltf = await gltfFile.arrayBuffer();
-
-    // function getModel(modelName: string): Promise<Object3D<Event>> {
-    //     return new Promise((resolve, reject) => {
-    //         const loader = new GLTFLoader();
-
-    //         // loader.load(
-    //         //     `/${modelName}.glb`,
-    //         //     (gltf) => {
-    //         //         resolve(gltf.scene.children[0]);
-    //         //     },
-    //         //     undefined,
-    //         //     reject,
-    //         // );
-    //     });
-    // }
-
-    // const model = await getModel('Hydrangea4');
-    // console.log(model);
-
     return {
         props: {
             metadata,
-            // arrayBuffergltf,
         },
     };
 };
@@ -53,8 +28,6 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
             const metadata = JSON.parse(metadataStr);
             const NFTs = metadata.NFTs;
             const garden = new GardenGrower(gardenEl);
-            // console.log(arrayBuffergltf);
-            // await garden.injectFlower(arrayBuffergltf);
 
             // for (let i = 0; i < 59; i++) {
             //     await garden.growFlower(NFTs[i]);
