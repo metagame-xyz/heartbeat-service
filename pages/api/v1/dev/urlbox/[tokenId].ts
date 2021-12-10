@@ -6,13 +6,13 @@ import Urlbox from 'urlbox';
 import { logger } from '@utils';
 import { URL_BOX_API_SECRET, URLBOX_API_KEY } from '@utils/constants';
 
-import ScreenshotQueue from '../queues/screenshot';
+import ScreenshotQueue from '../../queues/screenshot';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    logger.info('hello');
+    const { tokenId } = req.query;
+    const tokenIdString: string = Array.isArray(tokenId) ? tokenId[0] : tokenId;
 
-    const tokenId = '2';
-    const url = `https://dev.tokengarden.art/garden/${tokenId}`;
+    const url = `https://dev.tokengarden.art/garden/${tokenIdString}`;
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
 
     const baseOptions = {
@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const jobData = await ScreenshotQueue.enqueue(
             {
                 url: imgUrl,
-                tokenId,
+                tokenId: tokenIdString,
             },
             {
                 delay: '1m',

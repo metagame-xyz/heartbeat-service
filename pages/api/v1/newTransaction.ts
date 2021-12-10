@@ -3,6 +3,7 @@ import mql from '@microlink/mql';
 import { Redis } from 'ioredis';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
+import Urlbox from 'urlbox';
 
 import {
     fetcher,
@@ -13,8 +14,16 @@ import {
     Metadata,
     tsToMonthAndYear,
 } from '@utils';
-import { blackholeAddress, MICROLINK_API_KEY, WEBSITE_URL } from '@utils/constants';
+import {
+    blackholeAddress,
+    MICROLINK_API_KEY,
+    URL_BOX_API_SECRET,
+    URLBOX_API_KEY,
+    WEBSITE_URL,
+} from '@utils/constants';
 import { addToIPFS } from '@utils/ipfs';
+
+import ScreenshotQueue from './queues/screenshot';
 
 async function insertMetadata(
     res: NextApiResponse,
@@ -137,46 +146,58 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         NFTs,
     };
 
-    console.log('metadata', metadata);
+    logger.info(metadata);
 
     await insertMetadata(res, minterAddress, tokenId, metadata);
 
-    console.log('metadata inserted');
+    logger.info('metadata inserted');
 
     /************************/
     /* SCREENSHOT NFT IMAGE */
     /************************/
     const url = `https://dev.tokengarden.art/garden/${tokenId}`;
 
-    const { data, response } = await mql(url, {
-        apiKey: MICROLINK_API_KEY,
-        screenshot: true,
-        waitForSelector: '.gui',
-        waitForTimeout: 25000,
-        timeout: 28000,
-        ttl: '1m',
-    });
+    const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
+    const baseOptions = {
+        url,
+        format: 'png',
+        quality: 100,
+    };
+    // Set your options
+    const optionsWithForce = {
+        ...baseOptions,
+        full_page: true,
+        force: true,
+        wait_for: '.gui',
+        fail_if_selector_missing: true,
+    };
 
-    console.log(data);
-    // console.log(response.headers);
+    const forceImgUrl = urlbox.buildUrl(optionsWithForce);
+    const imgUrl = urlbox.buildUrl(baseOptions);
 
-    // const imgdataResponse = await fetch(data.screenshot.url);
-    // const imgdata = await imgdataResponse.buffer();
+    // send and forget
+    fetch(forceImgUrl);
 
-    const imageIFPSPath = await addToIPFS(data.screenshot.url);
+    logger.info(imgUrl);
 
-    console.log('imageIFPSPath', imageIFPSPath);
+    /************************/
+    /*  QUEUE UPDATING IMG  */
+    /************************/
+    try {
+        const jobData = await ScreenshotQueue.enqueue(
+            {
+                url: imgUrl,
+                tokenId,
+            },
+            {
+                delay: '1m',
+            },
+        );
+        logger.info(jobData);
+    } catch (error) {
+        logger.error(error);
+    }
 
-    /*********************/
-    /* UPDATE METADATA   */
-    /*********************/
-    metadata.image = imageIFPSPath;
-
-    await insertMetadata(res, minterAddress, tokenId, metadata);
-
-    console.log('metadata updated');
-
-    // res.status(504).end();
     res.status(200).send({
         minterAddress,
         tokenId,
