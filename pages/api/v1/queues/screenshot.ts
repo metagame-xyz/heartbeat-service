@@ -14,39 +14,41 @@ export default Queue(
         const { url, tokenId } = job;
         const imageIFPSPath = await addToIPFS(url);
 
-        console.log('imageIFPSPath', imageIFPSPath);
+        logger.info(`imageIFPSPath: ${imageIFPSPath}`);
 
-        const metadataStr = await ioredisClient.hget(tokenId, 'metadata');
-        const metadata: Metadata = JSON.parse(metadataStr);
-
-        /*********************/
-        /* UPDATE METADATA   */
-        /*********************/
-        metadata.image = imageIFPSPath;
-        const address = metadata.address;
+        logger.info(`'tokenId', tokenId: ${tokenId}`);
 
         try {
-            // index by wallet address
-            await ioredisClient.hset(address, {
-                tokenId,
-                metadata: JSON.stringify(metadata),
-            });
+            const metadataStr = await ioredisClient.hget(tokenId, 'metadata');
+            const metadata: Metadata = JSON.parse(metadataStr);
+
+            /*********************/
+            /* UPDATE METADATA   */
+            /*********************/
+            metadata.image = imageIFPSPath;
+            const address = metadata.address;
+
+            try {
+                // index by wallet address
+                await ioredisClient.hset(address, {
+                    tokenId,
+                    metadata: JSON.stringify(metadata),
+                });
+            } catch (error) {
+                logger.error({ error, extra: 'iosredis write error by address' });
+            }
+
+            try {
+                // index by tokenId
+                await ioredisClient.hset(tokenId, {
+                    address: address,
+                    metadata: JSON.stringify(metadata),
+                });
+            } catch (error) {
+                logger.error({ error, extra: 'iosredis read error by tokenId' });
+            }
         } catch (error) {
-            logger.error({ error });
+            logger.error({ error, extra: 'iosredis read error' });
         }
-
-        try {
-            // index by tokenId
-            await ioredisClient.hset(tokenId, {
-                address: address,
-                metadata: JSON.stringify(metadata),
-            });
-        } catch (error) {
-            logger.error({ error });
-        }
-
-        console.log('metadata updated');
-
-        console.log('in the queue', tokenId, address);
     },
 );
