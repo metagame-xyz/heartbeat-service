@@ -6,6 +6,7 @@ import fetch from 'node-fetch';
 import Urlbox from 'urlbox';
 
 import {
+    defaultProvider,
     fetcher,
     getUserName,
     ioredisClient,
@@ -16,46 +17,17 @@ import {
 } from '@utils';
 import {
     blackholeAddress,
+    ETHERSCAN_API_KEY,
     MICROLINK_API_KEY,
     URL_BOX_API_SECRET,
     URLBOX_API_KEY,
     WEBSITE_URL,
 } from '@utils/constants';
-import { addToIPFS } from '@utils/ipfs';
 
 import ScreenshotQueue from './queues/screenshot';
 
-async function insertMetadata(
-    res: NextApiResponse,
-    minterAddress: string,
-    tokenId: string,
-    metadata: Metadata,
-) {
-    try {
-        // index by wallet address
-        await ioredisClient.hset(minterAddress, {
-            tokenId,
-            metadata: JSON.stringify(metadata),
-        });
-    } catch (error) {
-        logger.error({ error });
-        return res.status(500).send({ message: 'ioredis error', error });
-    }
-
-    try {
-        // index by tokenId
-        await ioredisClient.hset(tokenId, {
-            address: minterAddress,
-            metadata: JSON.stringify(metadata),
-        });
-    } catch (error) {
-        logger.error({ error });
-        return res.status(500).send({ message: 'ioredis error 2', error });
-    }
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    logger.info(req.body);
+    logger.info(`top of newTransaction from tokeId ${req.body.tokenId}`);
     if (req.method !== 'POST') {
         /**
          * During development, it's useful to un-comment this block
@@ -71,7 +43,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).send(metadata);
     }
 
-    // check the message is coming from the event-forwarder
+    /****************/
+    /*     AUTH     */
+    /****************/
     if (!isValidEventForwarderSignature(req)) {
         const error = 'invalid event-forwarder Signature';
         logger.error({ error });
@@ -83,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     /****************/
     /* GET NFT DATA */
     /****************/
-    const etherscanProvider = new EtherscanProvider('homestead');
+    const etherscanProvider = new EtherscanProvider('homestead', ETHERSCAN_API_KEY);
 
     const etherscanURl = etherscanProvider.getUrl('account', {
         action: 'tokennfttx',
@@ -97,8 +71,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let status, message, result;
     try {
         ({ status, message, result } = await fetcher(etherscanURl));
-        logger.info({ status, message, result });
     } catch (error) {
+        logger.error(`Error in fetcher from etherscan: ${error}`);
+        // logger.error({ status, message, result });
+        return res.status(500).send({ status, message, result });
+    }
+
+    if (status != 1) {
+        logger.error(`etherscan status: ${status}. ${result}. returning a 500`);
+        // probably" Max rate limit reached", 5/sec
         logger.error({ status, message, result });
         return res.status(500).send({ status, message, result });
     }
@@ -123,7 +104,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return allSymbols;
     }, {});
 
-    const userName = await getUserName(etherscanProvider, minterAddress);
+    const userName = await getUserName(defaultProvider, minterAddress);
 
     const dateStr = tsToMonthAndYear(mintEvents[0].timeStamp);
     const creatorMap = {
@@ -155,14 +136,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     logger.info(metadata);
 
-    await insertMetadata(res, minterAddress, tokenId, metadata);
+    try {
+        // index by wallet address
+        await ioredisClient.hset(minterAddress, {
+            tokenId,
+            metadata: JSON.stringify(metadata),
+        });
+    } catch (error) {
+        logger.error({ error });
+        return res.status(500).send({ message: 'ioredis error', error });
+    }
 
-    logger.info('metadata inserted');
+    try {
+        // index by tokenId
+        await ioredisClient.hset(tokenId, {
+            address: minterAddress,
+            metadata: JSON.stringify(metadata),
+        });
+    } catch (error) {
+        logger.error({ error });
+        return res.status(500).send({ message: 'ioredis error 2', error });
+    }
 
     /************************/
     /* SCREENSHOT NFT IMAGE */
     /************************/
-    const url = `https://dev.tokengarden.art/garden/${tokenId}`;
+    const url = `https://dev.tokengarden.art/garden/${tokenId}`; //TODO un-hardcode
 
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
     const baseOptions = {

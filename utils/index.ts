@@ -1,3 +1,4 @@
+import { getDefaultProvider } from '@ethersproject/providers';
 import { createHmac } from 'crypto';
 import { ethers } from 'ethers';
 import Redis from 'ioredis';
@@ -7,13 +8,26 @@ import pino from 'pino';
 import { logflarePinoVercel } from 'pino-logflare';
 
 import {
+    ALCHEMY_PROJECT_ID,
     ETHERSCAN_API_KEY,
     EVENT_FORWARDER_AUTH_TOKEN,
+    INFURA_PROJECT_ID,
     LOGFLARE_API_KEY,
     LOGFLARE_SOURCE_UUID,
     networkStrings,
+    POCKET_NETWORK_API_KEY,
+    POCKET_NETWORK_ID,
     REDIS_URL,
 } from './constants';
+
+export const defaultProvider = getDefaultProvider(networkStrings.ethers, {
+    infura: INFURA_PROJECT_ID,
+    alchemy: ALCHEMY_PROJECT_ID,
+    pocket: {
+        applicationId: POCKET_NETWORK_ID,
+        applicationSecretKey: POCKET_NETWORK_API_KEY,
+    },
+});
 
 const fetchOptions = {
     retry: 12,

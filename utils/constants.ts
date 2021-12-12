@@ -10,6 +10,8 @@ export const INFURA_IPFS_PROJECT_ID = process.env.INFURA_IPFS_PROJECT_ID;
 export const INFURA_IPFS_SECRET = process.env.INFURA_IPFS_SECRET;
 export const URL_BOX_API_SECRET = process.env.URL_BOX_API_SECRET;
 export const URLBOX_API_KEY = process.env.URLBOX_API_KEY;
+export const POCKET_NETWORK_API_KEY = process.env.POCKET_NETWORK_API_KEY;
+export const POCKET_NETWORK_ID = process.env.POCKET_NETWORK_ID;
 
 /* Frontend Constants */
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
