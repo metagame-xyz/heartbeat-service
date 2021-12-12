@@ -6,7 +6,7 @@ import { addToIPFS } from '@utils/ipfs';
 
 type Job = {
     url: string;
-    tokenId: string; // should be a string but i guess it's a number?
+    tokenId: string;
 };
 
 export default Queue(
@@ -23,7 +23,7 @@ export default Queue(
 
         let metadataStr;
         try {
-            const metadataStr = await ioredisClient.hget(tokenId.toString(), 'metadata');
+            metadataStr = await ioredisClient.hget(tokenId, 'metadata');
         } catch (error) {
             logger.error({ error, extra: 'iosredis read error' });
         }
