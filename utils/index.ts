@@ -29,6 +29,15 @@ export const defaultProvider = getDefaultProvider(networkStrings.ethers, {
     },
 });
 
+export const defaultMainnetProvider = getDefaultProvider('homestead', {
+    infura: INFURA_PROJECT_ID,
+    alchemy: ALCHEMY_PROJECT_ID,
+    pocket: {
+        applicationId: POCKET_NETWORK_ID,
+        applicationSecretKey: POCKET_NETWORK_API_KEY,
+    },
+});
+
 const fetchOptions = {
     retry: 12,
     pause: 2000,
@@ -162,60 +171,10 @@ export const getUserName = async (provider, address) => {
     let ensName = null;
     try {
         ensName = await provider.lookupAddress(address);
+        logger.info(`ENS name for ${address} is ${ensName}`);
     } catch (error) {
         logger.error({ error });
         logger.error({ message: 'ensName lookup failed' });
     }
     return ensName || address.substr(0, 6);
 };
-
-type NFTMintData = {
-    name?: string;
-    symbol: string;
-    count: number;
-    creator?: string;
-};
-
-export type Metadata = {
-    name: string;
-    description: string;
-    image: string; //
-    external_url: string; // tokengarden.art/garden/[tokenId]
-    address: string;
-    uniqueNFTCount: number;
-    totalNFTCount: number;
-    NFTs: Array<NFTMintData>;
-};
-
-// birthblock.art/api/v1/metadata/[tokenId]
-export type OpenSeaMetadata = {
-    name: string;
-    description: string;
-    image: string; // birthblock.art/api/v1/image/[tokenId]
-    external_url: string; // birthblock.art/birthblock/[tokenId]
-    attributes: [
-        // properties
-        {
-            trait_type: 'address';
-            value: string;
-        },
-    ];
-};
-
-export function metadataToOpenSeaMetadata(metadata: Metadata): OpenSeaMetadata {
-    const openseaMetadata: OpenSeaMetadata = {
-        name: metadata.name,
-        description: metadata.description,
-        image: metadata.image,
-        external_url: metadata.external_url,
-        attributes: [
-            // properties
-            {
-                trait_type: 'address',
-                value: metadata.address,
-            },
-        ],
-    };
-
-    return openseaMetadata;
-}

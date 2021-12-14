@@ -7,6 +7,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { ioredisClient } from '@utils';
 import GardenGrower from '@utils/Garden';
+import { Metadata, NFTs } from '@utils/metadata';
 
 export const getServerSideProps = async (context) => {
     const { tokenId } = context.query;
@@ -25,24 +26,21 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
             while (gardenEl.firstChild) {
                 gardenEl.removeChild(gardenEl.firstChild);
             }
-            const metadata = JSON.parse(metadataStr);
-            const NFTs = metadata.NFTs;
+            
+            const metadata: Metadata = JSON.parse(metadataStr);
+            const nfts: NFTs = metadata.nfts;
             const garden = new GardenGrower(gardenEl);
-
-            // for (let i = 0; i < 59; i++) {
-            //     await garden.growFlower(NFTs[i]);
-            // }
 
             // await garden.showFlowerExamples();
 
             const promises = [];
 
-            for (let nft of NFTs) {
-                promises.push(garden.growFlower(nft));
+            for (let [address, nft] of Object.entries(nfts)) {
+                promises.push(garden.growFlower(address, nft.count));
             }
 
             await Promise.all(promises);
-            console.log(metadata);
+            // console.log(metadata);
             garden.initDevHelper();
         }
         growGarden();

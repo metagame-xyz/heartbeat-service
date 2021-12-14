@@ -1,34 +1,24 @@
-import { t } from '@chakra-ui/styled-system/dist/declarations/src/utils';
 import { GUI } from 'dat.gui';
-import { Children } from 'react';
 import {
-    AmbientLight,
     AxesHelper,
-    Box3,
-    Box3Helper,
-    BoxGeometry,
     BoxHelper,
-    Cache,
     Color,
     DirectionalLight,
     Event,
     GridHelper,
-    Group,
     Light,
     LoadingManager,
     Mesh,
-    MeshBasicMaterial,
     Object3D,
     PerspectiveCamera,
     Scene,
     sRGBEncoding,
-    Vector3,
     WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import { NFTdata } from '@utils/frontend';
+import { specialNfts } from './specialnfts2';
 
 declare global {
     interface Window {
@@ -36,18 +26,32 @@ declare global {
     }
 }
 
-const hydrangeaColors = [
-    'cyan',
-    'deepblue',
-    'greenyellow',
-    'lightblue',
-    'magenta',
-    'peach',
-    'pink',
-    'purple',
-    'red',
-    'yellowpink',
-];
+const randomFlowers = ['Amaryllis', 'Hydrangea', 'Periwinkle', 'Poppy'];
+const specificFlowers = ['Hydrangea', 'Periwinkle', 'Poppy'];
+const allFlowers = randomFlowers.concat(specificFlowers);
+
+const metagameFlowerColors = ['cyan', 'purple', 'greenyellow'];
+const standardFlowerColors = ['deepblue', 'lightblue', 'magenta', 'peach', 'pink', 'yellowgreen'];
+const randomFlowerColors = metagameFlowerColors.concat(standardFlowerColors);
+const domFlowerColors = ['red'];
+const allFlowerColors = randomFlowerColors.concat(domFlowerColors);
+type Coords = [number, number, number];
+
+function getRandomPosition(contractAddress: string): Coords {
+    const max = 7;
+    const min = -1 * max;
+
+    const charCodeTotal = contractAddress.split('').reduce((a, char) => a + char.charCodeAt(0), 0);
+    const reverseCharCodeTotal = Number(charCodeTotal.toString().split('').reverse().join(''));
+
+    const randomX = ((charCodeTotal * 3) % 1000) / 1000;
+    const randomZ = ((reverseCharCodeTotal * 3) % 1000) / 1000;
+
+    const x = min + randomX * (max - min);
+    const z = min + randomZ * (max - min);
+
+    return [x, 0, z];
+}
 
 export default class GardenGrower {
     el: HTMLElement;
@@ -181,21 +185,6 @@ export default class GardenGrower {
         });
     }
 
-    getModelFromArrayBuffer(arrayBuffer: ArrayBuffer): Promise<Object3D<Event>> {
-        return new Promise((resolve, reject) => {
-            const loader = new GLTFLoader(new LoadingManager());
-
-            loader.parse(
-                arrayBuffer,
-                '',
-                (gltf) => {
-                    resolve(gltf.scene.children[0]);
-                },
-                reject,
-            );
-        });
-    }
-
     async getFlower(modelString: string): Promise<Object3D<Event>> {
         console.log(modelString);
         let model;
@@ -210,113 +199,102 @@ export default class GardenGrower {
         return model;
     }
 
-    async showFlowerExamples(color = 'peach') {
-        const stems = ['short', 'normal', 'long'];
-        const sizes = ['baby', 'OG', 'bush'];
-        for (let i = 0; i < stems.length; i++) {
-            for (let j = 0; j < sizes.length; j++) {
-                if (i === 0 && (j === 0 || j === 2)) {
-                    console.log('skipping');
-                } else {
-                    const modelString = `Hydrangea/${sizes[j]}/${stems[i]}/Hydrangea_${sizes[j]}_${stems[i]}_${color}`;
-                    console.log(`${stems[i]} ${sizes[j]}`);
+    async showFlowerExamples(color = 'magenta') {
+        const order = [
+            ['baby/short', 'baby_short'],
+            ['OG/normal', 'OG_normal'],
+            ['bush/short', 'bush_short'],
+            ['bush/normal', 'bush_normal'],
+            ['bush/long', 'bush_long'],
+        ];
+        const flowers = [
+            'Amaryllis',
+            'Periwinkle',
+            'Poppy',
+            'Hydrangea',
+            // 'Cannalilly',
+        ];
+        for (let i = 0; i < flowers.length; i++) {
+            for (let j = 0; j < order.length; j++) {
+                for (let m = 0; m < randomFlowerColors.length; m++) {
+                    const modelString = `flowers/${flowers[i]}/${order[j][0]}/${flowers[i]}_${order[j][1]}_${randomFlowerColors[m]}`;
                     const model = await this.getFlower(modelString);
-                    model.position.set(i * 2, 0, j * 2);
-
+                    model.position.set(i * 20 + m * 2, 0, j * 3);
                     this.scene.add(model);
                 }
             }
         }
+        // const sizes = ['baby', 'OG', 'bush'];
+        // const stems = ['short', 'normal', 'long'];
+        // for (let i = 0; i < flowers.length; i++) {
+        //     for (let m = 0; m < randomFlowerColors.length; m++) {
+        //         for (let j = 0; j < sizes.length; j++) {
+        //             for (let k = 0; k < stems.length; k++) {
+        //                 const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${randomFlowerColors[m]}`;
+        //                 console.log(` ${stems[i]} ${sizes[j]}`);
+        //                 const model = await this.getFlower(modelString);
+        //                 model.position.set(i * 20 + m * 2, 0, j * 6 + k * 2);
+        //                 this.scene.add(model);
+        //             }
+        //         }
+        //     }
+        // }
+        // Cannalilly only
+        // const flowers = ['Cannalilly'];
+        // const sizes = ['OG'];
+        // const stems = ['short', 'normal', 'long'];
+        // for (let i = 0; i < flowers.length; i++) {
+        //     for (let m = 0; m < randomFlowerColors.length; m++) {
+        //         for (let j = 0; j < sizes.length; j++) {
+        //             for (let k = 0; k < stems.length; k++) {
+        //                 const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${randomFlowerColors[m]}`;
+        //                 console.log(` ${stems[i]} ${sizes[j]}`);
+        //                 const model = await this.getFlower(modelString);
+        //                 model.position.set(i * 20 + m * 2, 0, j * 6 + k * 2);
+        //                 this.scene.add(model);
+        //             }
+        //         }
+        //     }
+        // }
     }
-    async growFlower({ symbol, count, creator = null }: NFTdata) {
+    async growFlower(contractAddress: string, count: number) {
         // console.log('growFlower', symbol, count, creator);
 
-        const getFlowerSize = (count) => {
-            const base = 1;
-            switch (count) {
-                case 1:
-                    return base;
-                case 2:
-                    return base * 1.2;
-                default:
-                    return base * 1.5;
-            }
-        };
-
-        const getFlowerColor = (symbol: string, colorOptions: string[]) => {
+        const getRandom = (contractAddress: string, options: string[]) => {
             // sum char codes of symbol, pseudo-randomly pick a color
-            const charCodeTotal = symbol.split('').reduce((a, char) => a + char.charCodeAt(0), 0);
-            const colorIndex = charCodeTotal % colorOptions.length;
-
-            // saving number of each flower color, maybe for metadata
-            if (this.usedColors[colorOptions[colorIndex]]) {
-                this.usedColors[colorOptions[colorIndex]] += 1;
-            } else {
-                this.usedColors[colorOptions[colorIndex]] = 1;
-            }
-
-            return colorOptions[colorIndex];
+            const charCodeTotal = contractAddress
+                .split('')
+                .reduce((a, char) => a + char.charCodeAt(0), 0);
+            const index = charCodeTotal % options.length;
+            return options[index];
         };
 
-        const getFlowerName = (symbol: string) => {
-            return 'Hydrangea';
-        };
-
-        const getStemWord = (count) => {
-            if (count <= 3) {
-                return 'normal'; // TODO update correct stem word
-            } else if (count >= 12) {
-                return 'long';
-            } else {
-                return 'normal';
-            }
-        };
-
-        const getSizeWord = (count) => {
+        const getSizeAndStem = (count: number): [string, string] => {
             switch (count) {
                 case 1:
-                    return 'baby';
+                    return ['baby', 'short'];
                 case 2:
-                    console.log('2', count);
-                    return 'OG';
+                    return ['OG', 'normal'];
+                case 3:
+                    return ['bush', 'short'];
+                case 4:
+                    return ['bush', 'normal'];
                 default:
-                    return 'bush';
+                    return ['bush', 'long'];
             }
         };
 
-        const getRandomPosition = (): [number, number, number] => {
-            const max = 6;
-            const min = max * -1;
-            const x = Math.floor(Math.random() * (max - min + 1)) + min;
-            const z = Math.floor(Math.random() * (max - min + 1)) + min;
-            // console.log('x', x, 'z', z);
-            return [x, 0, z];
-        };
+        const nft = specialNfts[contractAddress];
 
-        const getSpecificPosition = (symbol: string): [number, number, number] | null => {
-            const specialNFTMapping = {
-                BBLOCK: [0, 0, 0],
-                LOOT: [1, 0, 1],
-                'The Proof of Attendance Protocol': [-1, 0, -1],
-                BLIT: [1, 0, -1],
-                CORRUPT: [-1, 0, 1],
-                NAUT: [2, 0, 2],
-            };
-            return specialNFTMapping[symbol];
-        };
+        const flowerName = nft?.flowerName || getRandom(contractAddress, randomFlowers);
+        const color = nft?.color || getRandom(contractAddress, randomFlowerColors);
+        const [size, stem] = nft?.sizeAndStem || getSizeAndStem(count);
 
-        const getPosition = (symbol: string): [number, number, number] => {
-            return getSpecificPosition(symbol) || getRandomPosition();
-        };
+        // console.log('nft:', nft?.name);
+        // console.log(`flowerName: ${flowerName}_${size}_${stem}_${color}`);
 
-        const color = getFlowerColor(symbol, hydrangeaColors);
-        const name = getFlowerName(symbol);
-        const stem = getStemWord(count);
-        const size = getSizeWord(count);
+        let modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
 
-        let modelString = `${name}/${size}/${stem}/${name}_${size}_${stem}_${color}`;
-
-        console.log('count', count, '', modelString);
         let model;
 
         if (this.flowers[modelString]) {
@@ -326,12 +304,11 @@ export default class GardenGrower {
             this.flowers[modelString] = model;
         }
 
-        // set scale
-        // const scaleFactor = getFlowerSize(count);
-        // model.scale.setScalar(scaleFactor); //0.1
+        const position = nft?.position || getRandomPosition(contractAddress);
+        // const position =
+        //     nft?.position || getPosition(flowerName, color) || getRandomPosition('demo');
 
-        // set position
-        model.position.set(...getPosition(symbol));
+        model.position.set(...position);
 
         this.scene.add(model);
         window.model = model;

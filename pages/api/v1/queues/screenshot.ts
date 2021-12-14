@@ -1,8 +1,9 @@
 import { Queue } from 'quirrel/next';
 
-import { fetcher, FetcherError, ioredisClient, logger, Metadata } from '@utils';
+import { fetcher, FetcherError, ioredisClient, logger } from '@utils';
 import { networkStrings } from '@utils/constants';
 import { addToIPFS } from '@utils/ipfs';
+import { Metadata } from '@utils/metadata';
 
 type Job = {
     url: string;
@@ -65,19 +66,19 @@ export default Queue(
         /*  UPDATE OPENSEA   */
         /*********************/
 
-        function openseaForceUpdateURL(tokenId, contractAddress) {
-            return `https://${networkStrings.openseaAPI}opensea.io/api/v1/asset/${contractAddress}/${tokenId}/?force_update=true`;
-        }
+        // function openseaForceUpdateURL(tokenId, contractAddress) {
+        //     return `https://${networkStrings.openseaAPI}opensea.io/api/v1/asset/${contractAddress}/${tokenId}/?force_update=true`;
+        // }
 
-        try {
-            const { permalink } = await fetcher(openseaForceUpdateURL(tokenId, address));
-            logger.info(permalink);
-        } catch (error) {
-            if (error instanceof FetcherError) {
-                // it logs in fetcher
-            } else {
-                logger.error(`unkown error: ${error.name} ${error.message}`);
-            }
-        }
+        // try {
+        //     const { permalink } = await fetcher(openseaForceUpdateURL(tokenId, address));
+        //     logger.info(permalink);
+        // } catch (error) {
+        //     if (error instanceof FetcherError) {
+        //         // it logs in fetcher
+        //     } else {
+        //         logger.error(`unkown error: ${error.name} ${error.message}`);
+        //     }
+        // }
     },
 );
