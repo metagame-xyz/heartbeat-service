@@ -1,4 +1,3 @@
-import image from 'next/image';
 import Urlbox from 'urlbox';
 
 import { URL_BOX_API_SECRET, URLBOX_API_KEY } from './constants';

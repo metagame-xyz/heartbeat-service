@@ -6,7 +6,7 @@ import Urlbox from 'urlbox';
 import { logger } from '@utils';
 import { URL_BOX_API_SECRET, URLBOX_API_KEY } from '@utils/constants';
 
-import ScreenshotQueue from '../../queues/screenshot';
+import ScreenshotQueue from '../../../queues/screenshot';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { tokenId } = req.query;

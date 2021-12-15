@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     let metadata: Metadata;
     try {
-        metadata = await formatMetadata(addressString, nfts, dateStr, userName);
+        metadata = await formatMetadata(addressString, nfts, dateStr, userName, '1');
     } catch (error) {
         logger.error(error);
     }
