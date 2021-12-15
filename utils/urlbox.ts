@@ -1,6 +1,6 @@
 import Urlbox from 'urlbox';
 
-import { URL_BOX_API_SECRET, URLBOX_API_KEY } from './constants';
+import { URL_BOX_API_SECRET, URLBOX_API_KEY, doneDivClass } from './constants';
 
 export function activateUrlbox(tokenId): string {
     const url = `https://dev.tokengarden.art/privateGarden/${tokenId}`; //TODO un-hardcode
@@ -17,7 +17,7 @@ export function activateUrlbox(tokenId): string {
         ...baseOptions,
         full_page: true,
         force: true,
-        wait_for: '.gui',
+        wait_for: `.${doneDivClass}`,
         fail_if_selector_missing: true,
     };
 

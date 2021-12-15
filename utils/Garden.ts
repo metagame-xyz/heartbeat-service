@@ -19,6 +19,7 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import { doneDivClass } from './constants';
 import { specialNfts } from './specialnfts2';
 
 declare global {
@@ -323,6 +324,12 @@ export default class GardenGrower {
 
         this.scene.add(model);
         window.model = model;
+    }
+
+    done() {
+        const doneDiv = document.createElement('div');
+        this.el.appendChild(doneDiv);
+        doneDiv.classList.add(doneDivClass);
     }
 
     initDevHelper() {

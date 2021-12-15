@@ -43,7 +43,7 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
 
             await Promise.all(promises);
             // console.log(metadata);
-            garden.initDevHelper();
+            garden.done();
         }
         growGarden();
     }, []);

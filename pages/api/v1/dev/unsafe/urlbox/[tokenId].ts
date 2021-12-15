@@ -4,7 +4,7 @@ import { performance } from 'perf_hooks';
 import Urlbox from 'urlbox';
 
 import { logger } from '@utils';
-import { URL_BOX_API_SECRET, URLBOX_API_KEY } from '@utils/constants';
+import { doneDivClass, URL_BOX_API_SECRET, URLBOX_API_KEY } from '@utils/constants';
 
 import ScreenshotQueue from '../../../queues/screenshot';
 
@@ -25,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ...baseOptions,
         full_page: true,
         force: true,
-        wait_for: '.gui',
+        wait_for: `.${doneDivClass}`,
         fail_if_selector_missing: true,
     };
 
