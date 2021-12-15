@@ -203,6 +203,8 @@ export default class GardenGrower {
             loader.load(
                 `/${modelName}.glb`,
                 (gltf) => {
+                    console.log(gltf.scene.children[1]);
+                    console.log(gltf.scene);
                     resolve(gltf.scene.children[0]);
                 },
                 undefined,
@@ -225,8 +227,8 @@ export default class GardenGrower {
         return model;
     }
 
-    async addGround(number) {
-        const ground = await this.getModel(`ground/ground1`);
+    async addGround(str) {
+        const ground = await this.getModel(`ground/${str}`);
         ground.name = 'ground';
         // ground.receiveShadow = true;
         ground.position.set(0, 0, 0);
@@ -243,23 +245,23 @@ export default class GardenGrower {
             ['bush/normal', 'bush_normal'],
             ['bush/long', 'bush_long'],
         ];
-        const flowers = [
-            'Amaryllis',
-            'Periwinkle',
-            'Poppy',
-            'Hydrangea',
-            // 'Cannalilly',
-        ];
-        for (let i = 0; i < flowers.length; i++) {
-            for (let j = 0; j < order.length; j++) {
-                for (let m = 0; m < randomFlowerColors.length; m++) {
-                    const modelString = `flowers/${flowers[i]}/${order[j][0]}/${flowers[i]}_${order[j][1]}_${randomFlowerColors[m]}`;
-                    const model = await this.getFlower(modelString);
-                    model.position.set(i * 20 + m * 2, 0, j * 3);
-                    this.scene.add(model);
-                }
-            }
-        }
+        // const flowers = [
+        //     'Amaryllis',
+        //     'Periwinkle',
+        //     'Poppy',
+        //     'Hydrangea',
+        //     // 'Cannalilly',
+        // ];
+        // for (let i = 0; i < flowers.length; i++) {
+        //     for (let j = 0; j < order.length; j++) {
+        //         for (let m = 0; m < randomFlowerColors.length; m++) {
+        //             const modelString = `flowers/${flowers[i]}/${order[j][0]}/${flowers[i]}_${order[j][1]}_${randomFlowerColors[m]}`;
+        //             const model = await this.getFlower(modelString);
+        //             model.position.set(i * 20 + m * 2, 0, j * 3);
+        //             this.scene.add(model);
+        //         }
+        //     }
+        // }
         // const sizes = ['baby', 'OG', 'bush'];
         // const stems = ['short', 'normal', 'long'];
         // for (let i = 0; i < flowers.length; i++) {
@@ -276,22 +278,22 @@ export default class GardenGrower {
         //     }
         // }
         // Cannalilly only
-        // const flowers = ['Cannalilly'];
-        // const sizes = ['OG'];
-        // const stems = ['short', 'normal', 'long'];
-        // for (let i = 0; i < flowers.length; i++) {
-        //     for (let m = 0; m < randomFlowerColors.length; m++) {
-        //         for (let j = 0; j < sizes.length; j++) {
-        //             for (let k = 0; k < stems.length; k++) {
-        //                 const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${randomFlowerColors[m]}`;
-        //                 console.log(` ${stems[i]} ${sizes[j]}`);
-        //                 const model = await this.getFlower(modelString);
-        //                 model.position.set(i * 20 + m * 2, 0, j * 6 + k * 2);
-        //                 this.scene.add(model);
-        //             }
-        //         }
-        //     }
-        // }
+        const flowers = ['Cannalilly'];
+        const sizes = ['baby', 'OG', 'bush'];
+        const stems = ['short', 'normal', 'long'];
+        for (let i = 0; i < flowers.length; i++) {
+            for (let m = 0; m < randomFlowerColors.length; m++) {
+                for (let j = 0; j < sizes.length; j++) {
+                    for (let k = 0; k < stems.length; k++) {
+                        const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${randomFlowerColors[m]}`;
+                        console.log(` ${stems[i]} ${sizes[j]}`);
+                        const model = await this.getFlower(modelString);
+                        model.position.set(i * 20 + m * 2, 0, j * 6 + k * 2);
+                        this.scene.add(model);
+                    }
+                }
+            }
+        }
     }
     async growFlower(contractAddress: string, count: number) {
         // console.log('growFlower', symbol, count, creator);
