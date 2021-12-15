@@ -121,8 +121,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
 
     const forceImgUrl = urlbox.buildUrl(optionsWithForce);
-    const imgUrl = urlbox.buildUrl(baseOptions);
 
+    logger.info(`begin screenshot of ${forceImgUrl}`);
     const start = performance.now();
     const data = await fetch(forceImgUrl);
     const end = performance.now();
