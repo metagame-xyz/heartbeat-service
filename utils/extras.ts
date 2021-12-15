@@ -11,6 +11,57 @@ const domFlowerColors = ['red'];
 const allFlowerColors = randomFlowerColors.concat(domFlowerColors);
 type Coords = [number, number, number];
 
+const layout1 = [90, 120, 60, 150, 30, 180, 0];
+
+const layout2 = [105, 75, 135, 45, 165, 15];
+
+export const order1 = layout1.concat(layout2);
+const order2 = layout2.concat(layout1);
+
+const oneOrder = order1.concat(order1).concat(order2).concat(order2);
+const totalOrder = oneOrder.concat(oneOrder).concat(oneOrder).concat(oneOrder);
+const totalFlowers = [];
+const flowers = ['Periwinkle', 'Amaryllis', 'Poppy', 'Cannalilly'];
+
+totalFlowers.push(...Array(7).fill(flowers[0]));
+totalFlowers.push(...Array(6).fill(flowers[1]));
+totalFlowers.push(...Array(7).fill(flowers[2]));
+totalFlowers.push(...Array(6).fill(flowers[3]));
+
+totalFlowers.push(...Array(6).fill(flowers[0]));
+totalFlowers.push(...Array(7).fill(flowers[1]));
+totalFlowers.push(...Array(6).fill(flowers[2]));
+totalFlowers.push(...Array(7).fill(flowers[3]));
+
+totalFlowers.push(...Array(7).fill(flowers[0]));
+totalFlowers.push(...Array(6).fill(flowers[1]));
+totalFlowers.push(...Array(7).fill(flowers[2]));
+totalFlowers.push(...Array(6).fill(flowers[3]));
+
+totalFlowers.push(...Array(6).fill(flowers[0]));
+totalFlowers.push(...Array(7).fill(flowers[1]));
+totalFlowers.push(...Array(6).fill(flowers[2]));
+totalFlowers.push(...Array(7).fill(flowers[3]));
+
+const positionScale = [3, 6, 9, 12];
+
+export function getFlowerName(randomFlowerNumber = 1, nftCount: number) {
+    const flower = totalFlowers[randomFlowerNumber];
+    return flower;
+}
+export function getRandomFlowerCoords(randomFlowerNumber, flower: string) {
+    const degree = totalOrder[randomFlowerNumber];
+    let coords = degreeToCoords(degree);
+    coords = coordMultiplier(coords, flower);
+    return coords;
+}
+
+export function getSpecialFlowerCoords(randomFlowerNumber = 1, flower: string) {
+    const degree = totalOrder[randomFlowerNumber];
+    let coords = degreeToCoords(degree);
+    return coords;
+}
+
 export function degreeToCoords(degree: number): [number, number, number] {
     const radian = degree * (Math.PI / 180);
     const x = Math.cos(radian);
@@ -36,17 +87,7 @@ export function getColorOptions(flowerName: string): string[] {
 }
 
 export function coordMultiplier(coords: Coords, flowerName: string): Coords {
-    const scale = [1, 2, 3];
-
-    if (flowerName === 'Hydrangea') {
-        return coords.map((c) => c * scale[0]) as Coords;
-    } else if (flowerName === 'Poppy') {
-        return coords.map((c) => c * scale[1]) as Coords;
-    } else if (flowerName === 'Periwinkle') {
-        return coords.map((c) => c * scale[2]) as Coords;
-    } else {
-        throw new Error(`Unknown flower name: ${flowerName}`);
-    }
+    return coords.map((c) => c * positionScale[flowers.indexOf(flowerName)]) as Coords;
 }
 
 export function getPosition(flowerName: string, color: string): Coords {

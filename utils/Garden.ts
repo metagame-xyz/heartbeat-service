@@ -1,3 +1,4 @@
+import { position } from '@chakra-ui/react';
 import Chance from 'chance';
 import { GUI } from 'dat.gui';
 import {
@@ -20,6 +21,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { doneDivClass } from './constants';
+import { getFlowerName, getRandomFlowerCoords, getSpecialFlowerCoords } from './extras';
 import { specialNfts } from './specialnfts2';
 
 declare global {
@@ -32,30 +34,30 @@ const randomFlowers = ['Amaryllis', 'Hydrangea', 'Periwinkle', 'Poppy'];
 const specificFlowers = ['Hydrangea', 'Periwinkle', 'Poppy'];
 const allFlowers = randomFlowers.concat(specificFlowers);
 
+const oneColor = ['magenta'];
 const metagameFlowerColors = ['cyan', 'purple', 'greenyellow'];
-const standardFlowerColors = ['deepblue', 'lightblue', 'magenta', 'peach', 'pink', 'yellowgreen'];
+const standardFlowerColors = ['deepblue', 'magenta', 'peach', 'pink', 'yellowgreen']; // lightblue
 const randomFlowerColors = metagameFlowerColors.concat(standardFlowerColors);
 const domFlowerColors = ['red'];
 const allFlowerColors = randomFlowerColors.concat(domFlowerColors);
 type Coords = [number, number, number];
 
 const getRandom = (contractAddress: string, options: string[]) => {
-    // sum char codes of symbol, pseudo-randomly pick a color
-    const charCodeTotal = contractAddress.split('').reduce((a, char) => a + char.charCodeAt(0), 0);
-    const index = charCodeTotal % options.length;
+    const chance = new Chance(contractAddress);
+    const index = chance.integer({ min: 0, max: options.length - 1 });
     return options[index];
 };
 
 const getSizeAndStem = (count: number): [string, string] => {
     switch (count) {
         case 1:
-            return ['baby', 'short'];
+        // return ['baby', 'short'];
         case 2:
             return ['OG', 'normal'];
         case 3:
             return ['bush', 'short'];
         case 4:
-            return ['bush', 'normal'];
+        // return ['bush', 'normal'];
         default:
             return ['bush', 'long'];
     }
@@ -92,6 +94,9 @@ export default class GardenGrower {
 
     coordinates: String[][];
 
+    randomFlowerCount: number;
+    specialFlowerCount: number;
+
     state = {
         //Lights
         directionalIntensity: 4,
@@ -119,12 +124,26 @@ export default class GardenGrower {
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
+        // this.controls.addEventListener('change', (event) => {
+        //     const pos = this.controls.object.position;
+        //     const target = this.controls.target;
+        //     console.log(`Position: ${Math.round(pos.x)} ${Math.round(pos.y)} ${Math.round(pos.z)}`);
+        //     console.log(
+        //         `Target: ${Math.round(target.x)} ${Math.round(target.y)} ${Math.round(target.z)}`,
+        //     );
+        // });
+
+        this.controls.object.position.set(0, 22, -15);
+        this.controls.target.set(0, 1, 0);
+
         this.el.appendChild(this.renderer.domElement);
 
         this.flowers = {};
         this.usedColors = {};
 
         this.coordinates = [];
+        this.randomFlowerCount = 0;
+        this.specialFlowerCount = 0;
 
         this.animate = this.animate.bind(this);
         requestAnimationFrame(this.animate);
@@ -203,8 +222,6 @@ export default class GardenGrower {
             loader.load(
                 `/${modelName}.glb`,
                 (gltf) => {
-                    console.log(gltf.scene.children[1]);
-                    console.log(gltf.scene);
                     resolve(gltf.scene.children[0]);
                 },
                 undefined,
@@ -232,9 +249,27 @@ export default class GardenGrower {
         ground.name = 'ground';
         // ground.receiveShadow = true;
         ground.position.set(0, 0, 0);
-        const scale = 0.01;
+        // const scale = 0.01;
+        const scale = 1;
         ground.scale.set(scale, scale, scale);
         this.scene.add(ground);
+
+        const locations = [
+            [0, 1],
+            [1, 1],
+            [1, 0],
+            [1, -1],
+            [0, -1],
+            [-1, -1],
+            [-1, 0],
+            [-1, 1],
+        ];
+        for (let i = 0; i < 8; i++) {
+            const size = 18.5;
+            const clone = ground.clone();
+            clone.position.set(locations[i][0] * size, 0, locations[i][1] * size);
+            this.scene.add(clone);
+        }
     }
 
     async showFlowerExamples(color = 'magenta') {
@@ -295,6 +330,48 @@ export default class GardenGrower {
             }
         }
     }
+
+    async growPlacedFlower(contractAddress: string, nftCount: number) {
+        let model;
+        let modelString;
+        let coords: Coords;
+
+        const nft = specialNfts[contractAddress];
+
+        if (nft) {
+            const flowerName = 'Hydrangea';
+            const color = getRandom(contractAddress, oneColor);
+            const [size, stem] = nft?.sizeAndStem || getSizeAndStem(nftCount);
+            modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
+
+            coords = getSpecialFlowerCoords(this.specialFlowerCount, flowerName);
+
+            coords = coords.map((c) => c * 2) as Coords;
+
+            this.specialFlowerCount++;
+        } else {
+            const flowerName = getFlowerName(this.randomFlowerCount, nftCount);
+            const color = getRandom(contractAddress, oneColor);
+            const [size, stem] = nft?.sizeAndStem || getSizeAndStem(nftCount);
+            modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
+            coords = getRandomFlowerCoords(this.randomFlowerCount, flowerName);
+
+            this.randomFlowerCount++;
+        }
+
+        if (this.flowers[modelString]) {
+            model = this.flowers[modelString].clone();
+        } else {
+            model = await this.getModel(modelString);
+            this.flowers[modelString] = model;
+        }
+
+        model.position.set(...coords);
+
+        this.scene.add(model);
+        window.model = model;
+    }
+
     async growFlower(contractAddress: string, count: number) {
         // console.log('growFlower', symbol, count, creator);
 
@@ -353,7 +430,7 @@ export default class GardenGrower {
 
     updateGridHelper() {
         if (this.state.grid) {
-            this.gridHelper = new GridHelper(48, 48);
+            this.gridHelper = new GridHelper(144, 144);
             this.scene.add(this.gridHelper);
         } else {
             this.scene.remove(this.gridHelper);

@@ -124,11 +124,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const imgUrl = urlbox.buildUrl(baseOptions);
 
     logger.info(`begin screenshot of ${imgUrl}`);
+    logger.info(`force URL: ${forceImgUrl}`);
     const start = performance.now();
     const data = await fetch(forceImgUrl);
     const end = performance.now();
     logger.info(`fetching image took ${(end - start) / 1000} seconds`);
-    logger.info({ data });
+    logger.info(data);
 
     /************************/
     /*  QUEUE UPDATING IMG  */
