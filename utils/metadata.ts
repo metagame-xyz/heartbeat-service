@@ -118,14 +118,15 @@ export async function formatMetadata(
     nfts: NFTs,
     dateStr: string,
     userName: string,
+    tokenId: string,
 ): Promise<Metadata> {
     const uniqueNFTCount = Object.keys(nfts).length;
 
     const metadata: Metadata = {
         name: `${userName}'s Token Garden`,
         description: `A garden that's been growning since ${dateStr}. It has ${uniqueNFTCount} flowers so far.`,
-        image: `https://${WEBSITE_URL}/api/v1/image/`,
-        external_url: `https://${WEBSITE_URL}/tokenGarden/`,
+        image: `https://${WEBSITE_URL}/growing.png`,
+        external_url: `https://${WEBSITE_URL}/garden/${tokenId}`,
         address: minterAddress,
         uniqueNFTCount,
         totalNFTCount: Object.values(nfts).reduce((t, n) => t + n.count, 0),

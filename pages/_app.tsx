@@ -17,7 +17,7 @@ const bgSize = ['100px', '120px', '220px', '300px'];
 function App({ Component, pageProps }: AppProps): JSX.Element {
     const { route } = useRouter();
 
-    return route.includes('garden') ? (
+    return route.includes('privateGarden') ? (
         <Component {...pageProps} />
     ) : (
         <ChakraProvider theme={theme}>

@@ -4,7 +4,7 @@ import Urlbox from 'urlbox';
 import { URL_BOX_API_SECRET, URLBOX_API_KEY } from './constants';
 
 export function activateUrlbox(tokenId): string {
-    const url = `https://dev.tokengarden.art/garden/${tokenId}`; //TODO un-hardcode
+    const url = `https://dev.tokengarden.art/privateGarden/${tokenId}`; //TODO un-hardcode
 
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
     const baseOptions = {

@@ -1,3 +1,4 @@
+import Chance from 'chance';
 import { GUI } from 'dat.gui';
 import {
     AxesHelper,
@@ -37,18 +38,38 @@ const domFlowerColors = ['red'];
 const allFlowerColors = randomFlowerColors.concat(domFlowerColors);
 type Coords = [number, number, number];
 
-function getRandomPosition(contractAddress: string): Coords {
-    const max = 7;
+const getRandom = (contractAddress: string, options: string[]) => {
+    // sum char codes of symbol, pseudo-randomly pick a color
+    const charCodeTotal = contractAddress.split('').reduce((a, char) => a + char.charCodeAt(0), 0);
+    const index = charCodeTotal % options.length;
+    return options[index];
+};
+
+const getSizeAndStem = (count: number): [string, string] => {
+    switch (count) {
+        case 1:
+            return ['baby', 'short'];
+        case 2:
+            return ['OG', 'normal'];
+        case 3:
+            return ['bush', 'short'];
+        case 4:
+            return ['bush', 'normal'];
+        default:
+            return ['bush', 'long'];
+    }
+};
+
+function getRandomPosition(contractAddress: string, tracking): Coords {
+    const max = 10;
     const min = -1 * max;
 
-    const charCodeTotal = contractAddress.split('').reduce((a, char) => a + char.charCodeAt(0), 0);
-    const reverseCharCodeTotal = Number(charCodeTotal.toString().split('').reverse().join(''));
+    const chanceX = new Chance(contractAddress);
+    const chanceZ = new Chance(contractAddress.split('').reverse().join(''));
 
-    const randomX = ((charCodeTotal * 3) % 1000) / 1000;
-    const randomZ = ((reverseCharCodeTotal * 3) % 1000) / 1000;
-
-    const x = min + randomX * (max - min);
-    const z = min + randomZ * (max - min);
+    const x = chanceX.floating({ min: min, max: max });
+    const z = chanceZ.floating({ min: min, max: max });
+    tracking.push([x, z]);
 
     return [x, 0, z];
 }
@@ -67,6 +88,8 @@ export default class GardenGrower {
 
     flowers: Record<string, Object3D>;
     usedColors: Record<string, number>;
+
+    coordinates: String[][];
 
     state = {
         //Lights
@@ -99,6 +122,8 @@ export default class GardenGrower {
 
         this.flowers = {};
         this.usedColors = {};
+
+        this.coordinates = [];
 
         this.animate = this.animate.bind(this);
         requestAnimationFrame(this.animate);
@@ -199,6 +224,16 @@ export default class GardenGrower {
         return model;
     }
 
+    async addGround(number) {
+        const ground = await this.getModel(`ground/ground1`);
+        ground.name = 'ground';
+        // ground.receiveShadow = true;
+        ground.position.set(0, 0, 0);
+        const scale = 0.01;
+        ground.scale.set(scale, scale, scale);
+        this.scene.add(ground);
+    }
+
     async showFlowerExamples(color = 'magenta') {
         const order = [
             ['baby/short', 'baby_short'],
@@ -260,30 +295,6 @@ export default class GardenGrower {
     async growFlower(contractAddress: string, count: number) {
         // console.log('growFlower', symbol, count, creator);
 
-        const getRandom = (contractAddress: string, options: string[]) => {
-            // sum char codes of symbol, pseudo-randomly pick a color
-            const charCodeTotal = contractAddress
-                .split('')
-                .reduce((a, char) => a + char.charCodeAt(0), 0);
-            const index = charCodeTotal % options.length;
-            return options[index];
-        };
-
-        const getSizeAndStem = (count: number): [string, string] => {
-            switch (count) {
-                case 1:
-                    return ['baby', 'short'];
-                case 2:
-                    return ['OG', 'normal'];
-                case 3:
-                    return ['bush', 'short'];
-                case 4:
-                    return ['bush', 'normal'];
-                default:
-                    return ['bush', 'long'];
-            }
-        };
-
         const nft = specialNfts[contractAddress];
 
         const flowerName = nft?.flowerName || getRandom(contractAddress, randomFlowers);
@@ -304,7 +315,7 @@ export default class GardenGrower {
             this.flowers[modelString] = model;
         }
 
-        const position = nft?.position || getRandomPosition(contractAddress);
+        const position = nft?.position || getRandomPosition(contractAddress, this.coordinates);
         // const position =
         //     nft?.position || getPosition(flowerName, color) || getRandomPosition('demo');
 

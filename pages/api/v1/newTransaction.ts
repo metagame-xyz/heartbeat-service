@@ -60,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     let metadata: Metadata;
     try {
-        metadata = await formatMetadata(minterAddress, nfts, dateStr, userName);
+        metadata = await formatMetadata(minterAddress, nfts, dateStr, userName, tokenId);
     } catch (error) {
         logger.error(error);
         return res.status(500).send(error);
