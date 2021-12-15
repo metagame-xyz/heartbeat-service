@@ -9803,7 +9803,7 @@ request-promise-native@^1.0.7:
     stealthy-require "^1.1.1"
     tough-cookie "^2.3.3"
 
-request@^2.79.0, request@^2.85.0, request@^2.88.0:
+"request@>=2.53.0 <3.0.0", request@^2.79.0, request@^2.85.0, request@^2.88.0:
   version "2.88.2"
   resolved "https://registry.yarnpkg.com/request/-/request-2.88.2.tgz#d73c918731cb5a87da047e207234146f664d12b3"
   integrity sha512-MsvtOrfG9ZcrOwAW+Qi+F6HbD0CWXEh9ou77uOb7FM2WPhwT7smM833PzanhJLsgXjN89Ir6V2PczXNnMpwKhw==
@@ -11125,6 +11125,13 @@ url-to-options@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/url-to-options/-/url-to-options-1.0.1.tgz#1505a03a289a48cbd7a434efbaeec5055f5633a9"
   integrity sha1-FQWgOiiaSMvXpDTvuu7FBV9WM6k=
+
+url2png@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/url2png/-/url2png-6.0.2.tgz#2b1d7b339ca22739cbd854f70a861752ca2b6e1d"
+  integrity sha1-Kx17M5yiJznL2FT3CoYXUsorbh0=
+  dependencies:
+    request ">=2.53.0 <3.0.0"
 
 url@^0.11.0:
   version "0.11.0"

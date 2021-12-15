@@ -1,6 +1,8 @@
+import mql from '@microlink/mql';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
 import { performance } from 'perf_hooks';
+import Url2png from 'url2png';
 import Urlbox from 'urlbox';
 
 import {
@@ -10,7 +12,14 @@ import {
     isValidEventForwarderSignature,
     logger,
 } from '@utils';
-import { doneDivClass, URL_BOX_API_SECRET, URLBOX_API_KEY } from '@utils/constants';
+import {
+    doneDivClass,
+    MICROLINK_API_KEY,
+    URL2PNG_API_KEY,
+    URL2PNG_SECRET,
+    URL_BOX_API_SECRET,
+    URLBOX_API_KEY,
+} from '@utils/constants';
 import { formatMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
 
 import ScreenshotQueue from '../../queues/screenshot';
@@ -69,7 +78,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).send(error);
     }
 
-    logger.info(metadata);
+    logger.info(`unique count: ${metadata.uniqueNFTCount}`);
 
     /*********************/
     /*  SAVE METADATA   */
@@ -105,19 +114,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
     const baseOptions = {
         url,
-        format: 'png',
+        format: 'jpg',
         quality: 100,
-        // retina: true,
+        full_page: true,
+        wait_for: `.${doneDivClass}`,
+        wait_timeout: 180000,
+        fail_if_selector_missing: true,
+        retina: true,
     };
 
     // force and wait for the image to load
     const optionsWithForce = {
         ...baseOptions,
-        full_page: true,
         force: true,
-        wait_for: `.${doneDivClass}`,
-        wait_timeout: 120000,
-        // fail_if_selector_missing: true,
     };
 
     const forceImgUrl = urlbox.buildUrl(optionsWithForce);
@@ -125,11 +134,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     logger.info(`begin screenshot of ${imgUrl}`);
     logger.info(`force URL: ${forceImgUrl}`);
-    const start = performance.now();
+    let start = performance.now();
     const data = await fetch(forceImgUrl);
-    const end = performance.now();
+    let end = performance.now();
     logger.info(`fetching image took ${(end - start) / 1000} seconds`);
     logger.info(data);
+
+    start = performance.now();
+    const cachedData = await fetch(imgUrl);
+    end = performance.now();
+    logger.info(`fetching image took ${(end - start) / 1000} seconds`);
+    logger.info(cachedData);
+
+    // const url = `https://dev.tokengarden.art/privateGarden/${tokenId}`; //TODO un-hardcode
+    // logger.info(`begin screenshot of ${url}`);
+    // const start = performance.now();
+    // const { status, data, response } = await mql(url, {
+    //     apiKey: MICROLINK_API_KEY,
+    //     screenshot: true,
+    //     waitForSelector: '.done',
+    //     // waitForTimeout: 25000,
+    //     timeout: 120000,
+    //     ttl: '1m',
+    // });
+
+    // const end = performance.now();
+    // console.log(`fetching image took ${(end - start) / 1000} seconds`);
+    // console.log('status:', status);
+    // console.log('data:', data);
+    // console.log('response:', response);
+    // console.log(data?.screenshot?.url);
 
     /************************/
     /*  QUEUE UPDATING IMG  */

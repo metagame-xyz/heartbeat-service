@@ -12,6 +12,8 @@ export const URL_BOX_API_SECRET = process.env.URL_BOX_API_SECRET;
 export const URLBOX_API_KEY = process.env.URLBOX_API_KEY;
 export const POCKET_NETWORK_API_KEY = process.env.POCKET_NETWORK_API_KEY;
 export const POCKET_NETWORK_ID = process.env.POCKET_NETWORK_ID;
+export const URL2PNG_API_KEY = process.env.URL2PNG_API_KEY;
+export const URL2PNG_SECRET = process.env.URL2PNG_SECRET;
 
 /* Frontend Constants */
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
@@ -23,7 +25,7 @@ export const GOOGLE_ANALYTICS_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL;
 export const networkStrings = getNetworkString(NETWORK);
 export const THE_METAGAME_ETH_ADDRESS = '0x902A37155438982884ca26A5DBccf73f5ae8194b';
-export const doneDivClass= 'done'
+export const doneDivClass = 'done';
 
 /* Events */
 export const connect_button_clicked = 'Connect Button Clicked';

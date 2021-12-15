@@ -41,6 +41,7 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
             }
 
             await Promise.all(promises);
+            garden.loadAllModels();
             // console.log(metadata);
             garden.done();
             // garden.addGUI();

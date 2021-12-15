@@ -96,6 +96,7 @@ export default class GardenGrower {
 
     randomFlowerCount: number;
     specialFlowerCount: number;
+    modelsToLoad: Object3D[];
 
     state = {
         //Lights
@@ -144,6 +145,7 @@ export default class GardenGrower {
         this.coordinates = [];
         this.randomFlowerCount = 0;
         this.specialFlowerCount = 0;
+        this.modelsToLoad = [];
 
         this.animate = this.animate.bind(this);
         requestAnimationFrame(this.animate);
@@ -252,7 +254,9 @@ export default class GardenGrower {
         // const scale = 0.01;
         const scale = 1;
         ground.scale.set(scale, scale, scale);
-        this.scene.add(ground);
+        this.modelsToLoad.push(ground);
+
+        // this.scene.add(ground);
 
         const locations = [
             [0, 1],
@@ -268,7 +272,7 @@ export default class GardenGrower {
             const size = 18.5;
             const clone = ground.clone();
             clone.position.set(locations[i][0] * size, 0, locations[i][1] * size);
-            this.scene.add(clone);
+            this.modelsToLoad.push(clone);
         }
     }
 
@@ -368,8 +372,8 @@ export default class GardenGrower {
 
         model.position.set(...coords);
 
-        this.scene.add(model);
-        window.model = model;
+        this.modelsToLoad.push(model);
+        // this.scene.add(model);
     }
 
     async growFlower(contractAddress: string, count: number) {
@@ -405,7 +409,16 @@ export default class GardenGrower {
         window.model = model;
     }
 
+    loadAllModels() {
+        const models = this.modelsToLoad;
+
+        for (let model of models) {
+            this.scene.add(model);
+        }
+    }
+
     done() {
+        console.log(this.renderer.info.render.triangles);
         const doneDiv = document.createElement('div');
         this.el.appendChild(doneDiv);
         doneDiv.classList.add(doneDivClass);
