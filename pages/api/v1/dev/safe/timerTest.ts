@@ -114,13 +114,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
     const baseOptions = {
         url,
-        format: 'jpg',
+        format: 'png',
         quality: 100,
         full_page: true,
         wait_for: `.${doneDivClass}`,
         wait_timeout: 180000,
         fail_if_selector_missing: true,
-        retina: true,
+        // retina: true,
     };
 
     // force and wait for the image to load

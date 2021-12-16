@@ -34,7 +34,7 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
             // await garden.showFlowerExamples();
 
             const promises = [];
-            promises.push(garden.addGround('flat_base_ground'));
+            // promises.push(garden.addGround('flat_base_ground'));
 
             for (let [address, nft] of Object.entries(nfts)) {
                 promises.push(garden.growPlacedFlower(address, nft.count));
