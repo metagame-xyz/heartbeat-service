@@ -40,6 +40,7 @@ const standardFlowerColors = ['deepblue', 'magenta', 'peach', 'pink', 'yellowgre
 const randomFlowerColors = metagameFlowerColors.concat(standardFlowerColors);
 const domFlowerColors = ['red'];
 const allFlowerColors = randomFlowerColors.concat(domFlowerColors);
+console.log(allFlowerColors);
 type Coords = [number, number, number];
 
 const getRandom = (contractAddress: string, options: string[]) => {
@@ -112,7 +113,7 @@ export default class GardenGrower {
         this.el = el;
         this.scene = new Scene();
 
-        this.camera = new PerspectiveCamera(60, el.clientWidth / el.clientHeight, 0.01, 1000);
+        this.camera = new PerspectiveCamera(75, el.clientWidth / el.clientHeight, 0.01, 1000);
         this.scene.add(this.camera);
         this.positionCamera();
         this.initLights();
@@ -317,22 +318,29 @@ export default class GardenGrower {
         //     }
         // }
         // Cannalilly only
-        const flowers = ['Cannalilly'];
+
+        async function addAndPlaceFlower(ctx, modelString, i, j, k, m) {
+            const model = await ctx.getFlower(modelString);
+            model.position.set(i * 20 + m * 2, 0, j * 6 + k * 2);
+            ctx.modelsToLoad.push(model);
+        }
+
+        const promises = [];
+        const flowers = ['Hydrangea'];
         const sizes = ['baby', 'OG', 'bush'];
         const stems = ['short', 'normal', 'long'];
         for (let i = 0; i < flowers.length; i++) {
-            for (let m = 0; m < randomFlowerColors.length; m++) {
+            for (let m = 0; m < allFlowerColors.length; m++) {
                 for (let j = 0; j < sizes.length; j++) {
                     for (let k = 0; k < stems.length; k++) {
-                        const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${randomFlowerColors[m]}`;
-                        console.log(` ${stems[i]} ${sizes[j]}`);
-                        const model = await this.getFlower(modelString);
-                        model.position.set(i * 20 + m * 2, 0, j * 6 + k * 2);
-                        this.scene.add(model);
+                        const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${allFlowerColors[m]}`;
+                        promises.push(addAndPlaceFlower(this, modelString, i, j, k, m));
                     }
                 }
             }
         }
+
+        await Promise.all(promises);
     }
 
     async growPlacedFlower(contractAddress: string, nftCount: number) {
