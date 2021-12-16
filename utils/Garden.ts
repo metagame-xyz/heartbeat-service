@@ -20,7 +20,7 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import { doneDivClass } from './constants';
+import { doneDivClass, POCKET_NETWORK_API_KEY } from './constants';
 import { getFlowerName, getRandomFlowerCoords, getSpecialFlowerCoords } from './extras';
 import { specialNfts } from './specialnfts2';
 
@@ -319,9 +319,9 @@ export default class GardenGrower {
         // }
         // Cannalilly only
 
-        async function addAndPlaceFlower(ctx, modelString, i, j, k, m) {
+        async function addAndPlaceFlower(ctx, modelString, i, j, k, m, n) {
             const model = await ctx.getFlower(modelString);
-            model.position.set(i * 20 + m * 2, 0, j * 6 + k * 2);
+            model.position.set(i * 20 + m * 2 + n * -19, 0, j * 6 + k * 2);
             ctx.modelsToLoad.push(model);
         }
 
@@ -329,17 +329,18 @@ export default class GardenGrower {
         const flowers = ['Hydrangea'];
         const sizes = ['baby', 'OG', 'bush'];
         const stems = ['short', 'normal', 'long'];
-        for (let i = 0; i < flowers.length; i++) {
-            for (let m = 0; m < allFlowerColors.length; m++) {
-                for (let j = 0; j < sizes.length; j++) {
-                    for (let k = 0; k < stems.length; k++) {
-                        const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${allFlowerColors[m]}`;
-                        promises.push(addAndPlaceFlower(this, modelString, i, j, k, m));
+        for (let n = 0; n < 3; n++) {
+            for (let i = 0; i < flowers.length; i++) {
+                for (let m = 0; m < allFlowerColors.length; m++) {
+                    for (let j = 0; j < sizes.length; j++) {
+                        for (let k = 0; k < stems.length; k++) {
+                            const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${allFlowerColors[m]}`;
+                            promises.push(addAndPlaceFlower(this, modelString, i, j, k, m, n));
+                        }
                     }
                 }
             }
         }
-
         await Promise.all(promises);
     }
 
@@ -426,7 +427,7 @@ export default class GardenGrower {
     }
 
     done() {
-        console.log(this.renderer.info.render.triangles);
+        console.log(this.renderer.info.render);
         const doneDiv = document.createElement('div');
         this.el.appendChild(doneDiv);
         doneDiv.classList.add(doneDivClass);
