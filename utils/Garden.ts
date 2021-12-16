@@ -334,7 +334,9 @@ export default class GardenGrower {
                 for (let m = 0; m < allFlowerColors.length; m++) {
                     for (let j = 0; j < sizes.length; j++) {
                         for (let k = 0; k < stems.length; k++) {
-                            const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${allFlowerColors[m]}`;
+                            // const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${allFlowerColors[m]}`;
+                            const modelString =
+                                'flowers/Hydrangea/bush/long/Hydrangea_bush_long_red';
                             promises.push(addAndPlaceFlower(this, modelString, i, j, k, m, n));
                         }
                     }
