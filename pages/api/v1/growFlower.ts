@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     logger.info(mintAddresses);
 
     let statusCode = 200;
-z
+
     for (let i = 0; i < mintAddresses.length; i++) {
         let tokenId;
         try {
