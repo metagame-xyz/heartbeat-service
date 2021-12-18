@@ -366,7 +366,7 @@ export default class GardenGrower {
             this.specialFlowerCount++;
         } else {
             const flowerName = getFlowerName(this.randomFlowerCount, nftCount);
-            const color = getRandom(contractAddress, oneColor);
+            const color = getRandom(contractAddress, allFlowerColors);
             const [size, stem] = nft?.sizeAndStem || getSizeAndStem(nftCount);
             modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
             coords = getRandomFlowerCoords(this.randomFlowerCount, flowerName);

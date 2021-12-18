@@ -1,6 +1,13 @@
 import { EtherscanProvider } from '@ethersproject/providers';
 
-import { defaultProvider, fetcher, getUserName, logger, tsToMonthAndYear } from '@utils';
+import {
+    defaultProvider,
+    fetcher,
+    getUserName,
+    ioredisClient,
+    logger,
+    tsToMonthAndYear,
+} from '@utils';
 import { blackholeAddress, ETHERSCAN_API_KEY, WEBSITE_URL } from '@utils/constants';
 
 export type NftEvent = {
@@ -113,13 +120,13 @@ export type Metadata = {
     nfts: NFTs;
 };
 
-export async function formatMetadata(
+export function formatMetadata(
     minterAddress: string,
     nfts: NFTs,
     dateStr: string,
     userName: string,
     tokenId: string,
-): Promise<Metadata> {
+): Metadata {
     const uniqueNFTCount = Object.keys(nfts).length;
 
     const metadata: Metadata = {
@@ -167,4 +174,24 @@ export function metadataToOpenSeaMetadata(metadata: Metadata): OpenSeaMetadata {
     };
 
     return openseaMetadata;
+}
+
+export async function getMetadata(tokenIdOrAddress: string): Promise<Metadata> {
+    const metadata = await ioredisClient.hget(tokenIdOrAddress, 'metadata');
+
+    if (!metadata) {
+        throw new Error(`tokenId Or Address ${tokenIdOrAddress} not found`);
+    }
+
+    return JSON.parse(metadata);
+}
+
+export async function getTokenIdForAddress(address: string): Promise<string> {
+    const tokenId = await ioredisClient.hget(address, 'tokenId');
+
+    if (!tokenId) {
+        throw new Error(`tokenId for address ${address} not found`);
+    }
+
+    return tokenId.toString();
 }

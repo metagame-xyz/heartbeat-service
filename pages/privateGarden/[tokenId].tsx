@@ -31,16 +31,16 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
             const nfts: NFTs = metadata.nfts;
             const garden = new GardenGrower(gardenEl);
 
-            await garden.showFlowerExamples();
+            // await garden.showFlowerExamples();
 
-            // const promises = [];
-            // // promises.push(garden.addGround('flat_base_ground'));
+            const promises = [];
+            promises.push(garden.addGround('flat_base_ground'));
 
-            // for (let [address, nft] of Object.entries(nfts)) {
-            //     promises.push(garden.growPlacedFlower(address, nft.count));
-            // }
+            for (let [address, nft] of Object.entries(nfts)) {
+                promises.push(garden.growPlacedFlower(address, nft.count));
+            }
 
-            // await Promise.all(promises);
+            await Promise.all(promises);
             garden.loadAllModels();
             // console.log(metadata);
             garden.done();

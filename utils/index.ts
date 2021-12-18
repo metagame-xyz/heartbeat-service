@@ -8,6 +8,7 @@ import pino from 'pino';
 import { logflarePinoVercel } from 'pino-logflare';
 
 import {
+    ALCHEMY_NOTIFY_TOKEN,
     ALCHEMY_PROJECT_ID,
     ETHERSCAN_API_KEY,
     EVENT_FORWARDER_AUTH_TOKEN,
@@ -111,6 +112,17 @@ export const isValidEventForwarderSignature = (request: NextApiRequest) => {
     return signature === digest;
 };
 
+export const isValidAlchemySignature = (request: NextApiRequest) => {
+    const token = ALCHEMY_NOTIFY_TOKEN;
+    const headers = request.headers;
+    const signature = headers['x-alchemy-signature'] || 'no signature';
+    const body = request.body;
+    const hmac = createHmac('sha256', token); // Create a HMAC SHA256 hash using the auth token
+    hmac.update(JSON.stringify(body), 'utf8'); // Update the token hash with the request body using utf8
+    const digest = hmac.digest('hex');
+    return signature === digest;
+};
+
 export const checkSignature = (message: string, joinedSignature: string, walletAddress: string) => {
     const digest = ethers.utils.id(message);
     const signature = ethers.utils.splitSignature(joinedSignature);
@@ -131,6 +143,7 @@ class LocalLogger {
         console.log(message);
     }
     error(message: any) {
+        // TODOD schematize this to an object, error & message maybe?
         console.error(message);
     }
     warn(message: any) {

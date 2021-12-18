@@ -47,6 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         [nfts, dateStr] = await getNFTData(minterAddress);
     } catch (error) {
+        return res.status(200).send({ message: 'its fine' });
         logger.error(error);
         return res.status(500).send(error);
     }
@@ -120,11 +121,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     res.status(200).send({
-        minterAddress,
-        tokenId,
-        ensName: userName,
         status: 1,
         message: 'success',
-        result: { minterAddress, tokenId, ensName: userName },
+        result: { minterAddress, tokenId, ensName: userName, userName },
     });
 }
+
+// const { statusCode, message, error, result } = await addOrUpdateNft(mintAddress, tokenId);
+
+// if (statusCode !== 200) {
+//     logger.error(message);
+//     return res.status(statusCode).send({ error });
+// } else {
+//     res.status(statusCode).send({
+//         status: statusCode === 200 ? 1 : 0,
+//         message,
+//         result,
+//     });
+// }
