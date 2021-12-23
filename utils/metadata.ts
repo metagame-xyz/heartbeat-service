@@ -1,13 +1,6 @@
 import { EtherscanProvider } from '@ethersproject/providers';
 
-import {
-    defaultProvider,
-    fetcher,
-    getUserName,
-    ioredisClient,
-    logger,
-    tsToMonthAndYear,
-} from '@utils';
+import { fetcher, ioredisClient, logger, tsToMonthAndYear } from '@utils';
 import { blackholeAddress, ETHERSCAN_API_KEY, WEBSITE_URL } from '@utils/constants';
 
 export type NftEvent = {
@@ -28,7 +21,8 @@ export type NFTs = {
 /* GET NFT DATA */
 /****************/
 export async function getNFTData(minterAddress: string): Promise<[NFTs, string]> {
-    const etherscanProvider = new EtherscanProvider('homestead', ETHERSCAN_API_KEY);
+    const address = minterAddress.toLowerCase();
+    const etherscanProvider = new EtherscanProvider('rinkeby', ETHERSCAN_API_KEY);
 
     const offset = 1000;
     let page = 1;
@@ -37,7 +31,7 @@ export async function getNFTData(minterAddress: string): Promise<[NFTs, string]>
     function getEtherscanUrl(page: number): string {
         return etherscanProvider.getUrl('account', {
             action: 'tokennfttx',
-            address: minterAddress,
+            address,
             startblock: '0',
             endblock: 'latest',
             page: page.toString(),
@@ -177,7 +171,7 @@ export function metadataToOpenSeaMetadata(metadata: Metadata): OpenSeaMetadata {
 }
 
 export async function getMetadata(tokenIdOrAddress: string): Promise<Metadata> {
-    const metadata = await ioredisClient.hget(tokenIdOrAddress, 'metadata');
+    const metadata = await ioredisClient.hget(tokenIdOrAddress.toLowerCase(), 'metadata');
 
     if (!metadata) {
         throw new Error(`tokenId Or Address ${tokenIdOrAddress} not found`);
@@ -187,7 +181,7 @@ export async function getMetadata(tokenIdOrAddress: string): Promise<Metadata> {
 }
 
 export async function getTokenIdForAddress(address: string): Promise<string> {
-    const tokenId = await ioredisClient.hget(address, 'tokenId');
+    const tokenId = await ioredisClient.hget(address.toLowerCase(), 'tokenId');
 
     if (!tokenId) {
         throw new Error(`tokenId for address ${address} not found`);

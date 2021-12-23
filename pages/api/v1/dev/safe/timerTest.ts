@@ -51,13 +51,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const { minterAddress, tokenId } = req.body;
+    const address: string = minterAddress.toLowerCase();
 
     /****************/
     /* GET NFT DATA */
     /****************/
     let nfts: NFTs, dateStr: string;
     try {
-        [nfts, dateStr] = await getNFTData(minterAddress);
+        [nfts, dateStr] = await getNFTData(address);
     } catch (error) {
         logger.error(error);
         return res.status(500).send(error);
@@ -68,11 +69,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     /*********************/
 
     // this will log an error if it fails but not stop the rest of this function
-    const userName = await getUserName(defaultProvider, minterAddress);
+    const userName = await getUserName(defaultProvider, address);
 
     let metadata: Metadata;
     try {
-        metadata = await formatMetadata(minterAddress, nfts, dateStr, userName, tokenId);
+        metadata = await formatMetadata(address, nfts, dateStr, userName, tokenId);
     } catch (error) {
         logger.error(error);
         return res.status(500).send(error);
@@ -85,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     /*********************/
     try {
         // index by wallet address
-        await ioredisClient.hset(minterAddress, {
+        await ioredisClient.hset(address, {
             tokenId,
             metadata: JSON.stringify(metadata),
         });
@@ -97,7 +98,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         // index by tokenId
         await ioredisClient.hset(tokenId, {
-            address: minterAddress,
+            address: address,
             metadata: JSON.stringify(metadata),
         });
     } catch (error) {
@@ -114,8 +115,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
     const baseOptions = {
         url,
-        format: 'png',
+        format: 'jpg',
         quality: 100,
+        retina: true,
         full_page: true,
         wait_for: `.${doneDivClass}`,
         wait_timeout: 180000,
@@ -184,11 +186,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // }
 
     res.status(200).send({
-        minterAddress,
+        minterAddress: address,
         tokenId,
         ensName: userName,
         status: 1,
         message: 'success',
-        result: { minterAddress, tokenId, ensName: userName },
+        result: { minterAddress: address, tokenId, ensName: userName },
     });
 }

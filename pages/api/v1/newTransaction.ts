@@ -1,19 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import {
-    defaultProvider,
-    getUserName,
-    ioredisClient,
-    isValidEventForwarderSignature,
-    logger,
-} from '@utils';
-import { formatMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
-import { activateUrlbox } from '@utils/urlbox';
-
-import ScreenshotQueue from './queues/screenshot';
+import { isValidEventForwarderSignature, logger } from '@utils';
+import { addOrUpdateNft } from '@utils/addOrUpdateNft';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    logger.info(`top of newTransaction from tokeId ${req.body.tokenId}`);
+    logger.info(`top of newTransaction for tokenId ${req.body.tokenId}`);
     if (req.method !== 'POST') {
         /**
          * During development, it's useful to un-comment this block
@@ -39,103 +30,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const { minterAddress, tokenId } = req.body;
+    const address: string = minterAddress.toLowerCase();
 
-    /****************/
-    /* GET NFT DATA */
-    /****************/
-    let nfts: NFTs, dateStr: string;
-    try {
-        [nfts, dateStr] = await getNFTData(minterAddress);
-    } catch (error) {
-        return res.status(200).send({ message: 'its fine' });
-        logger.error(error);
-        return res.status(500).send(error);
-    }
+    const { statusCode, message, error, result } = await addOrUpdateNft(address, tokenId);
 
-    /*********************/
-    /* DRAFT OF METADATA */
-    /*********************/
-
-    // this will log an error if it fails but not stop the rest of this function
-    const userName = await getUserName(defaultProvider, minterAddress);
-
-    let metadata: Metadata;
-    try {
-        metadata = await formatMetadata(minterAddress, nfts, dateStr, userName, tokenId);
-    } catch (error) {
-        logger.error(error);
-        return res.status(500).send(error);
-    }
-
-    logger.info(metadata);
-
-    /*********************/
-    /*  SAVE METADATA   */
-    /*********************/
-    try {
-        // index by wallet address
-        await ioredisClient.hset(minterAddress, {
-            tokenId,
-            metadata: JSON.stringify(metadata),
+    if (statusCode !== 200) {
+        logger.error(message);
+        return res.status(statusCode).send({ error });
+    } else {
+        res.status(statusCode).send({
+            status: statusCode === 200 ? 1 : 0,
+            message,
+            result,
         });
-    } catch (error) {
-        logger.error({ error });
-        return res.status(500).send({ message: 'ioredis error', error });
     }
-
-    try {
-        // index by tokenId
-        await ioredisClient.hset(tokenId, {
-            address: minterAddress,
-            metadata: JSON.stringify(metadata),
-        });
-    } catch (error) {
-        logger.error({ error });
-        return res.status(500).send({ message: 'ioredis error 2', error });
-    }
-
-    /************************/
-    /* SCREENSHOT NFT IMAGE */
-    /************************/
-
-    const imgUrl = activateUrlbox(tokenId);
-
-    logger.info({ imgUrl });
-
-    /************************/
-    /*  QUEUE UPDATING IMG  */
-    /************************/
-    try {
-        const jobData = await ScreenshotQueue.enqueue(
-            {
-                url: imgUrl,
-                tokenId,
-            },
-            {
-                delay: '1m',
-            },
-        );
-    } catch (error) {
-        logger.error(error);
-        return res.status(500).send({ message: 'screenshot queuing error', error });
-    }
-
-    res.status(200).send({
-        status: 1,
-        message: 'success',
-        result: { minterAddress, tokenId, ensName: userName, userName },
-    });
 }
-
-// const { statusCode, message, error, result } = await addOrUpdateNft(mintAddress, tokenId);
-
-// if (statusCode !== 200) {
-//     logger.error(message);
-//     return res.status(statusCode).send({ error });
-// } else {
-//     res.status(statusCode).send({
-//         status: statusCode === 200 ? 1 : 0,
-//         message,
-//         result,
-//     });
-// }

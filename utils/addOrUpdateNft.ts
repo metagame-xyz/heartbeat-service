@@ -1,16 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-
 import ScreenshotQueue from '@api/queues/screenshot';
 
-import {
-    defaultProvider,
-    getUserName,
-    ioredisClient,
-    isValidAlchemySignature,
-    logger,
-} from '@utils';
-import { blackholeAddress } from '@utils/constants';
-import { formatMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
+import { defaultProvider, getUserName, ioredisClient, logger } from '@utils';
+import { formatMetadata, getNFTData, NFTs } from '@utils/metadata';
 import { activateUrlbox } from '@utils/urlbox';
 
 export type newNftResponse = {
@@ -25,12 +16,13 @@ export async function addOrUpdateNft(
     minterAddress: string,
     tokenId: string,
 ): Promise<newNftResponse> {
+    const address = minterAddress.toLowerCase();
     /****************/
     /* GET NFT DATA */
     /****************/
     let nfts: NFTs, dateStr: string;
     try {
-        [nfts, dateStr] = await getNFTData(minterAddress);
+        [nfts, dateStr] = await getNFTData(address);
     } catch (error) {
         logger.error(error);
         return { statusCode: 500, error, message: 'Error in getNFTData' };
@@ -41,16 +33,16 @@ export async function addOrUpdateNft(
     /*********************/
 
     // this will log an error if it fails but not stop the rest of this function
-    const userName = await getUserName(defaultProvider, minterAddress);
+    const userName = await getUserName(defaultProvider, address);
 
-    const metadata = formatMetadata(minterAddress, nfts, dateStr, userName, tokenId);
+    const metadata = formatMetadata(address, nfts, dateStr, userName, tokenId);
 
     /*********************/
     /*  SAVE METADATA   */
     /*********************/
     try {
         // index by wallet address
-        await ioredisClient.hset(minterAddress, {
+        await ioredisClient.hset(address, {
             tokenId,
             metadata: JSON.stringify(metadata),
         });
@@ -59,14 +51,14 @@ export async function addOrUpdateNft(
         return {
             statusCode: 500,
             error,
-            message: `ioredisClient index by wallet address for ${minterAddress}`,
+            message: `ioredisClient index by wallet address for ${address}`,
         };
     }
 
     try {
         // index by tokenId
         await ioredisClient.hset(tokenId, {
-            address: minterAddress,
+            address: address,
             metadata: JSON.stringify(metadata),
         });
     } catch (error) {
@@ -74,7 +66,7 @@ export async function addOrUpdateNft(
         return {
             statusCode: 500,
             error,
-            message: `ioredisClient index by tokenId for ${minterAddress}`,
+            message: `ioredisClient index by tokenId for ${address}`,
         };
     }
 
@@ -84,11 +76,13 @@ export async function addOrUpdateNft(
 
     const imgUrl = activateUrlbox(tokenId);
 
-    logger.info({ imgUrl });
+    logger.info(`imgUrl for tokenId ${tokenId}: ${imgUrl}`);
 
     /************************/
     /*  QUEUE UPDATING IMG  */
     /************************/
+
+    // TODO skip if already queued: https://docs.quirrel.dev/api/queue#getbyid
     try {
         const jobData = await ScreenshotQueue.enqueue(
             {
@@ -101,7 +95,7 @@ export async function addOrUpdateNft(
         );
     } catch (error) {
         logger.error(error);
-        return { statusCode: 500, error, message: `screenshot queueing for ${minterAddress}` };
+        return { statusCode: 500, error, message: `screenshot queueing for ${address}` };
     }
 
     return {
@@ -110,7 +104,7 @@ export async function addOrUpdateNft(
         error: null,
         result: {
             tokenId,
-            minterAddress,
+            minterAddress: address,
             userName,
             ensName: userName,
         },

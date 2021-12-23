@@ -1,20 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import {
-    defaultProvider,
-    getUserName,
-    ioredisClient,
-    isValidAlchemySignature,
-    logger,
-} from '@utils';
+import { isValidAlchemySignature, logger } from '@utils';
 import { addOrUpdateNft } from '@utils/addOrUpdateNft';
-import { blackholeAddress } from '@utils/constants';
-import { formatMetadata, getNFTData, getTokenIdForAddress, Metadata, NFTs } from '@utils/metadata';
-import { activateUrlbox } from '@utils/urlbox';
-
-import ScreenshotQueue from './queues/screenshot';
+import { blackholeAddress, CONTRACT_ADDRESS } from '@utils/constants';
+import { getTokenIdForAddress } from '@utils/metadata';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    logger.info(`top of growFlower`);
     if (req.method !== 'POST') {
         /**
          * During development, it's useful to un-comment this block
@@ -33,23 +25,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     /****************/
     /*     AUTH     */
     /****************/
-    // if (!isValidAlchemySignature(req)) {
-    //     const error = 'invalid event-forwarder Signature';
-    //     logger.error({ error });
-    //     return res.status(400).send({ error });
-    // }
+    if (!isValidAlchemySignature(req)) {
+        const error = 'invalid event-forwarder Signature';
+        logger.error({ error });
+        return res.status(400).send({ error });
+    }
 
     const activity = req.body.activity;
 
-    const mintEvents = activity.filter(
-        (e) => e.fromAddress === blackholeAddress && e.erc721TokenId !== null,
-    );
+    // logger.info(activity);
+    // logger.info(`CONTRACT_ADDRESS: ${CONTRACT_ADDRESS}`);
 
+    const mintEvents = activity.filter(
+        (e) =>
+            e.fromAddress === blackholeAddress &&
+            e.erc721TokenId !== null &&
+            e.rawContract.address !== CONTRACT_ADDRESS,
+    );
     // logger.info(mintEvents);
 
     const mintAddresses = mintEvents.map((e) => e.toAddress);
 
-    logger.info(mintAddresses);
+    logger.info({ mintAddresses });
 
     let statusCode = 200;
 

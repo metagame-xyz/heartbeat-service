@@ -30,7 +30,7 @@ export default Queue(
         }
 
         if (!metadataStr) {
-            console.log(`metadataStr is null for ${tokenId}`);
+            logger.error(`metadataStr is null for ${tokenId}`);
             return;
         }
 
@@ -40,7 +40,7 @@ export default Queue(
         /* UPDATE METADATA   */
         /*********************/
         metadata.image = imageIPFSPath;
-        const address = metadata.address;
+        const address = metadata.address.toLowerCase();
 
         try {
             // index by wallet address
@@ -66,19 +66,19 @@ export default Queue(
         /*  UPDATE OPENSEA   */
         /*********************/
 
-        // function openseaForceUpdateURL(tokenId, contractAddress) {
-        //     return `https://${networkStrings.openseaAPI}opensea.io/api/v1/asset/${contractAddress}/${tokenId}/?force_update=true`;
-        // }
+        function openseaForceUpdateURL(tokenId, contractAddress) {
+            return `https://${networkStrings.openseaAPI}opensea.io/api/v1/asset/${contractAddress}/${tokenId}/?force_update=true`;
+        }
 
-        // try {
-        //     const { permalink } = await fetcher(openseaForceUpdateURL(tokenId, address));
-        //     logger.info(permalink);
-        // } catch (error) {
-        //     if (error instanceof FetcherError) {
-        //         // it logs in fetcher
-        //     } else {
-        //         logger.error(`unkown error: ${error.name} ${error.message}`);
-        //     }
-        // }
+        try {
+            const { permalink } = await fetcher(openseaForceUpdateURL(tokenId, address));
+            logger.info(permalink);
+        } catch (error) {
+            if (error instanceof FetcherError) {
+                // it logs in fetcher
+            } else {
+                logger.error(`unkown error: ${error.name} ${error.message}`);
+            }
+        }
     },
 );

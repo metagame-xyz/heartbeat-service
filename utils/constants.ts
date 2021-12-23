@@ -18,7 +18,7 @@ export const URL2PNG_API_KEY = process.env.URL2PNG_API_KEY;
 export const URL2PNG_SECRET = process.env.URL2PNG_SECRET;
 
 /* Frontend Constants */
-export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS.toLowerCase();
 export const NETWORK = process.env.NEXT_PUBLIC_NETWORK.toLowerCase();
 export const INFURA_PROJECT_ID = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID;
 export const ALCHEMY_PROJECT_ID = process.env.NEXT_PUBLIC_ALCHEMY_PROJECT_ID;

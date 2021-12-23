@@ -1,6 +1,6 @@
 import Urlbox from 'urlbox';
 
-import { URL_BOX_API_SECRET, URLBOX_API_KEY, doneDivClass } from './constants';
+import { doneDivClass, URL_BOX_API_SECRET, URLBOX_API_KEY } from './constants';
 
 export function activateUrlbox(tokenId): string {
     const url = `https://dev.tokengarden.art/privateGarden/${tokenId}`; //TODO un-hardcode
@@ -8,14 +8,15 @@ export function activateUrlbox(tokenId): string {
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
     const baseOptions = {
         url,
-        format: 'png',
+        format: 'jpg',
         quality: 100,
+        full_page: true,
+        retina: true,
     };
 
     // force and wait for the image to load
     const optionsWithForce = {
         ...baseOptions,
-        full_page: true,
         force: true,
         wait_for: `.${doneDivClass}`,
         fail_if_selector_missing: true,

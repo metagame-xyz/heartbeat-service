@@ -113,6 +113,9 @@ export const isValidEventForwarderSignature = (request: NextApiRequest) => {
 };
 
 export const isValidAlchemySignature = (request: NextApiRequest) => {
+    if (process.env.VERCEL_ENV !== 'production') {
+        return true;
+    }
     const token = ALCHEMY_NOTIFY_TOKEN;
     const headers = request.headers;
     const signature = headers['x-alchemy-signature'] || 'no signature';
@@ -184,7 +187,6 @@ export const getUserName = async (provider, address) => {
     let ensName = null;
     try {
         ensName = await provider.lookupAddress(address);
-        logger.info(`ENS name for ${address} is ${ensName}`);
     } catch (error) {
         logger.error({ error });
         logger.error({ message: 'ensName lookup failed' });
