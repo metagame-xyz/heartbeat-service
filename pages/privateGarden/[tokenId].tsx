@@ -33,16 +33,35 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
 
             // await garden.showFlowerExamples();
 
-            const promises = [];
-            promises.push(garden.addGround('flat_base_ground'));
-            for (let [address, nft] of Object.entries(nfts)) {
-                promises.push(garden.growPlacedFlower(address, nft.count));
-            }
-            await Promise.all(promises);
-            garden.loadAllModels();
-            garden.positionCamera();
+            const renderImmediately = true;
 
+            await garden.addGround('flat_base_ground');
+            garden.renderGround();
+            garden.renderAllFlowers();
+
+            const promiseAll = false;
+
+            if (!promiseAll) {
+                for (let [address, nft] of Object.entries(nfts)) {
+                    await garden.growPlacedFlower(address, nft.count, renderImmediately);
+                }
+            }
+
+            if (promiseAll) {
+                const promises = [];
+                promises.push(garden.addGround('flat_base_ground'));
+                for (let [address, nft] of Object.entries(nfts)) {
+                    promises.push(garden.growPlacedFlower(address, nft.count, renderImmediately));
+                }
+                await Promise.all(promises);
+            }
+            // if (!renderImmediately) {
+            //     garden.renderAllModels();
+            // }
+
+            garden.positionCamera();
             garden.done();
+
             // garden.addGUI();
         }
         growGarden();

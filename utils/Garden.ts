@@ -144,6 +144,7 @@ export default class GardenGrower {
         this.pmremGenerator.compileEquirectangularShader();
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this;
 
         this.controls.addEventListener('change', (event) => {
             const pos = this.controls.object.position;
@@ -154,8 +155,7 @@ export default class GardenGrower {
             );
         });
 
-        this.controls.object.position.set(0, 22, -15);
-        this.controls.target.set(0, 1, 0);
+        this.initControlsPosition();
 
         this.el.appendChild(this.renderer.domElement);
 
@@ -178,6 +178,11 @@ export default class GardenGrower {
         requestAnimationFrame(this.animate.bind(this));
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
+    }
+
+    initControlsPosition() {
+        this.controls.object.position.set(-1, 76, -124);
+        this.controls.target.set(-1, 3, 6);
     }
 
     initLights() {
@@ -338,7 +343,7 @@ export default class GardenGrower {
         // await Promise.all(promises);
     }
 
-    async growPlacedFlower(contractAddress: string, nftCount: number) {
+    async growPlacedFlower(contractAddress: string, nftCount: number, renderImmediately = false) {
         let model;
         let modelString;
         let coords: Coords;
@@ -359,7 +364,7 @@ export default class GardenGrower {
         } else {
             const flowerName = getFlowerName(this.randomFlowerCount, nftCount);
             // const flowerName = getFlowerName(this.randomFlowerCount, nftCount);
-            const color = getRandom(contractAddress, oneColor);
+            const color = getRandom(contractAddress, allFlowerColors);
             const [size, stem] = nft?.sizeAndStem || getSizeAndStem(nftCount);
             modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
             coords = getRandomFlowerCoords(this.randomFlowerCount, flowerName);
@@ -371,8 +376,11 @@ export default class GardenGrower {
 
         model.position.set(...coords);
 
+        // if (renderImmediately) {
+        //     console.log('adding model to scene');
+        //     this.scene.add(model);
+        // }
         this.flowers.add(model);
-        // this.scene.add(model);
     }
 
     async growFlower(contractAddress: string, count: number) {
@@ -432,17 +440,17 @@ export default class GardenGrower {
         return model;
     }
 
-    loadAllFlowers() {
+    renderAllFlowers() {
         this.scene.add(this.flowers);
     }
 
-    loadGround() {
+    renderGround() {
         this.scene.add(this.ground);
     }
 
-    loadAllModels() {
-        this.loadGround();
-        this.loadAllFlowers();
+    renderAllModels() {
+        this.renderGround();
+        this.renderAllFlowers();
         // this.updateEnvironment();
     }
 
