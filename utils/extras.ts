@@ -21,7 +21,7 @@ const order2 = layout2.concat(layout1);
 const oneOrder = order1.concat(order1).concat(order2).concat(order2);
 const totalOrder = oneOrder.concat(oneOrder).concat(oneOrder).concat(oneOrder);
 const totalFlowers = [];
-const flowers = ['Periwinkle', 'Amaryllis', 'Poppy', 'Cannalilly'];
+const flowers = ['Periwinkle', 'Amaryllis', 'Poppy', 'Amaryllis'];
 
 totalFlowers.push(...Array(7).fill(flowers[0]));
 totalFlowers.push(...Array(6).fill(flowers[1]));
