@@ -1,7 +1,7 @@
 import { EtherscanProvider } from '@ethersproject/providers';
 
 import { fetcher, ioredisClient, logger, tsToMonthAndYear } from '@utils';
-import { blackholeAddress, ETHERSCAN_API_KEY, WEBSITE_URL } from '@utils/constants';
+import { blackholeAddress, ETHERSCAN_API_KEY, networkStrings, WEBSITE_URL } from '@utils/constants';
 
 export type NftEvent = {
     tokenSymbol: string;
@@ -20,9 +20,12 @@ export type NFTs = {
 /****************/
 /* GET NFT DATA */
 /****************/
-export async function getNFTData(minterAddress: string): Promise<[NFTs, string]> {
+export async function getNFTData(
+    minterAddress: string,
+    network = networkStrings.etherscanAPI,
+): Promise<[NFTs, string]> {
     const address = minterAddress.toLowerCase();
-    const etherscanProvider = new EtherscanProvider('rinkeby', ETHERSCAN_API_KEY);
+    const etherscanProvider = new EtherscanProvider(network, ETHERSCAN_API_KEY);
 
     const offset = 1000;
     let page = 1;

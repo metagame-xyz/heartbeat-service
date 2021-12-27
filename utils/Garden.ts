@@ -1,26 +1,37 @@
-import { position } from '@chakra-ui/react';
 import Chance from 'chance';
 import { GUI } from 'dat.gui';
 import {
     AxesHelper,
+    Box3,
+    Box3Helper,
     BoxHelper,
     Color,
     DirectionalLight,
     Event,
     GridHelper,
+    Group,
     Light,
     LoadingManager,
+    MathUtils,
     Mesh,
+    MeshStandardMaterial,
     Object3D,
     PerspectiveCamera,
+    PMREMGenerator,
     Scene,
+    Sphere,
+    SphereGeometry,
     sRGBEncoding,
+    UnsignedByteType,
+    Vector3,
     WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
-import { doneDivClass, POCKET_NETWORK_API_KEY } from './constants';
+import { environments } from '../public/environment/index.js';
+import { doneDivClass } from './constants';
 import { getFlowerName, getRandomFlowerCoords, getSpecialFlowerCoords } from './extras';
 import { specialNfts } from './specialnfts2';
 
@@ -40,7 +51,6 @@ const standardFlowerColors = ['deepblue', 'magenta', 'peach', 'pink', 'yellowgre
 const randomFlowerColors = metagameFlowerColors.concat(standardFlowerColors);
 const domFlowerColors = ['red'];
 const allFlowerColors = randomFlowerColors.concat(domFlowerColors);
-console.log(allFlowerColors);
 type Coords = [number, number, number];
 
 const getRandom = (contractAddress: string, options: string[]) => {
@@ -90,7 +100,8 @@ export default class GardenGrower {
     axesHelper: AxesHelper;
     gridHelper: GridHelper;
 
-    flowers: Record<string, Object3D>;
+    flowers: Group;
+    ground: Group;
     usedColors: Record<string, number>;
 
     coordinates: String[][];
@@ -99,7 +110,11 @@ export default class GardenGrower {
     specialFlowerCount: number;
     modelsToLoad: Object3D[];
 
+    targetViewGroup: Group;
+
     state = {
+        environment: environments[1].name,
+        background: true,
         //Lights
         directionalIntensity: 4,
         directionalColor: 0xd1d1d1,
@@ -108,14 +123,15 @@ export default class GardenGrower {
         axes: false,
         boxes: false,
     };
+    activeCamera: any;
+    pmremGenerator: any;
 
     constructor(el: HTMLElement) {
         this.el = el;
         this.scene = new Scene();
 
-        this.camera = new PerspectiveCamera(75, el.clientWidth / el.clientHeight, 0.01, 1000);
+        this.camera = new PerspectiveCamera(10, el.clientWidth / el.clientHeight, 0.01, 1000);
         this.scene.add(this.camera);
-        this.positionCamera();
         this.initLights();
 
         this.renderer = new WebGLRenderer({ antialias: true });
@@ -124,23 +140,29 @@ export default class GardenGrower {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(el.clientWidth, el.clientHeight);
 
+        this.pmremGenerator = new PMREMGenerator(this.renderer);
+        this.pmremGenerator.compileEquirectangularShader();
+
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
-        // this.controls.addEventListener('change', (event) => {
-        //     const pos = this.controls.object.position;
-        //     const target = this.controls.target;
-        //     console.log(`Position: ${Math.round(pos.x)} ${Math.round(pos.y)} ${Math.round(pos.z)}`);
-        //     console.log(
-        //         `Target: ${Math.round(target.x)} ${Math.round(target.y)} ${Math.round(target.z)}`,
-        //     );
-        // });
+        this.controls.addEventListener('change', (event) => {
+            const pos = this.controls.object.position;
+            const target = this.controls.target;
+            console.log(`Position: ${Math.round(pos.x)} ${Math.round(pos.y)} ${Math.round(pos.z)}`);
+            console.log(
+                `Target: ${Math.round(target.x)} ${Math.round(target.y)} ${Math.round(target.z)}`,
+            );
+        });
 
         this.controls.object.position.set(0, 22, -15);
         this.controls.target.set(0, 1, 0);
 
         this.el.appendChild(this.renderer.domElement);
 
-        this.flowers = {};
+        this.flowers = new Group();
+        this.ground = new Group();
+        this.targetViewGroup = new Group();
+
         this.usedColors = {};
 
         this.coordinates = [];
@@ -158,12 +180,6 @@ export default class GardenGrower {
         this.renderer.render(this.scene, this.camera);
     }
 
-    positionCamera() {
-        this.camera.position.x = 4;
-        this.camera.position.y = 18;
-        this.camera.position.z = 12;
-        this.camera.lookAt(0, 1, 0);
-    }
     initLights() {
         this.lights = [];
 
@@ -191,60 +207,41 @@ export default class GardenGrower {
         });
     }
 
-    addGUI() {
-        this.gui = new GUI({ autoPlace: true, width: 260, hideable: true, name: 'Garden' });
-        const lightFolder = this.gui.addFolder('Lighting');
-        lightFolder.open();
+    positionCamera() {
+        const angle = 30;
+        // console.log(this.flowers);
+        const bbox = new Box3().setFromObject(this.flowers);
+        // this.scene.add(new Box3Helper(bbox, new Color(0xff0000)));
+        // console.log(bbox);
 
-        const lightControls = [
-            lightFolder.add(this.state, 'directionalIntensity', 0, 10, 1),
-            lightFolder.addColor(this.state, 'directionalColor'),
-        ];
+        const center = new Vector3();
+        bbox.getCenter(center);
+        // console.log('center:', center);
 
-        lightControls.forEach((ctrl) => ctrl.onChange(() => this.updateLights()));
+        const bsphere = bbox.getBoundingSphere(new Sphere());
+        // console.log(bsphere);
 
-        const helperFolder = this.gui.addFolder('Helper');
-        helperFolder.open();
+        // let m = new MeshStandardMaterial({
+        //     color: 0xffffff,
+        //     opacity: 0.3,
+        //     transparent: true,
+        // });
+        // var geometry = new SphereGeometry(bsphere.radius, 32, 32);
+        // let sMesh = new Mesh(geometry, m);
+        // this.scene.add(sMesh);
+        // sMesh.position.copy(center);
+        this.controls.target = center;
 
-        helperFolder.add(this.state, 'grid').onChange(() => this.updateGridHelper());
-        helperFolder.add(this.state, 'axes').onChange(() => this.updateAxesHelper());
-        helperFolder.add(this.state, 'boxes').onChange(() => this.updateBoxesHelper());
+        const vFoV = this.camera.getEffectiveFOV();
+        const hFoV = this.camera.fov * this.camera.aspect;
+        const halfFovInRadians = MathUtils.degToRad(hFoV) / 2;
+        const distance = bsphere.radius / Math.sin(halfFovInRadians);
 
-        const guiDiv = document.createElement('div');
-        this.el.appendChild(guiDiv);
-        guiDiv.classList.add('gui');
-        guiDiv.id = 'gui';
-        guiDiv.appendChild(this.gui.domElement);
-        this.gui.open();
-    }
+        const rad = MathUtils.degToRad(angle);
+        const z = Math.cos(rad) * (center.z - distance);
+        const y = Math.sin(rad) * (center.y + distance);
 
-    getModel(modelName: string): Promise<Object3D<Event>> {
-        return new Promise((resolve, reject) => {
-            const loader = new GLTFLoader(new LoadingManager());
-
-            loader.load(
-                `/${modelName}.glb`,
-                (gltf) => {
-                    resolve(gltf.scene.children[0]);
-                },
-                undefined,
-                reject,
-            );
-        });
-    }
-
-    async getFlower(modelString: string): Promise<Object3D<Event>> {
-        console.log(modelString);
-        let model;
-
-        if (this.flowers[modelString]) {
-            model = this.flowers[modelString].clone();
-        } else {
-            model = await this.getModel(modelString);
-            this.flowers[modelString] = model;
-        }
-
-        return model;
+        this.controls.object.position.set(center.x, y, z);
     }
 
     async addGround(str) {
@@ -252,56 +249,51 @@ export default class GardenGrower {
         ground.name = 'ground';
         // ground.receiveShadow = true;
         ground.position.set(0, 0, 0);
-        // const scale = 0.01;
         const scale = 1;
         ground.scale.set(scale, scale, scale);
-        this.modelsToLoad.push(ground);
-
+        // this.modelsToLoad.push(ground);
         // this.scene.add(ground);
 
-        const locations = [
-            [0, 1],
-            [1, 1],
-            [1, 0],
-            [1, -1],
-            [0, -1],
-            [-1, -1],
-            [-1, 0],
-            [-1, 1],
-        ];
-        for (let i = 0; i < 8; i++) {
-            const size = 18.5;
-            const clone = ground.clone();
-            clone.position.set(locations[i][0] * size, 0, locations[i][1] * size);
-            this.modelsToLoad.push(clone);
+        const width = 1;
+        const front = 4;
+        const back = -1;
+
+        for (let i = -width; i <= width; i++) {
+            for (let j = back; j <= front; j++) {
+                const size = 18.5;
+                const clone = ground.clone();
+                clone.position.set(i * size, 0, j * size);
+                this.ground.add(clone);
+            }
         }
     }
 
     async showFlowerExamples(color = 'magenta') {
         const order = [
-            ['baby/short', 'baby_short'],
+            // ['baby/short', 'baby_short'],
             ['OG/normal', 'OG_normal'],
             ['bush/short', 'bush_short'],
             ['bush/normal', 'bush_normal'],
-            ['bush/long', 'bush_long'],
+            // ['bush/long', 'bush_long'],
         ];
-        // const flowers = [
-        //     'Amaryllis',
-        //     'Periwinkle',
-        //     'Poppy',
-        //     'Hydrangea',
-        //     // 'Cannalilly',
-        // ];
-        // for (let i = 0; i < flowers.length; i++) {
-        //     for (let j = 0; j < order.length; j++) {
-        //         for (let m = 0; m < randomFlowerColors.length; m++) {
-        //             const modelString = `flowers/${flowers[i]}/${order[j][0]}/${flowers[i]}_${order[j][1]}_${randomFlowerColors[m]}`;
-        //             const model = await this.getFlower(modelString);
-        //             model.position.set(i * 20 + m * 2, 0, j * 3);
-        //             this.scene.add(model);
-        //         }
-        //     }
-        // }
+        const flowers = [
+            //     'Amaryllis',
+            // 'Periwinkle',
+            // 'Poppy',
+            'Hydrangea',
+            // 'Cannalilly',
+        ];
+        for (let i = 0; i < flowers.length; i++) {
+            for (let j = 0; j < order.length; j++) {
+                for (let m = 0; m < allFlowerColors.length; m++) {
+                    // const modelString = `flowers/${flowers[i]}/${order[j][0]}/${flowers[i]}_${order[j][1]}_${allFlowerColors[m]}`;
+                    const modelString = `flowers/${flowers[i]}/${order[j][0]}/${flowers[i]}_${order[j][1]}_red`;
+                    const model = await this.getFlower(modelString);
+                    model.position.set(i * 20 + m * 2, 0, j * 3);
+                    this.scene.add(model);
+                }
+            }
+        }
         // const sizes = ['baby', 'OG', 'bush'];
         // const stems = ['short', 'normal', 'long'];
         // for (let i = 0; i < flowers.length; i++) {
@@ -319,31 +311,31 @@ export default class GardenGrower {
         // }
         // Cannalilly only
 
-        async function addAndPlaceFlower(ctx, modelString, i, j, k, m, n) {
-            const model = await ctx.getFlower(modelString);
-            model.position.set(i * 20 + m * 2 + n * -19, 0, j * 6 + k * 2);
-            ctx.modelsToLoad.push(model);
-        }
+        // async function addAndPlaceFlower(ctx, modelString, i, j, k, m, n) {
+        //     const model = await ctx.getFlower(modelString);
+        //     model.position.set(i * 20 + m * 2 + n * -19, 0, j * 6 + k * 2);
+        //     ctx.modelsToLoad.push(model);
+        // }
 
-        const promises = [];
-        const flowers = ['Hydrangea'];
-        const sizes = ['baby', 'OG', 'bush'];
-        const stems = ['short', 'normal', 'long'];
-        for (let n = 0; n < 3; n++) {
-            for (let i = 0; i < flowers.length; i++) {
-                for (let m = 0; m < allFlowerColors.length; m++) {
-                    for (let j = 0; j < sizes.length; j++) {
-                        for (let k = 0; k < stems.length; k++) {
-                            // const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${allFlowerColors[m]}`;
-                            const modelString =
-                                'flowers/Hydrangea/bush/long/Hydrangea_bush_long_red';
-                            promises.push(addAndPlaceFlower(this, modelString, i, j, k, m, n));
-                        }
-                    }
-                }
-            }
-        }
-        await Promise.all(promises);
+        // const promises = [];
+        // const flowers = ['Hydrangea'];
+        // const sizes = ['baby', 'OG', 'bush'];
+        // const stems = ['short', 'normal', 'long'];
+        // for (let n = 0; n < 3; n++) {
+        //     for (let i = 0; i < flowers.length; i++) {
+        //         for (let m = 0; m < allFlowerColors.length; m++) {
+        //             for (let j = 0; j < sizes.length; j++) {
+        //                 for (let k = 0; k < stems.length; k++) {
+        //                     // const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${allFlowerColors[m]}`;
+        //                     const modelString =
+        //                         'flowers/Hydrangea/bush/long/Hydrangea_bush_long_red';
+        //                     promises.push(addAndPlaceFlower(this, modelString, i, j, k, m, n));
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        // await Promise.all(promises);
     }
 
     async growPlacedFlower(contractAddress: string, nftCount: number) {
@@ -366,7 +358,8 @@ export default class GardenGrower {
             this.specialFlowerCount++;
         } else {
             const flowerName = getFlowerName(this.randomFlowerCount, nftCount);
-            const color = getRandom(contractAddress, allFlowerColors);
+            // const flowerName = getFlowerName(this.randomFlowerCount, nftCount);
+            const color = getRandom(contractAddress, oneColor);
             const [size, stem] = nft?.sizeAndStem || getSizeAndStem(nftCount);
             modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
             coords = getRandomFlowerCoords(this.randomFlowerCount, flowerName);
@@ -374,16 +367,11 @@ export default class GardenGrower {
             this.randomFlowerCount++;
         }
 
-        if (this.flowers[modelString]) {
-            model = this.flowers[modelString].clone();
-        } else {
-            model = await this.getModel(modelString);
-            this.flowers[modelString] = model;
-        }
+        model = await this.getFlower(modelString);
 
         model.position.set(...coords);
 
-        this.modelsToLoad.push(model);
+        this.flowers.add(model);
         // this.scene.add(model);
     }
 
@@ -403,12 +391,7 @@ export default class GardenGrower {
 
         let model;
 
-        if (this.flowers[modelString]) {
-            model = this.flowers[modelString].clone();
-        } else {
-            model = await this.getModel(modelString);
-            this.flowers[modelString] = model;
-        }
+        model = await this.getFlower(modelString);
 
         const position = nft?.position || getRandomPosition(contractAddress, this.coordinates);
         // const position =
@@ -417,26 +400,61 @@ export default class GardenGrower {
         model.position.set(...position);
 
         this.scene.add(model);
-        window.model = model;
+    }
+
+    getModel(modelName: string): Promise<Object3D<Event>> {
+        return new Promise((resolve, reject) => {
+            const loader = new GLTFLoader(new LoadingManager());
+
+            loader.load(
+                `/${modelName}.glb`,
+                (gltf) => {
+                    resolve(gltf.scene.children[0]);
+                },
+                undefined,
+                reject,
+            );
+        });
+    }
+
+    async getFlower(modelString: string): Promise<Object3D<Event>> {
+        // console.log(modelString);
+        let model;
+
+        if (this.flowers[modelString]) {
+            model = this.flowers[modelString].clone();
+        } else {
+            model = await this.getModel(modelString);
+            this.flowers[modelString] = model;
+        }
+
+        // this.targetViewGroup.add(model);
+        return model;
+    }
+
+    loadAllFlowers() {
+        this.scene.add(this.flowers);
+    }
+
+    loadGround() {
+        this.scene.add(this.ground);
     }
 
     loadAllModels() {
-        const models = this.modelsToLoad;
-
-        for (let model of models) {
-            this.scene.add(model);
-        }
+        this.loadGround();
+        this.loadAllFlowers();
+        // this.updateEnvironment();
     }
 
     done() {
-        console.log(this.renderer.info.render);
+        // console.log(this.renderer.info.render);
         const doneDiv = document.createElement('div');
         this.el.appendChild(doneDiv);
         doneDiv.classList.add(doneDivClass);
     }
 
     initDevHelper() {
-        console.log(this.usedColors);
+        // console.log(this.usedColors);
         this.updateAxesHelper();
         this.updateGridHelper();
         this.updateBoxesHelper();
@@ -474,4 +492,65 @@ export default class GardenGrower {
             }
         }
     }
+
+    addGUI() {
+        this.gui = new GUI({ autoPlace: true, width: 260, hideable: true, name: 'Garden' });
+        const lightFolder = this.gui.addFolder('Lighting');
+        lightFolder.open();
+
+        const lightControls = [
+            lightFolder.add(this.state, 'directionalIntensity', 0, 10, 1),
+            lightFolder.addColor(this.state, 'directionalColor'),
+        ];
+
+        lightControls.forEach((ctrl) => ctrl.onChange(() => this.updateLights()));
+
+        const helperFolder = this.gui.addFolder('Helper');
+        helperFolder.open();
+
+        helperFolder.add(this.state, 'grid').onChange(() => this.updateGridHelper());
+        helperFolder.add(this.state, 'axes').onChange(() => this.updateAxesHelper());
+        helperFolder.add(this.state, 'boxes').onChange(() => this.updateBoxesHelper());
+
+        const guiDiv = document.createElement('div');
+        this.el.appendChild(guiDiv);
+        guiDiv.classList.add('gui');
+        guiDiv.id = 'gui';
+        guiDiv.appendChild(this.gui.domElement);
+        this.gui.open();
+    }
+
+    // updateEnvironment() {
+    //     console.log('environment:', environments);
+    //     const environment = environments.filter(
+    //         (entry) => entry.name === this.state.environment,
+    //     )[0];
+
+    //     this.getCubeMapTexture(environment).then(({ envMap }) => {
+    //         this.scene.environment = envMap;
+    //         this.scene.background = this.state.background ? envMap : null;
+    //     });
+    // }
+
+    // getCubeMapTexture(environment) {
+    //     const { path } = environment;
+
+    //     console.log('path:', path);
+    //     // no envmap
+    //     if (!path) return Promise.resolve({ envMap: null });
+
+    //     return new Promise((resolve, reject) => {
+    //         new RGBELoader().setDataType(UnsignedByteType).load(
+    //             '/environment/forest.hdr',
+    //             (texture) => {
+    //                 const envMap = this.pmremGenerator.fromCubemap(texture).texture;
+    //                 this.pmremGenerator.dispose();
+
+    //                 resolve({ envMap });
+    //             },
+    //             undefined,
+    //             reject,
+    //         );
+    //     });
+    // }
 }

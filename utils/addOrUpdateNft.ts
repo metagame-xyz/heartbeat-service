@@ -22,7 +22,7 @@ export async function addOrUpdateNft(
     /****************/
     let nfts: NFTs, dateStr: string;
     try {
-        [nfts, dateStr] = await getNFTData(address);
+        [nfts, dateStr] = await getNFTData(address, 'homestead');
     } catch (error) {
         logger.error(error);
         return { statusCode: 500, error, message: 'Error in getNFTData' };
@@ -74,7 +74,7 @@ export async function addOrUpdateNft(
     /* SCREENSHOT NFT IMAGE */
     /************************/
 
-    const imgUrl = activateUrlbox(tokenId);
+    const imgUrl = await activateUrlbox(tokenId, metadata.totalNFTCount, true);
 
     logger.info(`imgUrl for tokenId ${tokenId}: ${imgUrl}`);
 
@@ -83,20 +83,20 @@ export async function addOrUpdateNft(
     /************************/
 
     // TODO skip if already queued: https://docs.quirrel.dev/api/queue#getbyid
-    try {
-        const jobData = await ScreenshotQueue.enqueue(
-            {
-                url: imgUrl,
-                tokenId,
-            },
-            {
-                delay: '1m',
-            },
-        );
-    } catch (error) {
-        logger.error(error);
-        return { statusCode: 500, error, message: `screenshot queueing for ${address}` };
-    }
+    // try {
+    //     const jobData = await ScreenshotQueue.enqueue(
+    //         {
+    //             url: imgUrl,
+    //             tokenId,
+    //         },
+    //         {
+    //             delay: '1m',
+    //         },
+    //     );
+    // } catch (error) {
+    //     logger.error(error);
+    //     return { statusCode: 500, error, message: `screenshot queueing for ${address}` };
+    // }
 
     return {
         statusCode: 200,

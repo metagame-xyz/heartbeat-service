@@ -129,6 +129,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const optionsWithForce = {
         ...baseOptions,
         force: true,
+        gpu: true,
     };
 
     const forceImgUrl = urlbox.buildUrl(optionsWithForce);
