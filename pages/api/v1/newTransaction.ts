@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { isValidEventForwarderSignature, logger } from '@utils';
 import { addOrUpdateNft } from '@utils/addOrUpdateNft';
+import { addressMap } from '@utils/testAddresses';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     logger.info(`top of newTransaction for tokenId ${req.body.tokenId}`);
@@ -30,7 +31,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const { minterAddress, tokenId } = req.body;
-    const address: string = minterAddress.toLowerCase();
+    let address: string = minterAddress.toLowerCase();
+
+    if (process.env.NODE_ENV !== 'production') {
+        address = addressMap[tokenId.toString()];
+    }
 
     const { statusCode, message, error, result } = await addOrUpdateNft(address, tokenId);
 

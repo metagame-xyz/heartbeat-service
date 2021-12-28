@@ -1,7 +1,7 @@
 import { Queue } from 'quirrel/next';
 
 import { fetcher, FetcherError, ioredisClient, logger } from '@utils';
-import { networkStrings } from '@utils/constants';
+import { CONTRACT_ADDRESS, networkStrings } from '@utils/constants';
 import { addToIPFS } from '@utils/ipfs';
 import { Metadata } from '@utils/metadata';
 
@@ -71,7 +71,7 @@ export default Queue(
         }
 
         try {
-            const { permalink } = await fetcher(openseaForceUpdateURL(tokenId, address));
+            const { permalink } = await fetcher(openseaForceUpdateURL(tokenId, CONTRACT_ADDRESS));
             logger.info(permalink);
         } catch (error) {
             if (error instanceof FetcherError) {

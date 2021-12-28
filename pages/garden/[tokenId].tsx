@@ -25,22 +25,28 @@ function Garden({ metadataStr }: InferGetServerSidePropsType<typeof getServerSid
             }
 
             const metadata: Metadata = JSON.parse(metadataStr);
+            const minterAddress = metadata.address;
             const nfts: NFTs = metadata.nfts;
             const garden = new GardenGrower(gardenEl);
 
             // await garden.showFlowerExamples();
 
-            const promises = [];
-
-            promises.push(garden.addGround(3));
+            await garden.addGround('flat_base_ground');
+            garden.renderGround();
+            // await garden.addGrass();
+            // garden.renderGrass();
+            // await garden.addPebbles();
+            // garden.renderPebbles();
+            garden.renderAllFlowers();
 
             for (let [address, nft] of Object.entries(nfts)) {
-                promises.push(garden.growFlowerInSquare(address, nft.count, metadata.address));
+                await garden.growFlowerInSquare(address, nft.count, minterAddress);
             }
 
-            await Promise.all(promises);
-            // console.log(metadata);
-            garden.initDevHelper();
+            garden.positionCamera();
+            garden.done();
+
+            // garden.addGUI();
         }
         growGarden();
     }, []);
