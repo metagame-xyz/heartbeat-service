@@ -166,4 +166,10 @@ export const specialNfts = {
         color: colors[18],
         sizeAndStem: sizeAndStemTuples[18],
     },
+    '0x2048455ce758d59fe926990d252a0c8175fd4b08': {
+        name: 'Crypto Wrapped',
+        position: positionTuples[19],
+        color: colors[19],
+        sizeAndStem: sizeAndStemTuples[19],
+    },
 };

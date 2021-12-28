@@ -51,9 +51,50 @@ export function getRandomFlowerX(randomFlowerNumber, flower: string) {
     return xScale * totalOrder[randomFlowerNumber];
 }
 
-export function getRandomFlowerZ(randomFlowerNumber, flower: string): number {
+function randomToRow(randomFlowerNumber) {
+    const thresholds = [12, 22, 34, 44, 56, 68, 78, 90, 100, 112, 122, 132];
     const rows = [1, 3, 5, 9, 2, 7, 1, 3, 5, 9, 2, 7];
-    const row = rows[Math.floor(randomFlowerNumber / 11)];
+
+    if (randomFlowerNumber < thresholds[0]) {
+        return rows[0];
+    }
+    if (randomFlowerNumber < thresholds[1]) {
+        return rows[1];
+    }
+    if (randomFlowerNumber < thresholds[2]) {
+        return rows[2];
+    }
+    if (randomFlowerNumber < thresholds[3]) {
+        return rows[3];
+    }
+    if (randomFlowerNumber < thresholds[4]) {
+        return rows[4];
+    }
+    if (randomFlowerNumber < thresholds[5]) {
+        return rows[5];
+    }
+    if (randomFlowerNumber < thresholds[6]) {
+        return rows[6];
+    }
+    if (randomFlowerNumber < thresholds[7]) {
+        return rows[7];
+    }
+    if (randomFlowerNumber < thresholds[8]) {
+        return rows[8];
+    }
+    if (randomFlowerNumber < thresholds[9]) {
+        return rows[9];
+    }
+    if (randomFlowerNumber < thresholds[10]) {
+        return rows[10];
+    }
+    if (randomFlowerNumber < thresholds[11]) {
+        return rows[11];
+    }
+}
+
+export function getRandomFlowerZ(randomFlowerNumber, flower: string): number {
+    const row = randomToRow(randomFlowerNumber);
     // const jitter = Math.random() * 0.1;
     return zScale * row;
 }

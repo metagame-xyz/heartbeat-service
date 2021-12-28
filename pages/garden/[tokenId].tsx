@@ -1,9 +1,6 @@
-import { Box, Flex } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import { InferGetServerSidePropsType } from 'next';
 import React, { useEffect } from 'react';
-import { Event, Object3D } from 'three';
-import THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { ioredisClient } from '@utils';
 import GardenGrower from '@utils/Garden';
