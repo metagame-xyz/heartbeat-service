@@ -35,7 +35,7 @@ function Garden({ metadataStr }: InferGetServerSidePropsType<typeof getServerSid
             promises.push(garden.addGround(3));
 
             for (let [address, nft] of Object.entries(nfts)) {
-                promises.push(garden.growFlowerInSquare(address, nft.count));
+                promises.push(garden.growFlowerInSquare(address, nft.count, metadata.address));
             }
 
             await Promise.all(promises);

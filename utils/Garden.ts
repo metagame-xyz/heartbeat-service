@@ -28,7 +28,6 @@ import {
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import { environments } from '../public/environment/index.js';
 import { doneDivClass } from './constants';
@@ -41,22 +40,6 @@ import {
     getSpecialFlowerCoords,
 } from './squarePlanting';
 
-declare global {
-    interface Window {
-        model: Object3D<Event>;
-    }
-}
-
-const randomFlowers = ['Amaryllis', 'Hydrangea', 'Periwinkle', 'Poppy'];
-const specificFlowers = ['Hydrangea', 'Periwinkle', 'Poppy'];
-const allFlowers = randomFlowers.concat(specificFlowers);
-
-const oneColor = ['magenta'];
-const metagameFlowerColors = ['cyan', 'purple', 'greenyellow'];
-const standardFlowerColors = ['deepblue', 'magenta', 'peach', 'pink', 'yellowgreen']; // lightblue
-const randomFlowerColors = metagameFlowerColors.concat(standardFlowerColors);
-const domFlowerColors = ['red'];
-const allFlowerColors = randomFlowerColors.concat(domFlowerColors);
 type Coords = [number, number, number];
 
 export default class GardenGrower {
@@ -367,7 +350,6 @@ export default class GardenGrower {
             const [size, stem] = nft.sizeAndStem;
             modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
             coords = getSpecialFlowerCoords(nft.position);
-            // this.specialFlowerCount++;
         } else {
             const flowerName = getFlowerName(this.randomFlowerCount, nftCount);
             const color = getFlowerColor(minterAddress, nftCount);
