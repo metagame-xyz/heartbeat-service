@@ -56,19 +56,12 @@ export default class GardenGrower {
 
     flowers: Group;
     ground: Group;
-    usedColors: Record<string, number>;
-
-    coordinates: String[][];
 
     randomFlowerCount: number;
-    specialFlowerCount: number;
-    modelsToLoad: Object3D[];
-
-    targetViewGroup: Group;
 
     state = {
-        environment: environments[1].name,
-        background: true,
+        // environment: environments[1].name,
+        // background: true,
         //Lights
         directionalIntensity: 4,
         directionalColor: 0xd1d1d1,
@@ -119,14 +112,8 @@ export default class GardenGrower {
         this.ground = new Group();
         this.grass = new Group();
         this.pebbles = new Group();
-        this.targetViewGroup = new Group();
 
-        this.usedColors = {};
-
-        this.coordinates = [];
         this.randomFlowerCount = 0;
-        this.specialFlowerCount = 0;
-        this.modelsToLoad = [];
 
         this.animate = this.animate.bind(this);
         requestAnimationFrame(this.animate);
