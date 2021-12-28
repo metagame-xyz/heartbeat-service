@@ -10,7 +10,7 @@ import { useEthereum, wrongNetworkToast } from '@providers/EthereumProvider';
 
 import { maxW } from '@components/Layout';
 
-import { blackholeAddress, CONTRACT_ADDRESS, networkStrings } from '@utils/constants';
+import { blackholeAddress, CONTRACT_ADDRESS, networkStrings, WEBSITE_URL } from '@utils/constants';
 import { copy } from '@utils/content';
 import { debug, event } from '@utils/frontend';
 
@@ -39,6 +39,9 @@ const toastErrorData = (title: string, description: string) => ({
 
 function openseaLink(tokenId: number): string {
     return `https://${networkStrings.opensea}opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId}`;
+}
+function gardenLink(tokenId: number): string {
+    return `https://${WEBSITE_URL}/garden/${tokenId}`;
 }
 
 function Home() {
@@ -229,8 +232,8 @@ function Home() {
                             mt={2}
                             size="lg"
                             rightIcon={<ExternalLinkIcon />}
-                            onClick={() => window.open(openseaLink(userTokenId))}>
-                            View on Opensea
+                            onClick={() => window.open(gardenLink(userTokenId))}>
+                            View your Garden
                         </Button>
                     </Box>
                 )}
