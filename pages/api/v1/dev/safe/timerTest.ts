@@ -12,14 +12,7 @@ import {
     isValidEventForwarderSignature,
     logger,
 } from '@utils';
-import {
-    doneDivClass,
-    MICROLINK_API_KEY,
-    URL2PNG_API_KEY,
-    URL2PNG_SECRET,
-    URL_BOX_API_SECRET,
-    URLBOX_API_KEY,
-} from '@utils/constants';
+import { doneDivClass, URL_BOX_API_SECRET, URLBOX_API_KEY } from '@utils/constants';
 import { formatMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
 
 import ScreenshotQueue from '../../queues/screenshot';

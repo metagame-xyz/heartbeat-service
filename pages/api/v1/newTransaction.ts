@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { minterAddress, tokenId } = req.body;
     let address: string = minterAddress.toLowerCase();
 
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.VERCEL_ENV !== 'production') {
         address = addressMap[tokenId.toString()];
     }
 
