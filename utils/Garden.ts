@@ -1,4 +1,3 @@
-import Chance from 'chance';
 import { GUI } from 'dat.gui';
 import {
     AxesHelper,
@@ -32,8 +31,15 @@ import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
 import { environments } from '../public/environment/index.js';
 import { doneDivClass } from './constants';
-import { getFlowerName, getRandomFlowerCoords, getSpecialFlowerCoords } from './extras';
 import { specialNfts } from './specialnfts2';
+import {
+    getFlowerName,
+    getRandomFlowerColor,
+    getRandomFlowerCoords,
+    getRandomFlowerSize,
+    getSizeAndStem,
+    getSpecialFlowerCoords,
+} from './squarePlanting';
 
 declare global {
     interface Window {
@@ -52,41 +58,6 @@ const randomFlowerColors = metagameFlowerColors.concat(standardFlowerColors);
 const domFlowerColors = ['red'];
 const allFlowerColors = randomFlowerColors.concat(domFlowerColors);
 type Coords = [number, number, number];
-
-const getRandom = (contractAddress: string, options: string[]) => {
-    const chance = new Chance(contractAddress);
-    const index = chance.integer({ min: 0, max: options.length - 1 });
-    return options[index];
-};
-
-const getSizeAndStem = (count: number): [string, string] => {
-    switch (count) {
-        case 1:
-        // return ['baby', 'short'];
-        case 2:
-            return ['OG', 'normal'];
-        case 3:
-            return ['bush', 'short'];
-        case 4:
-        // return ['bush', 'normal'];
-        default:
-            return ['bush', 'long'];
-    }
-};
-
-function getRandomPosition(contractAddress: string, tracking): Coords {
-    const max = 10;
-    const min = -1 * max;
-
-    const chanceX = new Chance(contractAddress);
-    const chanceZ = new Chance(contractAddress.split('').reverse().join(''));
-
-    const x = chanceX.floating({ min: min, max: max });
-    const z = chanceZ.floating({ min: min, max: max });
-    tracking.push([x, z]);
-
-    return [x, 0, z];
-}
 
 export default class GardenGrower {
     el: HTMLElement;
@@ -125,6 +96,8 @@ export default class GardenGrower {
     };
     activeCamera: any;
     pmremGenerator: any;
+    grass: any;
+    pebbles: any;
 
     constructor(el: HTMLElement) {
         this.el = el;
@@ -161,6 +134,8 @@ export default class GardenGrower {
 
         this.flowers = new Group();
         this.ground = new Group();
+        this.grass = new Group();
+        this.pebbles = new Group();
         this.targetViewGroup = new Group();
 
         this.usedColors = {};
@@ -221,6 +196,7 @@ export default class GardenGrower {
 
         const center = new Vector3();
         bbox.getCenter(center);
+        center.x = 0;
         // console.log('center:', center);
 
         const bsphere = bbox.getBoundingSphere(new Sphere());
@@ -240,7 +216,7 @@ export default class GardenGrower {
         const vFoV = this.camera.getEffectiveFOV();
         const hFoV = this.camera.fov * this.camera.aspect;
         const halfFovInRadians = MathUtils.degToRad(hFoV) / 2;
-        const distance = bsphere.radius / Math.sin(halfFovInRadians);
+        const distance = (bsphere.radius / Math.sin(halfFovInRadians)) * 0.9;
 
         const rad = MathUtils.degToRad(angle);
         const z = Math.cos(rad) * (center.z - distance);
@@ -265,7 +241,7 @@ export default class GardenGrower {
 
         for (let i = -width; i <= width; i++) {
             for (let j = back; j <= front; j++) {
-                const size = 18.5;
+                const size = 18.9;
                 const clone = ground.clone();
                 clone.position.set(i * size, 0, j * size);
                 this.ground.add(clone);
@@ -273,77 +249,111 @@ export default class GardenGrower {
         }
     }
 
-    async showFlowerExamples(color = 'magenta') {
-        const order = [
-            // ['baby/short', 'baby_short'],
-            ['OG/normal', 'OG_normal'],
-            ['bush/short', 'bush_short'],
-            ['bush/normal', 'bush_normal'],
-            // ['bush/long', 'bush_long'],
-        ];
-        const flowers = [
-            //     'Amaryllis',
-            // 'Periwinkle',
-            // 'Poppy',
-            'Hydrangea',
-            // 'Cannalilly',
-        ];
-        for (let i = 0; i < flowers.length; i++) {
-            for (let j = 0; j < order.length; j++) {
-                for (let m = 0; m < allFlowerColors.length; m++) {
-                    // const modelString = `flowers/${flowers[i]}/${order[j][0]}/${flowers[i]}_${order[j][1]}_${allFlowerColors[m]}`;
-                    const modelString = `flowers/${flowers[i]}/${order[j][0]}/${flowers[i]}_${order[j][1]}_red`;
-                    const model = await this.getFlower(modelString);
-                    model.position.set(i * 20 + m * 2, 0, j * 3);
-                    this.scene.add(model);
-                }
+    async addGrass() {
+        const grass = await this.getModel(`ground/grass_individual`);
+        grass.name = 'grass';
+        // grass.receiveShadow = true;
+        grass.position.set(0, 0, 0);
+        const scale = 1;
+        grass.scale.set(scale, scale, scale);
+        // this.modelsToLoad.push(grass);
+        // this.scene.add(grass);
+
+        const width = 10;
+        const front = 20;
+        const back = 1;
+
+        for (let i = -width; i <= width; i++) {
+            for (let j = back; j <= front; j++) {
+                const size = 0.5;
+                const clone = grass.clone();
+                clone.position.set(i * size, 0, j * size);
+                this.grass.add(clone);
             }
         }
-        // const sizes = ['baby', 'OG', 'bush'];
-        // const stems = ['short', 'normal', 'long'];
-        // for (let i = 0; i < flowers.length; i++) {
-        //     for (let m = 0; m < randomFlowerColors.length; m++) {
-        //         for (let j = 0; j < sizes.length; j++) {
-        //             for (let k = 0; k < stems.length; k++) {
-        //                 const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${randomFlowerColors[m]}`;
-        //                 console.log(` ${stems[i]} ${sizes[j]}`);
-        //                 const model = await this.getFlower(modelString);
-        //                 model.position.set(i * 20 + m * 2, 0, j * 6 + k * 2);
-        //                 this.scene.add(model);
-        //             }
-        //         }
-        //     }
-        // }
-        // Cannalilly only
-
-        // async function addAndPlaceFlower(ctx, modelString, i, j, k, m, n) {
-        //     const model = await ctx.getFlower(modelString);
-        //     model.position.set(i * 20 + m * 2 + n * -19, 0, j * 6 + k * 2);
-        //     ctx.modelsToLoad.push(model);
-        // }
-
-        // const promises = [];
-        // const flowers = ['Hydrangea'];
-        // const sizes = ['baby', 'OG', 'bush'];
-        // const stems = ['short', 'normal', 'long'];
-        // for (let n = 0; n < 3; n++) {
-        //     for (let i = 0; i < flowers.length; i++) {
-        //         for (let m = 0; m < allFlowerColors.length; m++) {
-        //             for (let j = 0; j < sizes.length; j++) {
-        //                 for (let k = 0; k < stems.length; k++) {
-        //                     // const modelString = `flowers/${flowers[i]}/${sizes[j]}/${stems[k]}/${flowers[i]}_${sizes[j]}_${stems[k]}_${allFlowerColors[m]}`;
-        //                     const modelString =
-        //                         'flowers/Hydrangea/bush/long/Hydrangea_bush_long_red';
-        //                     promises.push(addAndPlaceFlower(this, modelString, i, j, k, m, n));
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-        // await Promise.all(promises);
     }
 
-    async growPlacedFlower(contractAddress: string, nftCount: number, renderImmediately = false) {
+    async addPebbles() {
+        const grass = await this.getModel(`ground/pebble`);
+        grass.name = 'grass';
+        // grass.receiveShadow = true;
+        grass.position.set(0, 0, 0);
+        const scale = 1;
+        grass.scale.set(scale, scale, scale);
+        // this.modelsToLoad.push(grass);
+        // this.scene.add(grass);
+
+        const width = 10;
+        const height = 10;
+        const front = 20;
+        const back = 1;
+
+        for (let i = 0; i < 100; i++) {
+            const clone = grass.clone();
+            clone.position.set(width * Math.random(), Math.random() * 0.2, height * Math.random());
+            clone.rotateX(Math.random() * 360);
+            clone.rotateY(Math.random() * 360);
+            clone.rotateZ(Math.random() * 360);
+            this.pebbles.add(clone);
+        }
+    }
+
+    async showFlowerExamples(color = 'magenta') {
+        let model;
+        let modelString;
+        let coords: Coords;
+
+        type Nft = {
+            name: string;
+            color: string;
+            position: number[];
+            sizeAndStem?: string[];
+            flowerName?: string;
+        };
+
+        for (const [key, nft] of Object.entries(specialNfts as Record<string, Nft>)) {
+            console.log('special nft:', nft.name);
+            const flowerName = nft.flowerName || 'Hydrangea';
+            const color = nft.color || 'red';
+            const [size, stem] = nft.sizeAndStem || ['OG', 'long'];
+            modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
+            coords = getSpecialFlowerCoords(nft.position as [number, number]);
+            console.log('special nft coords:', coords);
+            model = await this.getFlower(modelString);
+
+            model.position.set(...coords);
+            this.flowers.add(model);
+        }
+
+        // this.specialFlowerCount++;
+        // const order = [
+        //     // ['baby/short', 'baby_short'],
+        //     ['OG/normal', 'OG_normal'],
+        //     ['bush/short', 'bush_short'],
+        //     ['bush/normal', 'bush_normal'],
+        //     // ['bush/long', 'bush_long'],
+        // ];
+        // const flowers = [
+        //     //     'Amaryllis',
+        //     // 'Periwinkle',
+        //     // 'Poppy',
+        //     'Hydrangea',
+        //     // 'Cannalilly',
+        // ];
+        // for (let i = 0; i < flowers.length; i++) {
+        //     for (let j = 0; j < order.length; j++) {
+        //         for (let m = 0; m < allFlowerColors.length; m++) {
+        //             // const modelString = `flowers/${flowers[i]}/${order[j][0]}/${flowers[i]}_${order[j][1]}_${allFlowerColors[m]}`;
+        //             const modelString = `flowers/${flowers[i]}/${order[j][0]}/${flowers[i]}_${order[j][1]}_red`;
+        //             const model = await this.getFlower(modelString);
+        //             model.position.set(i * 20 + m * 2, 0, j * 3);
+        //             this.scene.add(model);
+        //         }
+        //     }
+        // }
+    }
+
+    async growFlowerInSquare(contractAddress: string, nftCount: number, renderImmediately = false) {
         let model;
         let modelString;
         let coords: Coords;
@@ -351,63 +361,31 @@ export default class GardenGrower {
         const nft = specialNfts[contractAddress];
 
         if (nft) {
-            const flowerName = 'Hydrangea';
-            const color = getRandom(contractAddress, oneColor);
-            const [size, stem] = nft?.sizeAndStem || getSizeAndStem(nftCount);
+            console.log('special nft:', nft.name);
+            const flowerName = nft.flowerName || 'Hydrangea';
+            const color = nft.color;
+            const [size, stem] = nft.sizeAndStem;
             modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
-
-            coords = getSpecialFlowerCoords(this.specialFlowerCount, flowerName);
-
-            coords = coords.map((c) => c * 2) as Coords;
-
-            this.specialFlowerCount++;
+            coords = getSpecialFlowerCoords(nft.position);
+            // this.specialFlowerCount++;
         } else {
             const flowerName = getFlowerName(this.randomFlowerCount, nftCount);
-            // const flowerName = getFlowerName(this.randomFlowerCount, nftCount);
-            const color = getRandom(contractAddress, allFlowerColors);
-            const [size, stem] = nft?.sizeAndStem || getSizeAndStem(nftCount);
+            const color = getRandomFlowerColor(this.randomFlowerCount, nftCount, flowerName);
+            // const [size, stem] = getRandomFlowerSize(this.randomFlowerCount, nftCount, flowerName);
+            const [size, stem] = getSizeAndStem(nftCount);
             modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
             coords = getRandomFlowerCoords(this.randomFlowerCount, flowerName);
 
             this.randomFlowerCount++;
         }
 
-        model = await this.getFlower(modelString);
+        // only 132 randomly placed flower spots
+        if (this.randomFlowerCount <= 132) {
+            model = await this.getFlower(modelString);
 
-        model.position.set(...coords);
-
-        // if (renderImmediately) {
-        //     console.log('adding model to scene');
-        //     this.scene.add(model);
-        // }
-        this.flowers.add(model);
-    }
-
-    async growFlower(contractAddress: string, count: number) {
-        // console.log('growFlower', symbol, count, creator);
-
-        const nft = specialNfts[contractAddress];
-
-        const flowerName = nft?.flowerName || getRandom(contractAddress, randomFlowers);
-        const color = nft?.color || getRandom(contractAddress, randomFlowerColors);
-        const [size, stem] = nft?.sizeAndStem || getSizeAndStem(count);
-
-        // console.log('nft:', nft?.name);
-        // console.log(`flowerName: ${flowerName}_${size}_${stem}_${color}`);
-
-        let modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
-
-        let model;
-
-        model = await this.getFlower(modelString);
-
-        const position = nft?.position || getRandomPosition(contractAddress, this.coordinates);
-        // const position =
-        //     nft?.position || getPosition(flowerName, color) || getRandomPosition('demo');
-
-        model.position.set(...position);
-
-        this.scene.add(model);
+            model.position.set(...coords);
+            this.flowers.add(model);
+        }
     }
 
     getModel(modelName: string): Promise<Object3D<Event>> {
@@ -436,6 +414,7 @@ export default class GardenGrower {
             this.flowers[modelString] = model;
         }
 
+        model.rotateY(Math.random() * 4 + 180);
         // this.targetViewGroup.add(model);
         return model;
     }
@@ -446,6 +425,14 @@ export default class GardenGrower {
 
     renderGround() {
         this.scene.add(this.ground);
+    }
+
+    renderGrass() {
+        this.scene.add(this.grass);
+    }
+
+    renderPebbles() {
+        this.scene.add(this.pebbles);
     }
 
     renderAllModels() {

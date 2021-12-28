@@ -1,3 +1,5 @@
+import Chance from 'chance';
+
 const randomFlowers = ['Amaryllis', 'Hydrangea', 'Periwinkle', 'Poppy'];
 const specificFlowers = ['Hydrangea', 'Periwinkle', 'Poppy'];
 const allFlowers = randomFlowers.concat(specificFlowers);
@@ -99,4 +101,39 @@ export function getPosition(flowerName: string, color: string): Coords {
     let coords = degreeToCoords(degree);
     coords = coordMultiplier(coords, flowerName);
     return coords;
+}
+
+const getRandom = (contractAddress: string, options: string[]) => {
+    const chance = new Chance(contractAddress);
+    const index = chance.integer({ min: 0, max: options.length - 1 });
+    return options[index];
+};
+
+const getSizeAndStem = (count: number): [string, string] => {
+    switch (count) {
+        case 1:
+        // return ['baby', 'short'];
+        case 2:
+            return ['OG', 'normal'];
+        case 3:
+            return ['bush', 'short'];
+        case 4:
+        // return ['bush', 'normal'];
+        default:
+            return ['bush', 'long'];
+    }
+};
+
+function getRandomPosition(contractAddress: string, tracking): Coords {
+    const max = 10;
+    const min = -1 * max;
+
+    const chanceX = new Chance(contractAddress);
+    const chanceZ = new Chance(contractAddress.split('').reverse().join(''));
+
+    const x = chanceX.floating({ min: min, max: max });
+    const z = chanceZ.floating({ min: min, max: max });
+    tracking.push([x, z]);
+
+    return [x, 0, z];
 }

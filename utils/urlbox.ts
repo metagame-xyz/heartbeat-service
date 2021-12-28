@@ -17,6 +17,7 @@ export async function activateUrlbox(tokenId, totalNFTCount, timer = false): Pro
         // retina: true,
         gpu: true,
         wait_for: `.${doneDivClass}`,
+        
         fail_if_selector_missing: true,
     };
 
