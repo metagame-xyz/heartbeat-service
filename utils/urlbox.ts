@@ -14,10 +14,9 @@ export async function activateUrlbox(tokenId, totalNFTCount, timer = false): Pro
         format: 'jpg',
         quality: 100,
         full_page: true,
-        // retina: true,
+        retina: true,
         gpu: true,
         wait_for: `.${doneDivClass}`,
-        
         fail_if_selector_missing: true,
     };
 
