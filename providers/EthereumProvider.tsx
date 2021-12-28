@@ -1,8 +1,9 @@
-import { useToast } from '@chakra-ui/react';
+import { ToastPositionWithLogical, useToast, UseToastOptions } from '@chakra-ui/react';
 import {
     BaseProvider,
     getDefaultProvider,
     JsonRpcSigner,
+    Provider,
     Web3Provider,
 } from '@ethersproject/providers';
 import WalletConnectProvider from '@walletconnect/web3-provider';
@@ -23,7 +24,7 @@ import { debug, event, EventParams, getTruncatedAddress } from '@utils/frontend'
 
 import rainbowLogo from '../images/rainbow.png';
 
-export const wrongNetworkToast = {
+export const wrongNetworkToast: UseToastOptions = {
     title: 'Wrong Network.',
     description: `You must be on ${networkStrings.ethers} to mint`,
     status: 'warning',
@@ -73,29 +74,21 @@ const brand800 = 'rgb(68, 51, 122)';
 const brand800Opaque = 'rgba(68, 51, 122,0.5)';
 const brand900 = ' rgb(50, 38, 89)';
 
-async function openWeb3ModalGenerator(
-    setProvider,
-    setSigner,
-    setUserAddress,
-    setEnsName,
-    setUserName,
-    setAvatarUrl,
-    setEventParams,
-    toast,
-    buttonLocation,
-) {
-    const web3Modal = new Web3Modal({
-        network: networkStrings.web3Modal, // optional
-        cacheProvider: false, // optional TODO true or ternary
-        providerOptions, // required
-        theme: {
-            background: brand900,
-            main: brand50,
-            secondary: brand100,
-            border: brand800Opaque,
-            hover: brand800,
-        },
-    });
+function EthereumProvider(props): JSX.Element {
+    const [initialized, setInitialized] = useState(false);
+    const [provider, setProvider] = useState<BaseProvider>();
+    const [signer, setSigner] = useState<Signer>();
+    const [userAddress, setUserAddress] = useState<string>();
+    const [ensName, setEnsName] = useState<string>('');
+    const [userName, setUserName] = useState<string>('');
+    const [avatarUrl, setAvatarUrl] = useState<string>('');
+    const [eventParams, setEventParams] = useState<EventParams>({});
+    const [web3Modal, setWeb3Modal] = useState<Web3Modal>();
+
+    function setInitialProvider() {
+        setProvider(defaultProvider);
+    }
+    const toast = useToast();
 
     async function updateVariables(providerFromModal, eventParams) {
         let provider: BaseProvider = defaultProvider;
@@ -150,83 +143,103 @@ async function openWeb3ModalGenerator(
         }
     }
 
-    try {
+    async function connect(provider, eventParams: EventParams, web3Modal: Web3Modal) {
+        try {
+            const { id: connectionType, name: connectionName } = getProviderInfo(provider);
+            eventParams = { ...eventParams, connectionType, connectionName };
+            event(wallet_provider_clicked, eventParams);
+
+            await updateVariables(provider, eventParams);
+            // Subscribe to accounts change
+            provider.on('accountsChanged', async (accounts: string[]) => {
+                if (!accounts.length) {
+                    web3Modal.clearCachedProvider();
+                }
+                console.log('accountsChanged');
+                await updateVariables(provider, eventParams);
+            });
+
+            // Subscribe to chainId change
+            provider.on('chainChanged', async (chainId: number) => {
+                debug({ chainId });
+                await updateVariables(provider, eventParams);
+                // window.location.reload();
+            });
+
+            // Subscribe to provider connection
+            provider.on('connect', (info: { chainId: number }) => {
+                console.log('provider fromModal Connected');
+                debug({ info });
+            });
+
+            // Subscribe to provider disconnection
+            provider.on('disconnect', (error: { code: number; message: string }) => {
+                console.log('provider fromModal disconnected');
+
+                debug({ error });
+                updateVariables(provider, eventParams);
+            });
+        } catch (error) {
+            event('Web3Modal closed by user', {
+                network: NETWORK,
+                buttonLocation: eventParams.buttonLocation,
+            });
+            // error seems to be undefined when the user rejects connecting to metamask
+            console.log('WEB3 MODAL ERROR:', error);
+        }
+    }
+
+    async function openWeb3ModalGenerator(buttonLocation) {
         let eventParams: EventParams = { buttonLocation, network: NETWORK };
         event(connect_button_clicked, eventParams);
 
         const providerFromModal = await web3Modal.connect();
-        const { id: connectionType, name: connectionName } = getProviderInfo(providerFromModal);
-        eventParams = { ...eventParams, connectionType, connectionName };
-        event(wallet_provider_clicked, eventParams);
 
-        await updateVariables(providerFromModal, eventParams);
-        // Subscribe to accounts change
-        providerFromModal.on('accountsChanged', async (accounts: string[]) => {
-            console.log('accountsChanged');
-            await updateVariables(providerFromModal, eventParams);
-        });
-
-        // Subscribe to chainId change
-        providerFromModal.on('chainChanged', async (chainId: number) => {
-            debug({ chainId });
-            await updateVariables(providerFromModal, eventParams);
-            // window.location.reload();
-        });
-
-        // Subscribe to provider connection
-        providerFromModal.on('connect', (info: { chainId: number }) => {
-            console.log('provider fromModal Connected');
-            debug({ info });
-        });
-
-        // Subscribe to provider disconnection
-        providerFromModal.on('disconnect', (error: { code: number; message: string }) => {
-            console.log('provider fromModal disconnected');
-            debug({ error });
-            updateVariables(providerFromModal, eventParams);
-        });
-    } catch (error) {
-        event('Web3Modal closed by user', { network: NETWORK, buttonLocation });
-        // error seems to be undefined when the user rejects connecting to metamask
-        console.log('WEB3 MODAL ERROR:', error);
+        await connect(providerFromModal, eventParams, web3Modal);
     }
-}
-
-function EthereumProvider(props): JSX.Element {
-    const [initialized, setInitialized] = useState(false);
-    const [provider, setProvider] = useState<BaseProvider>();
-    const [signer, setSigner] = useState<Signer>();
-    const [userAddress, setUserAddress] = useState<string>();
-    const [ensName, setEnsName] = useState<string>('');
-    const [userName, setUserName] = useState<string>('');
-    const [avatarUrl, setAvatarUrl] = useState<string>('');
-    const [eventParams, setEventParams] = useState<EventParams>({});
-
-    function setInitialProvider() {
-        setProvider(defaultProvider);
-    }
-
-    const toast = useToast();
 
     useEffect(() => {
         setInitialProvider();
         setInitialized(true);
+
+        const web3Modal = new Web3Modal({
+            network: networkStrings.web3Modal, // optional
+            cacheProvider: true, // optional TODO true or ternary
+            providerOptions, // required
+            theme: {
+                background: brand900,
+                main: brand50,
+                secondary: brand100,
+                border: brand800Opaque,
+                hover: brand800,
+            },
+        });
+
+        setWeb3Modal(web3Modal);
+
+        async function reconnectIfAvailable() {
+            if (web3Modal.cachedProvider) {
+                let eventParams: EventParams = { buttonLocation: 'reconnection', network: NETWORK };
+                const provider = await web3Modal.connect();
+                await connect(provider, eventParams, web3Modal);
+            }
+        }
+        reconnectIfAvailable();
     }, []);
 
     const openWeb3Modal = async (buttonLocation: string) =>
-        await openWeb3ModalGenerator(
-            setProvider,
-            setSigner,
-            setUserAddress,
-            setEnsName,
-            setUserName,
-            setAvatarUrl,
-            setEventParams,
-            toast,
-            buttonLocation,
-        );
+        await openWeb3ModalGenerator(buttonLocation);
 
-    const variables = { provider, signer, userAddress, ensName, userName, avatarUrl, eventParams };
+    const variables = {
+        provider,
+        signer,
+        userAddress,
+        ensName,
+        userName,
+        avatarUrl,
+        eventParams,
+        web3Modal,
+    };
     const functions = { openWeb3Modal, toast };
 
     const value = { ...variables, ...functions };

@@ -57,7 +57,7 @@ export const specialNfts = {
         color: colors[0],
         sizeAndStem: sizeAndStemTuples[0],
     },
-    placeholder: {
+    '0x7d414BC0482432d2d74021095256aAB2e6d3f6B8': {
         name: 'Token Garden',
         position: positionTuples[1],
         color: colors[1],

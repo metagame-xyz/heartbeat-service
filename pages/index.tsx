@@ -14,8 +14,8 @@ import { blackholeAddress, CONTRACT_ADDRESS, networkStrings } from '@utils/const
 import { copy } from '@utils/content';
 import { debug, event } from '@utils/frontend';
 
-import Birthblock from '../birthblock.json';
 import BirthblockImage from '../images/example-birthblock.svg';
+import TokenGarden from '../tokenGarden.json';
 
 function About({ heading, text }) {
     return (
@@ -45,15 +45,13 @@ function Home() {
     const { provider, signer, userAddress, userName, eventParams, openWeb3Modal, toast } =
         useEthereum();
 
-    const birthblockContract = new Contract(CONTRACT_ADDRESS, Birthblock.abi, provider);
+    const tokenGardenContract = new Contract(CONTRACT_ADDRESS, TokenGarden.abi, provider);
 
     let [minted, setMinted] = useState(false);
     let [minting, setMinting] = useState(false);
     let [userTokenId, setUserTokenId] = useState<number>(null);
 
-    let [freeMintsLeft, setFreeMintsLeft] = useState<number>(null);
     let [mintCount, setMintCount] = useState<number>(null);
-    let [freeMints, setFreeMints] = useState<number>(144);
 
     useEffect(() => {
         async function getUserMintedTokenId() {
@@ -61,11 +59,11 @@ function Home() {
             let tokenId = null;
             try {
                 if (userAddress) {
-                    const filter = birthblockContract.filters.Transfer(
+                    const filter = tokenGardenContract.filters.Transfer(
                         blackholeAddress,
                         userAddress,
                     );
-                    const [event] = await birthblockContract.queryFilter(filter); // get first event, should only be one
+                    const [event] = await tokenGardenContract.queryFilter(filter); // get first event, should only be one
                     if (event) {
                         tokenId = event.args[2].toNumber();
                     }
@@ -85,30 +83,15 @@ function Home() {
     useEffect(() => {
         async function getMintedCount() {
             try {
-                const mintCount: BigNumber = await birthblockContract.mintedCount();
-                // const freeMints: BigNumber = await birthblockContract.freeMints();
+                console.log('getting mint count');
+                const mintCount: BigNumber = await tokenGardenContract.mintedCount();
                 setMintCount(mintCount.toNumber());
-                // setFreeMints(freeMints.toNumber());
-                setFreeMintsLeft(freeMints - mintCount.toNumber());
             } catch (error) {
                 debug({ error });
             }
         }
-        getMintedCount();
-
-        // just turn off listener for now
-
-        // birthblockContract.removeAllListeners();
-
-        // birthblockContract.on(
-        //     'Transfer',
-        //     (fromAddress: string, toAddress: string, tokenId: BigNumber) => {
-        //         if (fromAddress === blackholeAddress) {
-        //             setMintCount(tokenId.toNumber());
-        //             setFreeMintsLeft(freeMints - tokenId.toNumber());
-        //         }
-        //     },
-        // );
+        const interval = setInterval(getMintedCount, 4000);
+        return () => clearInterval(interval);
     }, []);
 
     const mint = async () => {
@@ -121,11 +104,10 @@ function Home() {
         }
 
         setMinting(true);
-        const birthblockContractWritable = birthblockContract.connect(signer);
-        // const value = freeMintsLeft > 0 ? '0' : parseEther('0.01');
-        const value = parseEther('0.01'); // switched to hardcoded, this should be a ternary
+        const tokenGardenContractWritable = tokenGardenContract.connect(signer);
+        const value = parseEther('0.01');
         try {
-            const data = await birthblockContractWritable.mint({ value });
+            const data = await tokenGardenContractWritable.mint({ value });
             const moreData = await data.wait();
             const [fromAddress, toAddress, tokenId] = moreData.events.find(
                 (e) => (e.event = 'Transfer'),

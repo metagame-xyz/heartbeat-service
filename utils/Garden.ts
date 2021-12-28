@@ -54,7 +54,8 @@ export default class GardenGrower {
     axesHelper: AxesHelper;
     gridHelper: GridHelper;
 
-    flowers: Group;
+    centerFlowers: Group;
+    sideFlowers: Group;
     ground: Group;
 
     randomFlowerCount: number;
@@ -108,7 +109,8 @@ export default class GardenGrower {
 
         this.el.appendChild(this.renderer.domElement);
 
-        this.flowers = new Group();
+        this.centerFlowers = new Group();
+        this.sideFlowers = new Group();
         this.ground = new Group();
         this.grass = new Group();
         this.pebbles = new Group();
@@ -160,7 +162,7 @@ export default class GardenGrower {
     positionCamera() {
         const angle = 30;
         // console.log(this.flowers);
-        const bbox = new Box3().setFromObject(this.flowers);
+        const bbox = new Box3().setFromObject(this.centerFlowers);
         // this.scene.add(new Box3Helper(bbox, new Color(0xff0000)));
         // console.log(bbox);
 
@@ -186,7 +188,7 @@ export default class GardenGrower {
         const vFoV = this.camera.getEffectiveFOV();
         const hFoV = this.camera.fov * this.camera.aspect;
         const halfFovInRadians = MathUtils.degToRad(hFoV) / 2;
-        const distance = (bsphere.radius / Math.sin(halfFovInRadians)) * 0.9;
+        const distance = (bsphere.radius / Math.sin(halfFovInRadians)) * 1.1;
 
         const rad = MathUtils.degToRad(angle);
         const z = Math.cos(rad) * (center.z - distance);
@@ -292,7 +294,7 @@ export default class GardenGrower {
             model = await this.getFlower(modelString);
 
             model.position.set(...coords);
-            this.flowers.add(model);
+            this.centerFlowers.add(model);
         }
 
         // this.specialFlowerCount++;
@@ -352,7 +354,11 @@ export default class GardenGrower {
             model = await this.getFlower(modelString, minterAddress);
 
             model.position.set(...coords);
-            this.flowers.add(model);
+            if (modelString.includes('Poppy')) {
+                this.sideFlowers.add(model);
+            } else {
+                this.centerFlowers.add(model);
+            }
         }
     }
 
@@ -375,11 +381,11 @@ export default class GardenGrower {
         // console.log(modelString);
         let model;
 
-        if (this.flowers[modelString]) {
-            model = this.flowers[modelString].clone();
+        if (this.centerFlowers[modelString]) {
+            model = this.centerFlowers[modelString].clone();
         } else {
             model = await this.getModel(modelString);
-            this.flowers[modelString] = model;
+            this.centerFlowers[modelString] = model;
         }
 
         const chance = new Chance(minterAddress);
@@ -389,7 +395,8 @@ export default class GardenGrower {
     }
 
     renderAllFlowers() {
-        this.scene.add(this.flowers);
+        this.scene.add(this.centerFlowers);
+        this.scene.add(this.sideFlowers);
     }
 
     renderGround() {
