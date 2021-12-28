@@ -204,7 +204,7 @@ function EthereumProvider(props): JSX.Element {
 
         const web3Modal = new Web3Modal({
             network: networkStrings.web3Modal, // optional
-            cacheProvider: true, // optional TODO true or ternary
+            cacheProvider: true,
             providerOptions, // required
             theme: {
                 background: brand900,
