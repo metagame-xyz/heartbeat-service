@@ -28,12 +28,11 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
             }
 
             const metadata: Metadata = JSON.parse(metadataStr);
+            const minterAddress = metadata.address;
             const nfts: NFTs = metadata.nfts;
             const garden = new GardenGrower(gardenEl);
 
             // await garden.showFlowerExamples();
-
-            const renderImmediately = true;
 
             await garden.addGround('flat_base_ground');
             garden.renderGround();
@@ -43,26 +42,9 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
             // garden.renderPebbles();
             garden.renderAllFlowers();
 
-            const promiseAll = false;
-
-            if (!promiseAll) {
-                for (let [address, nft] of Object.entries(nfts)) {
-                    await garden.growFlowerInSquare(address, nft.count, renderImmediately);
-                }
+            for (let [address, nft] of Object.entries(nfts)) {
+                await garden.growFlowerInSquare(address, nft.count, minterAddress);
             }
-
-            if (promiseAll) {
-                const promises = [];
-                promises.push(garden.addGround('flat_base_ground'));
-                for (let [address, nft] of Object.entries(nfts)) {
-                    promises.push(garden.growFlowerInSquare(address, nft.count, renderImmediately));
-                }
-                await Promise.all(promises);
-            }
-
-            // if (!renderImmediately) {
-            //     garden.renderAllModels();
-            // }
 
             garden.positionCamera();
             garden.done();

@@ -83,20 +83,20 @@ export async function addOrUpdateNft(
     /************************/
 
     // TODO skip if already queued: https://docs.quirrel.dev/api/queue#getbyid
-    // try {
-    //     const jobData = await ScreenshotQueue.enqueue(
-    //         {
-    //             url: imgUrl,
-    //             tokenId,
-    //         },
-    //         {
-    //             delay: '1m',
-    //         },
-    //     );
-    // } catch (error) {
-    //     logger.error(error);
-    //     return { statusCode: 500, error, message: `screenshot queueing for ${address}` };
-    // }
+    try {
+        const jobData = await ScreenshotQueue.enqueue(
+            {
+                url: imgUrl,
+                tokenId,
+            },
+            {
+                delay: '30s',
+            },
+        );
+    } catch (error) {
+        logger.error(error);
+        return { statusCode: 500, error, message: `screenshot queueing for ${address}` };
+    }
 
     return {
         statusCode: 200,

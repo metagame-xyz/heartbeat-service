@@ -1,3 +1,4 @@
+import Chance from 'chance';
 import { GUI } from 'dat.gui';
 import {
     AxesHelper,
@@ -33,10 +34,9 @@ import { environments } from '../public/environment/index.js';
 import { doneDivClass } from './constants';
 import { specialNfts } from './specialnfts2';
 import {
+    getRandomFlowerColor as getFlowerColor,
     getFlowerName,
-    getRandomFlowerColor,
     getRandomFlowerCoords,
-    getRandomFlowerSize,
     getSizeAndStem,
     getSpecialFlowerCoords,
 } from './squarePlanting';
@@ -353,7 +353,7 @@ export default class GardenGrower {
         // }
     }
 
-    async growFlowerInSquare(contractAddress: string, nftCount: number, renderImmediately = false) {
+    async growFlowerInSquare(contractAddress: string, nftCount: number, minterAddress: string) {
         let model;
         let modelString;
         let coords: Coords;
@@ -370,8 +370,7 @@ export default class GardenGrower {
             // this.specialFlowerCount++;
         } else {
             const flowerName = getFlowerName(this.randomFlowerCount, nftCount);
-            const color = getRandomFlowerColor(this.randomFlowerCount, nftCount, flowerName);
-            // const [size, stem] = getRandomFlowerSize(this.randomFlowerCount, nftCount, flowerName);
+            const color = getFlowerColor(minterAddress, nftCount);
             const [size, stem] = getSizeAndStem(nftCount);
             modelString = `flowers/${flowerName}/${size}/${stem}/${flowerName}_${size}_${stem}_${color}`;
             coords = getRandomFlowerCoords(this.randomFlowerCount, flowerName);
@@ -380,8 +379,8 @@ export default class GardenGrower {
         }
 
         // only 132 randomly placed flower spots
-        if (this.randomFlowerCount <= 132) {
-            model = await this.getFlower(modelString);
+        if (this.randomFlowerCount <= 132 || nft) {
+            model = await this.getFlower(modelString, minterAddress);
 
             model.position.set(...coords);
             this.flowers.add(model);
@@ -403,7 +402,7 @@ export default class GardenGrower {
         });
     }
 
-    async getFlower(modelString: string): Promise<Object3D<Event>> {
+    async getFlower(modelString: string, minterAddress = ''): Promise<Object3D<Event>> {
         // console.log(modelString);
         let model;
 
@@ -414,8 +413,9 @@ export default class GardenGrower {
             this.flowers[modelString] = model;
         }
 
-        model.rotateY(Math.random() * 4 + 180);
-        // this.targetViewGroup.add(model);
+        const chance = new Chance(minterAddress);
+        const random = chance.floating({ min: -1, max: 1 });
+        model.rotateY(random * 2 + 180);
         return model;
     }
 

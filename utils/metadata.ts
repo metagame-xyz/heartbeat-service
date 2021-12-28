@@ -1,7 +1,10 @@
 import { EtherscanProvider } from '@ethersproject/providers';
+import Chance from 'chance';
 
 import { fetcher, ioredisClient, logger, tsToMonthAndYear } from '@utils';
 import { blackholeAddress, ETHERSCAN_API_KEY, networkStrings, WEBSITE_URL } from '@utils/constants';
+
+import { specialNfts } from './specialnfts2';
 
 export type NftEvent = {
     tokenSymbol: string;
@@ -10,7 +13,7 @@ export type NftEvent = {
     contractAddress?: string;
     tokenName: string;
     count?: number;
-    creator?: string;
+    special?: boolean;
 };
 
 export type NFTs = {
@@ -81,11 +84,6 @@ export async function getNFTData(
         }),
     );
 
-    const creatorMap = {
-        BBLOCK: 'The Metagame',
-        LOOT: 'Dom Hoffman',
-    };
-
     const nfts: NFTs = mintEvents.reduce((newEventObj, event) => {
         if (newEventObj[event.contractAddress]) {
             newEventObj[event.contractAddress].count += 1;
@@ -94,8 +92,8 @@ export async function getNFTData(
             newEventObj[event.contractAddress].count = 1;
 
             // add creator for special tokens
-            if (creatorMap[event.tokenSymbol]) {
-                newEventObj[event.contractAddress].creator = creatorMap[event.tokenSymbol];
+            if (specialNfts[event.contractAddress]) {
+                newEventObj[event.contractAddress].special = true;
             }
             delete event.contractAddress;
         }
@@ -140,22 +138,24 @@ export function formatMetadata(
     return metadata;
 }
 
+type Attributes = {
+    display_type?: string;
+    trait_type: string;
+    value: any;
+};
+
 // birthblock.art/api/v1/metadata/[tokenId]
 export type OpenSeaMetadata = {
     name: string;
     description: string;
     image: string; // birthblock.art/api/v1/image/[tokenId]
     external_url: string; // birthblock.art/birthblock/[tokenId]
-    attributes: [
-        // properties
-        {
-            trait_type: 'address';
-            value: string;
-        },
-    ];
+    attributes: Attributes[];
 };
 
 export function metadataToOpenSeaMetadata(metadata: Metadata): OpenSeaMetadata {
+    const specialNFTs = Object.values(metadata.nfts).filter(({ special }) => special);
+
     const openseaMetadata: OpenSeaMetadata = {
         name: metadata.name,
         description: metadata.description,
@@ -167,8 +167,43 @@ export function metadataToOpenSeaMetadata(metadata: Metadata): OpenSeaMetadata {
                 trait_type: 'address',
                 value: metadata.address,
             },
+            {
+                trait_type: 'unique NFTs',
+                value: metadata.uniqueNFTCount.toString(),
+            },
+            {
+                trait_type: 'total NFTs',
+                value: metadata.totalNFTCount.toString(),
+            },
+            {
+                trait_type: 'special NFTs',
+                value: specialNFTs.length.toString(),
+            },
+            {
+                trait_type: 'unique NFTs',
+                value: metadata.uniqueNFTCount,
+            },
+            {
+                trait_type: 'total NFTs',
+                value: metadata.totalNFTCount,
+            },
+            {
+                trait_type: 'special NFTs',
+                value: specialNFTs.length,
+            },
+            {
+                trait_type: 'Color set',
+                value: (new Chance(metadata.address).integer({ min: 0, max: 2 }) + 1).toString(),
+            },
         ],
     };
+
+    for (const nft of specialNFTs) {
+        openseaMetadata.attributes.push({
+            trait_type: nft.tokenName,
+            value: `mints: ${nft.count}`,
+        });
+    }
 
     return openseaMetadata;
 }

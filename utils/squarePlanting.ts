@@ -1,3 +1,5 @@
+import Chance from 'chance';
+
 const totalFlowers = [];
 const flowers = ['Periwinkle', 'Amaryllis', 'Cannalilly'];
 
@@ -45,7 +47,7 @@ export function getFlowerName(randomFlowerNumber = 1, nftCount: number) {
     return flower;
 }
 
-export function getRandomFlowerX(randomFlowerNumber, flower: string) {
+function getRandomFlowerX(randomFlowerNumber, flower: string) {
     const col = totalOrder[randomFlowerNumber];
     // const jitter = Math.random() * 0.1;
     return xScale * totalOrder[randomFlowerNumber];
@@ -93,7 +95,7 @@ function randomToRow(randomFlowerNumber) {
     }
 }
 
-export function getRandomFlowerZ(randomFlowerNumber, flower: string): number {
+function getRandomFlowerZ(randomFlowerNumber, flower: string): number {
     const row = randomToRow(randomFlowerNumber);
     // const jitter = Math.random() * 0.1;
     return zScale * row;
@@ -105,18 +107,6 @@ export function getRandomFlowerCoords(randomFlowerNumber, flower: string): Coord
     const z = getRandomFlowerZ(randomFlowerNumber, flower);
 
     return [x, y, z];
-}
-
-const flowerSize = [
-    ['baby', 'short'],
-    ['OG', 'normal'],
-    ['bush', 'short'],
-    ['bush', 'normal'],
-    ['bush', 'long'],
-];
-
-export function getRandomFlowerSize(randomFlowerNumber, nftCount: number, flower: string) {
-    return flowerSize[3];
 }
 
 export const getSizeAndStem = (count: number): [string, string] => {
@@ -138,24 +128,30 @@ export const getSizeAndStem = (count: number): [string, string] => {
     }
 };
 
-const colors = ['yellowgreen', 'peach', 'pink'];
+const color1 = ['yellowgreen', 'peach', 'pink'];
+const color2 = ['lightblue', 'greenyellow', 'deepblue'];
+const color3 = ['red', 'magenta', 'purple'];
+const colors = [color1, color2, color3];
 
-export const getRandomFlowerColor = (
-    randomFlowerNumber,
-    nftCount: number,
-    flower: string,
-): string => {
+function pickColorSet(minterAddress) {
+    const chance = new Chance(minterAddress);
+    const index = chance.integer({ min: 0, max: 2 });
+    return colors[index];
+}
+
+export const getRandomFlowerColor = (minterAddress: string, nftCount: number): string => {
+    const colorSet = pickColorSet(minterAddress);
     switch (nftCount) {
         case 1:
-            return colors[0];
+            return colorSet[0];
         case 2:
-            return colors[1];
+            return colorSet[1];
         case 3:
-            return colors[1];
+            return colorSet[1];
         case 4:
-            return colors[2];
+            return colorSet[2];
         default:
-            return colors[2];
+            return colorSet[2];
     }
 };
 
