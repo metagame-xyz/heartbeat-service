@@ -23,19 +23,19 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
         <ChakraProvider theme={theme}>
             <EthereumProvider>
                 <Flex
-                // backgroundImage={leftBg.src}
-                // bgBlendMode="overlay"
-                // bgPosition={'left 0px top -70px'}
-                // bgSize={bgSize}
-                // width="100%"
-                // bgRepeat="no-repeat repeat"
+                    // backgroundImage={leftBg.src}
+                    // bgBlendMode="overlay"
+                    // bgPosition={'left 0px top -70px'}
+                    // bgSize={bgSize}
+                    width="100%"
+                    // bgRepeat="no-repeat repeat"
                 >
                     <Flex
-                    // backgroundImage={rightBg.src}
-                    // width="100%"
-                    // bgPosition={'right 0px top -70px'}
-                    // bgSize={bgSize}
-                    // bgRepeat="no-repeat repeat"
+                        // backgroundImage={rightBg.src}
+                        width="100%"
+                        // bgPosition={'right 0px top -70px'}
+                        // bgSize={bgSize}
+                        // bgRepeat="no-repeat repeat"
                     >
                         <Flex bgColor="brand.100opaque" width="100%">
                             <Layout>
