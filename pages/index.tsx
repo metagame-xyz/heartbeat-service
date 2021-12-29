@@ -1,6 +1,7 @@
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { Box, Button, Heading, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react';
 import { parseEther } from '@ethersproject/units';
+import { getGPUTier } from 'detect-gpu';
 import { BigNumber, Contract } from 'ethers';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -10,12 +11,24 @@ import { useEthereum, wrongNetworkToast } from '@providers/EthereumProvider';
 
 import { maxW } from '@components/Layout';
 
+import { ioredisClient } from '@utils';
 import { blackholeAddress, CONTRACT_ADDRESS, networkStrings, WEBSITE_URL } from '@utils/constants';
 import { copy } from '@utils/content';
 import { debug, event } from '@utils/frontend';
+import GardenGrower from '@utils/Garden';
+import { Metadata, NFTs } from '@utils/metadata';
 
-import BirthblockImage from '../images/example-birthblock.svg';
+import TokenGardenImage from '../images/example-token-garden.png';
 import TokenGarden from '../tokenGarden.json';
+
+export const getServerSideProps = async () => {
+    const metadata = await ioredisClient.hget('20', 'metadata');
+    return {
+        props: {
+            metadata,
+        },
+    };
+};
 
 function About({ heading, text }) {
     return (
@@ -37,14 +50,11 @@ const toastErrorData = (title: string, description: string) => ({
     isClosable: true,
 });
 
-function openseaLink(tokenId: number): string {
-    return `https://${networkStrings.opensea}opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId}`;
-}
 function gardenLink(tokenId: number): string {
-    return `https://${WEBSITE_URL}/garden/${tokenId}`;
+    return `https://${WEBSITE_URL}/garden/${tokenId}?showToast=true`;
 }
 
-function Home() {
+function Home({ metadata: metadataStr }) {
     const { provider, signer, userAddress, userName, eventParams, openWeb3Modal, toast } =
         useEthereum();
 
@@ -55,6 +65,8 @@ function Home() {
     let [userTokenId, setUserTokenId] = useState<number>(null);
 
     let [mintCount, setMintCount] = useState<number>(null);
+
+    let [hasGPU, setHasGPU] = useState<boolean>(true);
 
     useEffect(() => {
         async function getUserMintedTokenId() {
@@ -172,6 +184,44 @@ function Home() {
         }
     };
 
+    useEffect(() => {
+        async function growGarden() {
+            const gpuTier = await getGPUTier();
+            console.log('gpuTier', gpuTier);
+
+            if (gpuTier.tier === 0) {
+                setHasGPU(false);
+                return false;
+            }
+
+            let gardenEl = document.getElementById('garden');
+            while (gardenEl.firstChild) {
+                gardenEl.removeChild(gardenEl.firstChild);
+            }
+
+            const metadata: Metadata = JSON.parse(metadataStr);
+            const minterAddress = metadata.address;
+            const nfts: NFTs = metadata.nfts;
+            const garden = new GardenGrower(gardenEl);
+
+            await garden.addGround('flat_base_ground');
+            garden.renderGround();
+            await garden.addPebbles(minterAddress);
+            garden.renderPebbles();
+            garden.renderAllFlowers();
+
+            for (let [address, nft] of Object.entries(nfts)) {
+                await garden.growFlowerInSquare(address, nft.count, minterAddress);
+            }
+
+            garden.positionCamera();
+            garden.done();
+
+            // garden.addGUI();
+        }
+        growGarden();
+    }, []);
+
     return (
         <Box align="center">
             <Head>
@@ -181,15 +231,28 @@ function Home() {
                 <Heading as="h1" fontSize={[54, 72, 96]} textAlign="center" color="brand.900">
                     {copy.title}
                 </Heading>
-                <Text fontSize={[16, 22, 30]} fontWeight="light" maxW={['container.md']}>
+                <Text fontSize={[16, 22, 30]} fontWeight="light" maxW={['container.md']} pb={4}>
                     {copy.heroSubheading}
                 </Text>
-                <Image
-                    src={BirthblockImage.src}
-                    alt={`${copy.nameLowercase} image`}
-                    width="432px"
-                    height="432px"
-                />
+                {hasGPU ? (
+                    <Box
+                        alignSelf="center"
+                        mx="auto"
+                        id="garden"
+                        bgColor="grey"
+                        maxWidth="1066px"
+                        maxHeight="800px"
+                        w="80vw"
+                        h="60vw"></Box>
+                ) : (
+                    <Image
+                        src={TokenGardenImage.src}
+                        alt={`${copy.nameLowercase} image`}
+                        layout="intrinsic"
+                        width={1069}
+                        height={760}
+                    />
+                )}
             </Box>
 
             <Box px={8} py={8} width="fit-content" margin="auto" maxW={maxW}>

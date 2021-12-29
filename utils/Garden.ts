@@ -29,7 +29,6 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import { environments } from '../public/environment/index.js';
 import { doneDivClass } from './constants';
 import { specialNfts } from './specialnfts2';
 import {
@@ -195,6 +194,10 @@ export default class GardenGrower {
         const y = Math.sin(rad) * (center.y + distance);
 
         this.controls.object.position.set(center.x, y, z);
+
+        this.controls.maxPolarAngle = MathUtils.degToRad(75);
+        this.controls.maxDistance = distance * 2;
+        this.controls.enablePan = false;
     }
 
     async addGround(str) {
@@ -207,9 +210,9 @@ export default class GardenGrower {
         // this.modelsToLoad.push(ground);
         // this.scene.add(ground);
 
-        const width = 1;
+        const width = 4;
         const front = 4;
-        const back = -1;
+        const back = -4;
 
         for (let i = -width; i <= width; i++) {
             for (let j = back; j <= front; j++) {
@@ -245,7 +248,7 @@ export default class GardenGrower {
         }
     }
 
-    async addPebbles() {
+    async addPebbles(minterAddress = '') {
         const grass = await this.getModel(`ground/pebble`);
         grass.name = 'grass';
         // grass.receiveShadow = true;
@@ -255,17 +258,22 @@ export default class GardenGrower {
         // this.modelsToLoad.push(grass);
         // this.scene.add(grass);
 
-        const width = 10;
-        const height = 10;
-        const front = 20;
-        const back = 1;
+        const width = 60;
+        const height = 0.2;
+        const depth = 60;
 
-        for (let i = 0; i < 100; i++) {
+        const chance = new Chance(minterAddress);
+
+        for (let i = 0; i < 360; i++) {
             const clone = grass.clone();
-            clone.position.set(width * Math.random(), Math.random() * 0.2, height * Math.random());
-            clone.rotateX(Math.random() * 360);
-            clone.rotateY(Math.random() * 360);
-            clone.rotateZ(Math.random() * 360);
+            const x = chance.floating({ min: -width, max: width });
+            const y = chance.floating({ min: 0, max: height });
+            const z = chance.floating({ min: 5 - depth, max: 5 + depth });
+
+            clone.position.set(x, y, z);
+            clone.rotateX(chance.integer({ min: 0, max: 360 }));
+            clone.rotateY(chance.integer({ min: 0, max: 360 }));
+            clone.rotateZ(chance.integer({ min: 0, max: 360 }));
             this.pebbles.add(clone);
         }
     }

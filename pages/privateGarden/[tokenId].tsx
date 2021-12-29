@@ -1,9 +1,6 @@
 import { Box } from '@chakra-ui/react';
 import { InferGetServerSidePropsType } from 'next';
 import React, { useEffect } from 'react';
-import { Event, Object3D } from 'three';
-import THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { ioredisClient } from '@utils';
 import GardenGrower from '@utils/Garden';
@@ -32,14 +29,10 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
             const nfts: NFTs = metadata.nfts;
             const garden = new GardenGrower(gardenEl);
 
-            // await garden.showFlowerExamples();
-
             await garden.addGround('flat_base_ground');
             garden.renderGround();
-            // await garden.addGrass();
-            // garden.renderGrass();
-            // await garden.addPebbles();
-            // garden.renderPebbles();
+            await garden.addPebbles(minterAddress);
+            garden.renderPebbles();
             garden.renderAllFlowers();
 
             for (let [address, nft] of Object.entries(nfts)) {

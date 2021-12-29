@@ -17,11 +17,11 @@ export const headMetadata: MetaProps = {
 export const copy = {
     title: 'Token Garden',
     nameLowercase: 'token-garden',
-    heroSubheading: 'An ever-growing garden of flowers based on the NFTs you’ve minted',
+    heroSubheading: 'An ever-growing 3D garden of flowers based on the NFTs you’ve minted',
     heading1: 'Continuously Growing',
     text1: 'Each time you mint an NFT, a flower will sprout or grow bigger in your garden.',
     heading2: 'Naturally Scarce',
-    text2: 'The number, size, and type of flowers in your garden is based on your on-chain data instead of an artificial limit.',
+    text2: 'The number, size, and color of flowers in your garden is based on your on-chain data instead of an artificial limit.',
     heading3: 'Minted, not Purchased',
     text3: 'Token Gardens are based on the NFTs you’ve minted, not purchased. You can’t buy your way to a full garden, you have to grow it!',
     bottomSectonHeading: 'The Metagame',

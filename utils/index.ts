@@ -10,7 +10,6 @@ import { logflarePinoVercel } from 'pino-logflare';
 import {
     ALCHEMY_NOTIFY_TOKEN,
     ALCHEMY_PROJECT_ID,
-    ETHERSCAN_API_KEY,
     EVENT_FORWARDER_AUTH_TOKEN,
     INFURA_PROJECT_ID,
     LOGFLARE_API_KEY,
