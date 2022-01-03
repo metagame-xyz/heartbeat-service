@@ -187,9 +187,10 @@ function Home({ metadata: metadataStr }) {
     useEffect(() => {
         async function growGarden() {
             const gpuTier = await getGPUTier();
+
             console.log('gpuTier', gpuTier);
 
-            if (gpuTier.tier === 0) {
+            if (gpuTier.tier === 0 || gpuTier.isMobile) {
                 setHasGPU(false);
                 return false;
             }
