@@ -1,8 +1,6 @@
-import mql from '@microlink/mql';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
 import { performance } from 'perf_hooks';
-import Url2png from 'url2png';
 import Urlbox from 'urlbox';
 
 import {
