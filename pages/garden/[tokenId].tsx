@@ -51,7 +51,7 @@ function Garden({
             const metadata: Metadata = JSON.parse(metadataStr);
             const minterAddress = metadata.address;
             const nfts: NFTs = metadata.nfts;
-            const garden = new GardenGrower(gardenEl);
+            const garden = new GardenGrower(gardenEl, true);
 
             // await garden.showFlowerExamples();
 

@@ -74,8 +74,12 @@ export default class GardenGrower {
     pmremGenerator: any;
     grass: any;
     pebbles: any;
+    controlsDestination: Vector3;
+    timeToPositionCamera: boolean;
+    initialPositionSet: boolean;
+    positionCameraSlowly: boolean;
 
-    constructor(el: HTMLElement) {
+    constructor(el: HTMLElement, positionCameraSlowly = false) {
         this.el = el;
         this.scene = new Scene();
 
@@ -93,7 +97,7 @@ export default class GardenGrower {
         this.pmremGenerator.compileEquirectangularShader();
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        this;
+        this.positionCameraSlowly = positionCameraSlowly;
 
         this.controls.addEventListener('change', (event) => {
             const pos = this.controls.object.position;
@@ -103,6 +107,8 @@ export default class GardenGrower {
                 `Target: ${Math.round(target.x)} ${Math.round(target.y)} ${Math.round(target.z)}`,
             );
         });
+
+        this.initialPositionSet = false;
 
         this.initControlsPosition();
 
@@ -123,11 +129,29 @@ export default class GardenGrower {
     animate() {
         requestAnimationFrame(this.animate.bind(this));
         this.controls.update();
+
+        function areVectorsSame(v1: Vector3, v2: Vector3) {
+            return (
+                Math.abs(v1.x - v2.x) < 0.05 &&
+                Math.abs(v1.y - v2.y) < 0.05 &&
+                Math.abs(v1.z - v2.z) < 0.05
+            );
+        }
+        if (areVectorsSame(this.controls.object.position, this.controlsDestination)) {
+            this.initialPositionSet = true;
+        }
+
+        if (!this.initialPositionSet && this.timeToPositionCamera && this.positionCameraSlowly) {
+            this.controls.object.position.lerp(this.controlsDestination, 0.07);
+        }
+
         this.renderer.render(this.scene, this.camera);
     }
 
     initControlsPosition() {
-        this.controls.object.position.set(-1, 76, -124);
+        const intialPosition = new Vector3(-1, 76, -124);
+        this.controlsDestination = new Vector3(0, 0, 0);
+        this.controls.object.position.set(intialPosition.x, intialPosition.y, intialPosition.z);
         this.controls.target.set(-1, 3, 6);
     }
 
@@ -193,7 +217,16 @@ export default class GardenGrower {
         const z = Math.cos(rad) * (center.z - distance);
         const y = Math.sin(rad) * (center.y + distance);
 
-        this.controls.object.position.set(center.x, y, z);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.1;
+
+        if (!this.positionCameraSlowly) {
+            this.controls.object.position.set(center.x, y, z);
+        }
+
+        const destination = new Vector3(center.x, y, z);
+        this.controlsDestination = destination;
+        this.timeToPositionCamera = true;
 
         this.controls.maxPolarAngle = MathUtils.degToRad(75);
         this.controls.maxDistance = distance * 2;
