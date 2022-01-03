@@ -102,10 +102,10 @@ export default class GardenGrower {
         this.controls.addEventListener('change', (event) => {
             const pos = this.controls.object.position;
             const target = this.controls.target;
-            console.log(`Position: ${Math.round(pos.x)} ${Math.round(pos.y)} ${Math.round(pos.z)}`);
-            console.log(
-                `Target: ${Math.round(target.x)} ${Math.round(target.y)} ${Math.round(target.z)}`,
-            );
+            // console.log(`Position: ${Math.round(pos.x)} ${Math.round(pos.y)} ${Math.round(pos.z)}`);
+            // console.log(
+            //     `Target: ${Math.round(target.x)} ${Math.round(target.y)} ${Math.round(target.z)}`,
+            // );
         });
 
         this.initialPositionSet = false;

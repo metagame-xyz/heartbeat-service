@@ -2,6 +2,7 @@ import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { Box, Button, Flex, useToast, UseToastOptions } from '@chakra-ui/react';
 import { InferGetServerSidePropsType, NextPageContext } from 'next';
 import React, { useEffect } from 'react';
+import Countdown, { zeroPad } from 'react-countdown';
 
 import { ioredisClient } from '@utils';
 import { CONTRACT_ADDRESS, networkStrings } from '@utils/constants';
@@ -38,9 +39,30 @@ function Garden({
     tokenId,
     showToast,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    console.log('showToast', showToast);
     const toast = useToast();
-    const [showOpenseaButton, setShowOpenseaButton] = React.useState(false);
+    const [showCountdown, setShowCountdown] = React.useState(false);
+
+    const countdownRenderer = ({ days, hours, minutes, seconds, completed }) => {
+        if (completed) {
+            // Render a completed state
+            return (
+                <Button
+                    colorScheme="brand"
+                    // color="white"
+                    _hover={{ bgColor: 'brand.600' }}
+                    _active={{ bgColor: 'brand.500' }}
+                    size="lg"
+                    rightIcon={<ExternalLinkIcon />}
+                    onClick={() => window.open(openseaLink(tokenId))}>
+                    View on Opensea
+                </Button>
+            );
+        } else {
+            // Render a countdown
+            return <Box color="brand.300">00:{zeroPad(seconds)}</Box>;
+        }
+    };
+
     useEffect(() => {
         async function growGarden() {
             let gardenEl = document.getElementById('garden');
@@ -75,10 +97,7 @@ function Garden({
                         `Your Garden will take about 30 seconds to grow into an NFT. We'll let you know when it's ready!`,
                     ),
                 );
-
-                setTimeout(() => {
-                    setShowOpenseaButton(true);
-                }, 30_000);
+                setShowCountdown(true);
             }
             // garden.addGUI();
         }
@@ -87,29 +106,21 @@ function Garden({
 
     return (
         <Box>
-            {showOpenseaButton && (
-                <Flex w="100vw">
-                    <Box
-                        fontSize={[24, 24, 36]}
-                        color="white"
-                        position="absolute"
-                        left="0"
-                        right="0"
-                        textAlign="center">
-                        <Button
-                            colorScheme="brand"
-                            // color="white"
-                            _hover={{ bgColor: 'brand.600' }}
-                            _active={{ bgColor: 'brand.500' }}
-                            m={6}
-                            size="lg"
-                            rightIcon={<ExternalLinkIcon />}
-                            onClick={() => window.open(openseaLink(tokenId))}>
-                            View on Opensea
-                        </Button>
-                    </Box>
-                </Flex>
-            )}
+            <Flex w="100vw">
+                <Box
+                    fontSize={24}
+                    color="white"
+                    position="absolute"
+                    left="0"
+                    right="0"
+                    textAlign="center">
+                    {showCountdown && (
+                        <Box m={6}>
+                            <Countdown date={Date.now() + 30_000} renderer={countdownRenderer} />
+                        </Box>
+                    )}
+                </Box>
+            </Flex>
             <Flex
                 alignContent="center"
                 margin="auto"
