@@ -1,0 +1,602 @@
+[
+    {
+        "userName": "chungknows.eth",
+        "uniqueNFTCount": 148,
+        "totalNFTCount": 441,
+        "address": "0xF1a9F5AEb0F975489aC2628A22040Cf42E9fE8DD"
+    },
+    {
+        "userName": "knwndesigns.eth",
+        "uniqueNFTCount": 91,
+        "totalNFTCount": 144,
+        "address": "0xFb6cf36C7C765E3Ff96e83463b26C9781D2Fdd2d"
+    },
+    {
+        "userName": "jollydinger.eth",
+        "uniqueNFTCount": 85,
+        "totalNFTCount": 477,
+        "address": "0xD64cBEb833DBC72c8Dfa28B7a7320a103E12B7Af"
+    },
+    {
+        "userName": "akilian.eth",
+        "uniqueNFTCount": 77,
+        "totalNFTCount": 234,
+        "address": "0x380E5b655d459A0cFa6fa2DFBbE586bf40DcFd7F"
+    },
+    {
+        "userName": "manpan.eth",
+        "uniqueNFTCount": 77,
+        "totalNFTCount": 482,
+        "address": "0x7fC9435A996E6F07e75c244bd9F345FAAF81AF8C"
+    },
+    {
+        "userName": "andrewjiang.eth",
+        "uniqueNFTCount": 71,
+        "totalNFTCount": 234,
+        "address": "0x760e7B42c920c2a0FeB58DDD610c14A6Bdd2Ebea"
+    },
+    {
+        "userName": "hashblaster.eth",
+        "uniqueNFTCount": 68,
+        "totalNFTCount": 393,
+        "address": "0xa76fEb263493F19Ab6455a9226fA84f2b525E07A"
+    },
+    {
+        "userName": "0x9720",
+        "uniqueNFTCount": 66,
+        "totalNFTCount": 133,
+        "address": "0x9720363251d248D9f95E95E1934114108a7eFAf6"
+    },
+    {
+        "userName": "0xc25b",
+        "uniqueNFTCount": 65,
+        "totalNFTCount": 225,
+        "address": "0xc25be9d8c420182161677eDfb27F3a084c24BC76"
+    },
+    {
+        "userName": "dame.eth",
+        "uniqueNFTCount": 64,
+        "totalNFTCount": 510,
+        "address": "0x3B3525F60eeea4a1eF554df5425912c2a532875D"
+    },
+    {
+        "userName": "0x2D31",
+        "uniqueNFTCount": 59,
+        "totalNFTCount": 572,
+        "address": "0x2D3178af3Dfbb679716cc14E245Be0A9E5945500"
+    },
+    {
+        "userName": "guyverone.eth",
+        "uniqueNFTCount": 49,
+        "totalNFTCount": 164,
+        "address": "0xC033c5A44cb1F2D95Dfb56d731fcF64b9fDAa1b2"
+    },
+    {
+        "userName": "gouldie.eth",
+        "uniqueNFTCount": 43,
+        "totalNFTCount": 64,
+        "address": "0x596E7fe8a3FD3AB4dEdC227c848569a0265828Ff"
+    },
+    {
+        "userName": "0x890E",
+        "uniqueNFTCount": 41,
+        "totalNFTCount": 366,
+        "address": "0x890E86F504e4eC9B2bd18dfc32C6f9FD0F79A6Cd"
+    },
+    {
+        "userName": "0xd770",
+        "uniqueNFTCount": 40,
+        "totalNFTCount": 114,
+        "address": "0xd770383C8401dCAEe72829c4202477C6Cb917aE9"
+    },
+    {
+        "userName": "pickleric.eth",
+        "uniqueNFTCount": 36,
+        "totalNFTCount": 493,
+        "address": "0xef3F063136fE5002065bf7c4A2D85fF34cfB0ac0"
+    },
+    {
+        "userName": "mikeybitcoin.eth",
+        "uniqueNFTCount": 30,
+        "totalNFTCount": 159,
+        "address": "0xBb3F043290841B97b9C92F6Bc001a020D4B33255"
+    },
+    {
+        "userName": "0x2204",
+        "uniqueNFTCount": 28,
+        "totalNFTCount": 81,
+        "address": "0x2204D5B8e7cE8c27Bf13a37a6B50Ed3442A3AEED"
+    },
+    {
+        "userName": "0xBE5D",
+        "uniqueNFTCount": 28,
+        "totalNFTCount": 120,
+        "address": "0xBE5DCA554e58CE63C716a76BC1E34273d21Aff82"
+    },
+    {
+        "userName": "lylemckeany.eth",
+        "uniqueNFTCount": 26,
+        "totalNFTCount": 41,
+        "address": "0xcF3FcBf7A7E04e05c8E080eD5db480eF38635530"
+    },
+    {
+        "userName": "0x1009",
+        "uniqueNFTCount": 25,
+        "totalNFTCount": 48,
+        "address": "0x10093Ace9533e22110198239411E8CD5f70B7437"
+    },
+    {
+        "userName": "dmonte.eth",
+        "uniqueNFTCount": 25,
+        "totalNFTCount": 48,
+        "address": "0x82F402847051BDdAAb0f5D4b481417281837c424"
+    },
+    {
+        "userName": "angrythug.eth",
+        "uniqueNFTCount": 24,
+        "totalNFTCount": 56,
+        "address": "0x5ad9aF22B0B2603d7F9D8B8fcC4D262Aa6F5de87"
+    },
+    {
+        "userName": "ygeezus.eth",
+        "uniqueNFTCount": 24,
+        "totalNFTCount": 52,
+        "address": "0xE1D49F083207eEed71414c0AA28236e97b1793c0"
+    },
+    {
+        "userName": "0xE161",
+        "uniqueNFTCount": 24,
+        "totalNFTCount": 39,
+        "address": "0xE161889e329ACa149B22Ee1A66e0656a6001aA0d"
+    },
+    {
+        "userName": "faraaz.eth",
+        "uniqueNFTCount": 23,
+        "totalNFTCount": 59,
+        "address": "0xd6CB70a88bB0D8fB1be377bD3E48e603528AdB54"
+    },
+    {
+        "userName": "jonathancai.eth",
+        "uniqueNFTCount": 22,
+        "totalNFTCount": 36,
+        "address": "0xf725a0353dbB6aAd2a4692D49DDa0bE241f45fD0"
+    },
+    {
+        "userName": "0x0aAa",
+        "uniqueNFTCount": 22,
+        "totalNFTCount": 54,
+        "address": "0x0aAaF6f4C1E4F04F99a4d7447B6Af6a705b4Aff4"
+    },
+    {
+        "userName": "timbeiko.eth",
+        "uniqueNFTCount": 20,
+        "totalNFTCount": 49,
+        "address": "0x10F5d45854e038071485AC9e402308cF80D2d2fE"
+    },
+    {
+        "userName": "0x00F4",
+        "uniqueNFTCount": 20,
+        "totalNFTCount": 32,
+        "address": "0x00F4C5A7B7d83Aaaef9ED7d143B262bca4330529"
+    },
+    {
+        "userName": "botev.eth",
+        "uniqueNFTCount": 19,
+        "totalNFTCount": 31,
+        "address": "0x68D5120C01269d370e7bFeb43630c4350887Be00"
+    },
+    {
+        "userName": "zachdavidson.eth",
+        "uniqueNFTCount": 18,
+        "totalNFTCount": 38,
+        "address": "0xE8B0016130A38f26c116576A7b13267c9FB11B59"
+    },
+    {
+        "userName": "0x8C9F",
+        "uniqueNFTCount": 17,
+        "totalNFTCount": 151,
+        "address": "0x8C9FcCEd4c9ec98Ced2EeC251E905E48Dbfeb2C5"
+    },
+    {
+        "userName": "0x98CC",
+        "uniqueNFTCount": 16,
+        "totalNFTCount": 40,
+        "address": "0x98CC9fd8B9aF3Ed207d977400626D95E38200bf1"
+    },
+    {
+        "userName": "0xA5E1",
+        "uniqueNFTCount": 15,
+        "totalNFTCount": 21,
+        "address": "0xA5E1C37Ad90BAAcb791Cfa18506224D7c50f1619"
+    },
+    {
+        "userName": "0xaa51",
+        "uniqueNFTCount": 15,
+        "totalNFTCount": 74,
+        "address": "0xaa5146397cfFAc091eb64b21b7950F332eCcfD00"
+    },
+    {
+        "userName": "jonjyan.eth",
+        "uniqueNFTCount": 15,
+        "totalNFTCount": 25,
+        "address": "0xEac7fC039b337753bda03112e6DC5c2429475F84"
+    },
+    {
+        "userName": "0xD702",
+        "uniqueNFTCount": 14,
+        "totalNFTCount": 14,
+        "address": "0xD7029BDEa1c17493893AAfE29AAD69EF892B8ff2"
+    },
+    {
+        "userName": "gaby.eth",
+        "uniqueNFTCount": 14,
+        "totalNFTCount": 21,
+        "address": "0x01b7baA7baA864fEF3CD1C7bc118Cc97cEdCB33f"
+    },
+    {
+        "userName": "0xb80a",
+        "uniqueNFTCount": 13,
+        "totalNFTCount": 39,
+        "address": "0xb80ae4427115c8d349c11D4668FefDDAa9cbEF77"
+    },
+    {
+        "userName": "0xa469",
+        "uniqueNFTCount": 13,
+        "totalNFTCount": 33,
+        "address": "0xa469A5347669328524f7Cdfb2773744490093Aa1"
+    },
+    {
+        "userName": "pwatts.eth",
+        "uniqueNFTCount": 12,
+        "totalNFTCount": 37,
+        "address": "0xD5c0D17cCb9071D27a4F7eD8255F59989b9aee0d"
+    },
+    {
+        "userName": "0x89D1",
+        "uniqueNFTCount": 11,
+        "totalNFTCount": 23,
+        "address": "0x89D1D8f899dB211ad664638E6e92a637B8c83BA3"
+    },
+    {
+        "userName": "0x44B0",
+        "uniqueNFTCount": 11,
+        "totalNFTCount": 61,
+        "address": "0x44B0B3BD1E852776e7f6F4Ca17d228E144Ef1802"
+    },
+    {
+        "userName": "0xCbBD",
+        "uniqueNFTCount": 11,
+        "totalNFTCount": 21,
+        "address": "0xCbBD50AD883394c1E244CBb0D7cA97E20ad208BC"
+    },
+    {
+        "userName": "scharfstein.eth",
+        "uniqueNFTCount": 10,
+        "totalNFTCount": 25,
+        "address": "0x87046aEEE06bb38C4D87a5De4A475a626A6B157e"
+    },
+    {
+        "userName": "kylemccollom.eth",
+        "uniqueNFTCount": 9,
+        "totalNFTCount": 26,
+        "address": "0xa4E221aA5a7ba51B5D5C7d5C923Bfb9BcebCb252"
+    },
+    {
+        "userName": "0x5e34",
+        "uniqueNFTCount": 9,
+        "totalNFTCount": 11,
+        "address": "0x5e349eca2dc61aBCd9dD99Ce94d04136151a09Ee"
+    },
+    {
+        "userName": "zakk.eth",
+        "uniqueNFTCount": 9,
+        "totalNFTCount": 23,
+        "address": "0xC3268DDB8E38302763fFdC9191FCEbD4C948fe1b"
+    },
+    {
+        "userName": "0xEF79",
+        "uniqueNFTCount": 9,
+        "totalNFTCount": 19,
+        "address": "0xEF7935913857A6deB46c609D54381B9960396771"
+    },
+    {
+        "userName": "0x2f9a",
+        "uniqueNFTCount": 9,
+        "totalNFTCount": 22,
+        "address": "0x2f9a965c28C19EC71fb1CF06d8e58D590A51AdCC"
+    },
+    {
+        "userName": "0x7Bea",
+        "uniqueNFTCount": 8,
+        "totalNFTCount": 8,
+        "address": "0x7Bea9a9Ca90b2FCED6e0eB8aF3198437EB016791"
+    },
+    {
+        "userName": "0x6cA0",
+        "uniqueNFTCount": 8,
+        "totalNFTCount": 9,
+        "address": "0x6cA011Aae6D551a3EFA533c40c24A810321c0384"
+    },
+    {
+        "userName": "hellogoodmorning.eth",
+        "uniqueNFTCount": 7,
+        "totalNFTCount": 7,
+        "address": "0xE219A3DCE37F843B6bf839F7aF9e417357D0316E"
+    },
+    {
+        "userName": "robinkim.eth",
+        "uniqueNFTCount": 7,
+        "totalNFTCount": 19,
+        "address": "0x70D04384b5c3a466EC4D8CFB8213Efc31C6a9D15"
+    },
+    {
+        "userName": "0x4F1a",
+        "uniqueNFTCount": 7,
+        "totalNFTCount": 13,
+        "address": "0x4F1a63e53E67bE6Ba0f497D91a3259686d41A540"
+    },
+    {
+        "userName": "varunsrin.eth",
+        "uniqueNFTCount": 6,
+        "totalNFTCount": 7,
+        "address": "0x0fd5C2Cf64Fe2D02f309f616fa362355c91470E7"
+    },
+    {
+        "userName": "jordihays.eth",
+        "uniqueNFTCount": 6,
+        "totalNFTCount": 9,
+        "address": "0xE49BAA498E03Bd37ddd9a3c4Cc02a85809954B70"
+    },
+    {
+        "userName": "derrickli.eth",
+        "uniqueNFTCount": 6,
+        "totalNFTCount": 10,
+        "address": "0x82bddc74bc4e082D5cFbEA1C1e333d2C5034583D"
+    },
+    {
+        "userName": "0xe243",
+        "uniqueNFTCount": 6,
+        "totalNFTCount": 9,
+        "address": "0xe243eB923c5089d34EdC4fb82A4175b10113c139"
+    },
+    {
+        "userName": "joeye.eth",
+        "uniqueNFTCount": 5,
+        "totalNFTCount": 7,
+        "address": "0xc4cA8f910702555F0AD3f81edF17DC82b0F98Bce"
+    },
+    {
+        "userName": "cbo.eth",
+        "uniqueNFTCount": 5,
+        "totalNFTCount": 12,
+        "address": "0xa25cE58deb8b4791AEb7954ca4Ff1dA87aeD91b5"
+    },
+    {
+        "userName": "schecter.eth",
+        "uniqueNFTCount": 5,
+        "totalNFTCount": 6,
+        "address": "0xaAba999423e939a67373E422dFabE088d5bc31A5"
+    },
+    {
+        "userName": "sepand.eth",
+        "uniqueNFTCount": 5,
+        "totalNFTCount": 17,
+        "address": "0xF23607026914E5D37508A691cae87B829EC28E63"
+    },
+    {
+        "userName": "shin.eth",
+        "uniqueNFTCount": 4,
+        "totalNFTCount": 7,
+        "address": "0x41480d8E776AD9DA63A71eA78afd77b4C03EcBEA"
+    },
+    {
+        "userName": "hunterh.eth",
+        "uniqueNFTCount": 4,
+        "totalNFTCount": 23,
+        "address": "0xcf6b8a78F5Ddf39312D98Aa138eA2a29E5Ad851f"
+    },
+    {
+        "userName": "jpa.eth",
+        "uniqueNFTCount": 4,
+        "totalNFTCount": 4,
+        "address": "0xFc4e51A187bF53EC6E21d0b4516a0e6437e8d73B"
+    },
+    {
+        "userName": "0x34C4",
+        "uniqueNFTCount": 4,
+        "totalNFTCount": 5,
+        "address": "0x34C43198659424642e00A35cD83eB85ad6FE18F7"
+    },
+    {
+        "userName": "rdasika.eth",
+        "uniqueNFTCount": 4,
+        "totalNFTCount": 6,
+        "address": "0xbEeE35054f7D4c68a0E35B8AfF3C54dA7fFBC309"
+    },
+    {
+        "userName": "saisai.eth",
+        "uniqueNFTCount": 4,
+        "totalNFTCount": 14,
+        "address": "0x50EbfF55962413d52BFD1F782F8D3e1C50DE87CA"
+    },
+    {
+        "userName": "0xf2D0",
+        "uniqueNFTCount": 4,
+        "totalNFTCount": 4,
+        "address": "0xf2D0C8010b98d9C5A3f94c7C84a9A3d9ad2B5a52"
+    },
+    {
+        "userName": "0x6C2a",
+        "uniqueNFTCount": 3,
+        "totalNFTCount": 6,
+        "address": "0x6C2a066B6CE2872BD5398347E97223C6F6F84104"
+    },
+    {
+        "userName": "0x6D62",
+        "uniqueNFTCount": 3,
+        "totalNFTCount": 3,
+        "address": "0x6D6215ae48B29E4C06078bA7Dc9658FDB5974F7C"
+    },
+    {
+        "userName": "kirtan.eth",
+        "uniqueNFTCount": 3,
+        "totalNFTCount": 3,
+        "address": "0xD8502075f65BF5aF9aC4A553D5f66CCC06806515"
+    },
+    {
+        "userName": "0x527e",
+        "uniqueNFTCount": 3,
+        "totalNFTCount": 5,
+        "address": "0x527eB4eea1D0CDe4E7dD2d11e4830aC345A370c9"
+    },
+    {
+        "userName": "0x4CD4",
+        "uniqueNFTCount": 3,
+        "totalNFTCount": 3,
+        "address": "0x4CD41A61471639aF0fC607acF88Ce9010709f282"
+    },
+    {
+        "userName": "victorma.eth",
+        "uniqueNFTCount": 3,
+        "totalNFTCount": 6,
+        "address": "0x223F2db258234F7Fa164a9e4C0929318FEb3B550"
+    },
+    {
+        "userName": "kaihan.eth",
+        "uniqueNFTCount": 3,
+        "totalNFTCount": 7,
+        "address": "0xCDc020f6C903b24D1CeA729d035A06440abce52E"
+    },
+    {
+        "userName": "0x59F8",
+        "uniqueNFTCount": 2,
+        "totalNFTCount": 3,
+        "address": "0x59F8bF460B6A7c41f716139285Db1CA9d029CAF7"
+    },
+    {
+        "userName": "austinmccollom.eth",
+        "uniqueNFTCount": 2,
+        "totalNFTCount": 4,
+        "address": "0xA2BBf371015FF4f6D8FD2671126CA8F630A0EABc"
+    },
+    {
+        "userName": "libovness.eth",
+        "uniqueNFTCount": 2,
+        "totalNFTCount": 2,
+        "address": "0x888b4bee0F8dfF4E7269811E066a1dE6438cbf7A"
+    },
+    {
+        "userName": "bobbyg.eth",
+        "uniqueNFTCount": 2,
+        "totalNFTCount": 1000,
+        "address": "0x75667BB83190C19de669295B10068144B51a6fA9"
+    },
+    {
+        "userName": "0x8104",
+        "uniqueNFTCount": 2,
+        "totalNFTCount": 2,
+        "address": "0x81047b958D5d8D6A1d69468fA157072f766e232C"
+    },
+    {
+        "userName": "0x36D4",
+        "uniqueNFTCount": 2,
+        "totalNFTCount": 2,
+        "address": "0x36D4605F50Ba263cC3a3C0A9D497d6c948459AD2"
+    },
+    {
+        "userName": "anandc.eth",
+        "uniqueNFTCount": 2,
+        "totalNFTCount": 2,
+        "address": "0x7968F135d89e0538F2D74f5FCF2cdf4Aa1Ab69da"
+    },
+    {
+        "userName": "yinz.eth",
+        "uniqueNFTCount": 2,
+        "totalNFTCount": 3,
+        "address": "0x1531E76b26d265BfBa094ac56E5670c02DD214FE"
+    },
+    {
+        "userName": "0x12fC",
+        "uniqueNFTCount": 2,
+        "totalNFTCount": 2,
+        "address": "0x12fC0B4535a83C2022dd207af25211cD993E4141"
+    },
+    {
+        "userName": "dev.brenner.eth",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0x7d0414B0622f485D0368602E76F502CabEf57bf4"
+    },
+    {
+        "userName": "0x4c2c",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0x4c2ce80Fd3dD0813D35c673FDF17859B57A705BF"
+    },
+    {
+        "userName": "0xF0f4",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0xF0f449f4E8D94D0e64de385D7c32a1F61B749DD3"
+    },
+    {
+        "userName": "giacaglia.eth",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0xE7b25a8aB435C4f8a0d056EdDA7ba450A9999285"
+    },
+    {
+        "userName": "aesmonty.eth",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0x9fd5916134055813a05F20182a2A9f4107236d41"
+    },
+    {
+        "userName": "varadh.eth",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0xbA6597e654358F052Ee4e61D251Cc6A22AF08cae"
+    },
+    {
+        "userName": "0xaa3E",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0xaa3E78E700F93C7b81553a7D7c10899ba5349bC5"
+    },
+    {
+        "userName": "0xE9aB",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0xE9aB120d8378057e4443A348153e9CCBe90B5898"
+    },
+    {
+        "userName": "0xbe05",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0xbe051A07baFB53061fCA5EF5D2f2789e88e5c6a8"
+    },
+    {
+        "userName": "0x1fAB",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0x1fABB61b554486af7E501BF665a240B7685c8173"
+    },
+    {
+        "userName": "0x9645",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0x9645285e0d8517459E5cC4D224aBc4278f4e4D3D"
+    },
+    {
+        "userName": "0x8870",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0x8870703F7459ca8243f387A233091Ca68DA124fd"
+    },
+    {
+        "userName": "0xc372",
+        "uniqueNFTCount": 1,
+        "totalNFTCount": 1,
+        "address": "0xc37263B59E73fbC86755cdC2B7069DFa2E67FFD3"
+    }
+]

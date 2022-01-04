@@ -8,25 +8,23 @@ export interface MetaProps {
 }
 
 export const headMetadata: MetaProps = {
-    title: 'Birthblock',
-    description:
-        'An NFT with art and attributes based on the data from your first transaction on Ethereum',
+    title: 'Token Garden',
+    description: 'An ever-growing garden of flowers based on the NFTs you’ve minted',
     image: `https://${WEBSITE_URL}/site-preview.png`,
     type: 'website',
 };
 
 export const copy = {
-    title: 'Birthblock',
-    nameLowercase: 'birthblock',
-    heading1: 'Minted Fairly',
-    text1: 'Unlimited total mints with one mint per wallet. No rush to mint, no gas wars, and open to everyone.',
+    title: 'Token Garden',
+    nameLowercase: 'token-garden',
+    heroSubheading: 'An ever-growing 3D garden of flowers based on the NFTs you’ve minted',
+    heading1: 'Continuously Growing',
+    text1: 'Each time you mint an NFT, a flower will sprout or grow bigger in your garden.',
     heading2: 'Naturally Scarce',
-    text2: 'The number of possible Birthblock NFTs with 100+ rings is set by existing on-chain data instead of by an artificial limit.',
-    heading3: 'Earned',
-    text3: 'Part of the infant category of earned NFTs where you earn attributes based on your actions. The older your wallet, the bigger your tree.',
-    heroSubheading:
-        'An NFT with art and attributes based on the data from your first transaction on Ethereum',
+    text2: 'The number, size, and color of flowers in your garden is based on your on-chain data instead of an artificial limit.',
+    heading3: 'Minted, not Purchased',
+    text3: 'Token Gardens are based on the NFTs you’ve minted, not purchased. You can’t buy your way to a full garden, you have to grow it!',
     bottomSectonHeading: 'The Metagame',
     bottomSectionText:
-        'Birthblock is the first NFT in an infinite series of achievements you earn by playing a game many of us are already playing whether we know it or not: The Metagame. These earned achievements will allow access to private spaces gated by shared experiences. Each achievement will contribute to leveling up your character. Follow along: ',
+        'Token Garden is the second NFT in an infinite series of achievements you earn by playing a game many of us are already playing whether we know it or not: The Metagame. These earned achievements will allow access to private spaces gated by shared experiences. Each achievement will contribute to leveling up your character. Follow along: ',
 };

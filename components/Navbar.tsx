@@ -15,6 +15,8 @@ import { useEthereum } from '@providers/EthereumProvider';
 
 import { Etherscan, Logo, Opensea, Twitter } from '@components/Icons';
 
+import { copy } from '@utils/content';
+
 function Navbar(props) {
     const { userName, openWeb3Modal, avatarUrl } = useEthereum();
 
@@ -34,7 +36,7 @@ function Navbar(props) {
                     <Logo boxSize={10} />
                     {showName && (
                         <Heading as="h1" fontSize="34px">
-                            Birthblock
+                            {copy.title}
                         </Heading>
                     )}
                 </HStack>
@@ -44,7 +46,7 @@ function Navbar(props) {
                     <Opensea />
                     <Etherscan />
                     {userName ? (
-                        <Box bgColor="teal.700" color="white" px={4} py={3} borderRadius="full">
+                        <Box bgColor="brand.700" color="white" px={4} py={3} borderRadius="full">
                             <HStack>
                                 {avatarUrl && <Avatar size="xs" src={`${avatarUrl}`} />}
                                 <Text>{userName}</Text>
@@ -54,8 +56,8 @@ function Navbar(props) {
                         <Button
                             onClick={() => openWeb3Modal('Navbar')}
                             fontWeight="normal"
-                            colorScheme="teal"
-                            bg="teal.700"
+                            colorScheme="brand"
+                            bg="brand.700"
                             size="lg"
                             boxShadow="lg"
                             fontSize="2xl"
