@@ -33,6 +33,8 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
             garden.renderGround();
             await garden.addPebbles(minterAddress);
             garden.renderPebbles();
+            await garden.addPlants(minterAddress);
+            garden.renderPlants();
             garden.renderAllFlowers();
 
             for (let [address, nft] of Object.entries(nfts)) {

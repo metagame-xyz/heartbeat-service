@@ -1,4 +1,5 @@
 import Chance from 'chance';
+import { Group } from 'three';
 
 const randomFlowers = ['Amaryllis', 'Hydrangea', 'Periwinkle', 'Poppy'];
 const specificFlowers = ['Hydrangea', 'Periwinkle', 'Poppy'];

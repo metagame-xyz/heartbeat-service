@@ -81,6 +81,8 @@ function Garden({
             garden.renderGround();
             await garden.addPebbles();
             garden.renderPebbles();
+            await garden.addPlants(minterAddress);
+            garden.renderPlants();
             garden.renderAllFlowers();
 
             for (let [address, nft] of Object.entries(nfts)) {

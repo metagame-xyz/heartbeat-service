@@ -22,7 +22,7 @@ import TokenGardenImage from '../images/example-token-garden.png';
 import TokenGarden from '../tokenGarden.json';
 
 export const getServerSideProps = async () => {
-    const metadata = await ioredisClient.hget('20', 'metadata');
+    const metadata = await ioredisClient.hget('homepageExample', 'metadata');
     return {
         props: {
             metadata,

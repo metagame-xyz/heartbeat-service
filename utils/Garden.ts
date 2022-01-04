@@ -30,6 +30,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { doneDivClass } from './constants';
+import { degreeToCoords } from './extras';
 import { specialNfts } from './specialnfts2';
 import {
     getRandomFlowerColor as getFlowerColor,
@@ -78,6 +79,7 @@ export default class GardenGrower {
     timeToPositionCamera: boolean;
     initialPositionSet: boolean;
     positionCameraSlowly: boolean;
+    plants: Group;
 
     constructor(el: HTMLElement, positionCameraSlowly = false) {
         this.el = el;
@@ -119,6 +121,7 @@ export default class GardenGrower {
         this.ground = new Group();
         this.grass = new Group();
         this.pebbles = new Group();
+        this.plants = new Group();
 
         this.randomFlowerCount = 0;
 
@@ -222,15 +225,16 @@ export default class GardenGrower {
 
         if (!this.positionCameraSlowly) {
             this.controls.object.position.set(center.x, y, z);
+        } else {
+            // limit controls if it's on the user-accessible page
+            this.controls.maxPolarAngle = MathUtils.degToRad(75);
+            this.controls.maxDistance = distance * 2;
+            this.controls.enablePan = false;
         }
 
         const destination = new Vector3(center.x, y, z);
         this.controlsDestination = destination;
         this.timeToPositionCamera = true;
-
-        this.controls.maxPolarAngle = MathUtils.degToRad(75);
-        this.controls.maxDistance = distance * 2;
-        this.controls.enablePan = false;
     }
 
     async addGround(str) {
@@ -255,6 +259,61 @@ export default class GardenGrower {
                 this.ground.add(clone);
             }
         }
+    }
+    async addPlants(address: string) {
+        const getPlant = this.getPlant.bind(this);
+        const plants = this.plants;
+        function coordMultiplier(coords: Coords, multiplier: number): Coords {
+            return coords.map((c) => c * multiplier) as Coords;
+        }
+        async function getFillerRowCoords(
+            treeTypes: number[],
+            frequency: number,
+            distance: number,
+            offset = 0,
+            jitter = 0.1,
+            start = 0,
+            end = 360,
+            scale = 1,
+        ) {
+            const chance = new Chance(address);
+
+            const degrees = (end - start) / frequency;
+            console.log('degrees:', degrees);
+            const startDegree = start + (degrees * offset) / 2;
+            console.log('startDegree:', startDegree);
+            const totalPlants = frequency - offset;
+
+            for (let i = 0; i < totalPlants; i++) {
+                const plantType = treeTypes[i % treeTypes.length];
+                const plant = await getPlant(`filler/background_plant_${plantType}`, address);
+
+                let coords = degreeToCoords(startDegree + degrees * i);
+                const jitterX = chance.floating({ min: -jitter, max: jitter });
+                const jitterZ = chance.floating({ min: -jitter, max: jitter });
+                coords[0] += jitterX;
+                coords[2] += jitterZ;
+                coords = coordMultiplier(coords, distance);
+                if (plantType == 3) {
+                    scale = 0.7;
+                }
+                plant.scale.set(scale, scale, scale);
+
+                plant.position.set(...coords);
+                plants.add(plant);
+            }
+        }
+
+        const distances = [24, 30, 36, 42, 48, 54, 60];
+        const defaultFreq = 90;
+
+        await getFillerRowCoords([8, 9], defaultFreq * 2, distances[0]); // small bushes
+        await getFillerRowCoords([3, 7], defaultFreq, distances[1], 0, 0.1, 0, 360); // big bushes
+        await getFillerRowCoords([3], defaultFreq, distances[2], 0, 0.1, 0, 360, 0.7); // big bushes
+        await getFillerRowCoords([2], defaultFreq * 2, distances[3], 0, 0.1, 0, 360); // small trees
+        await getFillerRowCoords([4, 5], defaultFreq, distances[4], 0, 0.1, 0, 360, 0.6); // big trees
+        await getFillerRowCoords([5, 4], defaultFreq, distances[5], 1, 0.1, 0, 360, 0.7); // big trees
+        await getFillerRowCoords([5, 4], defaultFreq * 10, distances[6], 1, 0.1, 0, 360, 0.7); // big trees
     }
 
     async addGrass() {
@@ -418,6 +477,23 @@ export default class GardenGrower {
         });
     }
 
+    async getPlant(modelString: string, minterAddress = ''): Promise<Object3D<Event>> {
+        // console.log(modelString);
+        let model;
+
+        if (this.plants[modelString]) {
+            model = this.plants[modelString].clone();
+        } else {
+            model = await this.getModel(modelString);
+            this.plants[modelString] = model;
+        }
+
+        const chance = new Chance(minterAddress);
+        const random = chance.floating({ min: -1, max: 1 });
+        model.rotateY(random * 2 + 180);
+        return model;
+    }
+
     async getFlower(modelString: string, minterAddress = ''): Promise<Object3D<Event>> {
         // console.log(modelString);
         let model;
@@ -450,6 +526,10 @@ export default class GardenGrower {
 
     renderPebbles() {
         this.scene.add(this.pebbles);
+    }
+
+    renderPlants() {
+        this.scene.add(this.plants);
     }
 
     renderAllModels() {
