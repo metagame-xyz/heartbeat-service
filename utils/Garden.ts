@@ -310,10 +310,10 @@ export default class GardenGrower {
         await getFillerRowCoords([8, 9], defaultFreq * 2, distances[0]); // small bushes
         await getFillerRowCoords([3, 7], defaultFreq, distances[1], 0, 0.1, 0, 360); // big bushes
         await getFillerRowCoords([3], defaultFreq, distances[2], 0, 0.1, 0, 360, 0.7); // big bushes
-        await getFillerRowCoords([2], defaultFreq * 2, distances[3], 0, 0.1, 0, 360); // small trees
-        await getFillerRowCoords([4, 5], defaultFreq, distances[4], 0, 0.1, 0, 360, 0.6); // big trees
-        await getFillerRowCoords([5, 4], defaultFreq, distances[5], 1, 0.1, 0, 360, 0.7); // big trees
-        await getFillerRowCoords([5, 4], defaultFreq * 10, distances[6], 1, 0.1, 0, 360, 0.7); // big trees
+        await getFillerRowCoords([2], defaultFreq, distances[3], 0, 0.1, 0, 180); // small trees
+        await getFillerRowCoords([4, 5], defaultFreq / 2, distances[4], 0, 0.1, 0, 180, 0.6); // big trees
+        await getFillerRowCoords([5, 4], defaultFreq / 2, distances[5], 1, 0.1, 0, 180, 0.7); // big trees
+        await getFillerRowCoords([5, 4], defaultFreq * 5, distances[6], 1, 0.1, 0, 180, 0.7); // big trees
     }
 
     async addGrass() {
