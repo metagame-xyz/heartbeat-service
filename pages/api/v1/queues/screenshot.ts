@@ -2,7 +2,7 @@ import { Queue } from 'quirrel/next';
 
 import { fetcher, FetcherError, ioredisClient, logger } from '@utils';
 import { CONTRACT_ADDRESS, networkStrings } from '@utils/constants';
-import { addToIPFS } from '@utils/ipfs';
+import { addToIPFS, removeFromIPFS } from '@utils/ipfs';
 import { Metadata } from '@utils/metadata';
 
 type Job = {
@@ -35,6 +35,19 @@ export default Queue(
         }
 
         const metadata: Metadata = JSON.parse(metadataStr);
+
+        if (metadata.image.includes('ipfs://')) {
+            try {
+                await removeFromIPFS(metadata.image);
+            } catch (error) {
+                logger.error({
+                    error,
+                    extra: 'ipfs unpin remove error',
+                    ipfsUrl: metadata.image,
+                    tokenId,
+                });
+            }
+        }
 
         /*********************/
         /* UPDATE METADATA   */

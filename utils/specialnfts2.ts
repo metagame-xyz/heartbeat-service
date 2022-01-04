@@ -172,4 +172,11 @@ export const specialNfts = {
         color: colors[19],
         sizeAndStem: sizeAndStemTuples[19],
     },
+    '0xca21d4228cdcc68d4e23807e5e370c07577dd152': {
+        name: 'ZORBS',
+        position: positionTuples[20],
+        color: colors[20],
+        sizeAndStem: sizeAndStemTuples[20],
+    },
+    
 };
