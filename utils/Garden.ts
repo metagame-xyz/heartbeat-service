@@ -279,9 +279,7 @@ export default class GardenGrower {
             const chance = new Chance(address);
 
             const degrees = (end - start) / frequency;
-            console.log('degrees:', degrees);
             const startDegree = start + (degrees * offset) / 2;
-            console.log('startDegree:', startDegree);
             const totalPlants = frequency - offset;
 
             for (let i = 0; i < totalPlants; i++) {
