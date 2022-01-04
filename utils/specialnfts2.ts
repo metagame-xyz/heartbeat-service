@@ -76,8 +76,8 @@ export const specialNfts = {
         color: colors[3],
         sizeAndStem: sizeAndStemTuples[3],
     },
-    '0x3725ca6034bcdbc3c9ada649d49df68527661175': {
-        name: 'Mirror',
+    '0xca21d4228cdcc68d4e23807e5e370c07577dd152': {
+        name: 'ZORBS',
         position: positionTuples[4],
         color: colors[4],
         sizeAndStem: sizeAndStemTuples[4],
@@ -106,8 +106,8 @@ export const specialNfts = {
         color: colors[8],
         sizeAndStem: sizeAndStemTuples[8],
     },
-    '0xff9c1b15b16263c61d017ee9f65c50e4ae0113d7': {
-        name: 'Loot',
+    '0x3725ca6034bcdbc3c9ada649d49df68527661175': {
+        name: 'Mirror',
         position: positionTuples[9],
         color: colors[9],
         sizeAndStem: sizeAndStemTuples[9],
@@ -172,11 +172,10 @@ export const specialNfts = {
         color: colors[19],
         sizeAndStem: sizeAndStemTuples[19],
     },
-    '0xca21d4228cdcc68d4e23807e5e370c07577dd152': {
-        name: 'ZORBS',
+    '0xff9c1b15b16263c61d017ee9f65c50e4ae0113d7': {
+        name: 'Loot',
         position: positionTuples[20],
         color: colors[20],
         sizeAndStem: sizeAndStemTuples[20],
     },
-    
 };
