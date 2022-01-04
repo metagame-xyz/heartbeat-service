@@ -203,12 +203,14 @@ function Home({ metadata: metadataStr }) {
             const metadata: Metadata = JSON.parse(metadataStr);
             const minterAddress = metadata.address;
             const nfts: NFTs = metadata.nfts;
-            const garden = new GardenGrower(gardenEl);
+            const garden = new GardenGrower(gardenEl, true);
 
             await garden.addGround('flat_base_ground');
             garden.renderGround();
             await garden.addPebbles(minterAddress);
             garden.renderPebbles();
+            await garden.addPlants(minterAddress);
+            garden.renderPlants();
             garden.renderAllFlowers();
 
             for (let [address, nft] of Object.entries(nfts)) {
