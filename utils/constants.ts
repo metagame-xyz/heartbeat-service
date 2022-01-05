@@ -13,6 +13,7 @@ export const URLBOX_API_KEY = process.env.URLBOX_API_KEY;
 export const POCKET_NETWORK_API_KEY = process.env.POCKET_NETWORK_API_KEY;
 export const POCKET_NETWORK_ID = process.env.POCKET_NETWORK_ID;
 export const ALCHEMY_NOTIFY_TOKEN = process.env.ALCHEMY_NOTIFY_TOKEN;
+export const OPENSEA_API_KEY = process.env.OPENSEA_API_KEY;
 
 export const URL2PNG_API_KEY = process.env.URL2PNG_API_KEY;
 export const URL2PNG_SECRET = process.env.URL2PNG_SECRET;

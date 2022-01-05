@@ -1,9 +1,11 @@
 import { Queue } from 'quirrel/next';
 
-import { fetcher, FetcherError, ioredisClient, logger, sleep } from '@utils';
+import { fetcher, FetcherError, ioredisClient, logger, openseaGetAssetURL, sleep } from '@utils';
 import { CONTRACT_ADDRESS, networkStrings } from '@utils/constants';
 import { addToIPFS, removeFromIPFS } from '@utils/ipfs';
 import { Metadata } from '@utils/metadata';
+
+import OpenseaForceUpdate from './openseaForceUpdate';
 
 type Job = {
     url: string;
@@ -90,8 +92,12 @@ export default Queue(
             return `https://${networkStrings.openseaAPI}opensea.io/api/v1/asset/${contractAddress}/${tokenId}/?force_update=true`;
         }
 
+        openseaGetAssetURL(tokenId, CONTRACT_ADDRESS);
+
         try {
-            const { permalink } = await fetcher(openseaForceUpdateURL(tokenId, CONTRACT_ADDRESS));
+            const { permalink } = await fetcher(
+                openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true),
+            );
             logger.info(permalink);
         } catch (error) {
             if (error instanceof FetcherError) {
@@ -99,6 +105,12 @@ export default Queue(
             } else {
                 logger.error(`unkown error: ${error.name} ${error.message}`);
             }
+        }
+
+        try {
+            const jobData = await OpenseaForceUpdate.enqueue({ tokenId }, { delay: '15s' });
+        } catch (error) {
+            logger.error(error);
         }
     },
 );
