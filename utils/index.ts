@@ -71,7 +71,7 @@ export class FetcherError extends Error {
     }
 }
 
-function sleep(ms) {
+export function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 export async function fetcher(url: string, options = fetchOptions) {

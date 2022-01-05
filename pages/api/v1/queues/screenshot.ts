@@ -1,6 +1,6 @@
 import { Queue } from 'quirrel/next';
 
-import { fetcher, FetcherError, ioredisClient, logger } from '@utils';
+import { fetcher, FetcherError, ioredisClient, logger, sleep } from '@utils';
 import { CONTRACT_ADDRESS, networkStrings } from '@utils/constants';
 import { addToIPFS, removeFromIPFS } from '@utils/ipfs';
 import { Metadata } from '@utils/metadata';
@@ -15,11 +15,17 @@ export default Queue(
     async (job: Job) => {
         const { url, tokenId } = job;
 
+        let retries = 1;
         let imageIPFSPath = 'addToIPFS HAD AN ERROR';
-        try {
-            imageIPFSPath = await addToIPFS(url);
-        } catch (error) {
-            logger.error(error);
+        while (retries <= 3) {
+            try {
+                imageIPFSPath = await addToIPFS(url);
+                break;
+            } catch (error) {
+                logger.error(error);
+                retries++;
+                await sleep(1_000);
+            }
         }
 
         let metadataStr;
