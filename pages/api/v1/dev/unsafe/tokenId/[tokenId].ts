@@ -15,5 +15,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // const openseaMetadata = metadataToOpenSeaMetadata(JSON.parse(metadata));
     res.send(JSON.parse(metadata));
-    res.send({});
+    // res.send({});
 }
