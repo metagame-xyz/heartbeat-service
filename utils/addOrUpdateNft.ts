@@ -35,6 +35,8 @@ export async function addOrUpdateNft(
         special: true,
     };
 
+    logger.info(nfts);
+
     /*********************/
     /* DRAFT OF METADATA */
     /*********************/
