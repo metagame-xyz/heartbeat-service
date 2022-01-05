@@ -28,7 +28,7 @@ export async function addOrUpdateNft(
         return { statusCode: 500, error, message: 'Error in getNFTData' };
     }
 
-    nfts[0x7d414bc0482432d2d74021095256aab2e6d3f6b8] = {
+    nfts['0x7d414bc0482432d2d74021095256aab2e6d3f6b8'] = {
         tokenSymbol: 'TGRDN',
         tokenName: 'Token Garden',
         count: 1,

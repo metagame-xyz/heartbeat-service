@@ -24,7 +24,7 @@ export default function Footer(props) {
                         </Link>
                         {' & '}
                         <Link isExternal href="https://twitter.com/damngrahamm">
-                            @damngrahamm
+                            damngraham.eth
                         </Link>
                     </Text>
                 </Flex>
