@@ -22,9 +22,10 @@ export default Queue(
                 imageIPFSPath = await addToIPFS(url);
                 break;
             } catch (error) {
-                logger.error(error);
+                logger.error(`url: ${url}`);
+                logger.error(`addToIPFS error: ${error}, try #${retries}`);
                 retries++;
-                await sleep(1_000);
+                await sleep(300);
             }
         }
 
