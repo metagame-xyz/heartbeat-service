@@ -59,7 +59,7 @@ export async function getNFTData(
             throw { status, message, result };
         }
 
-        if (status != 1) {
+        if (message != 'No transactions found' && status != 1) {
             logger.error(`etherscan status: ${status}. ${result}. returning a 500`);
             // probably" Max rate limit reached", 5/sec
             logger.error({ status, message, result });
