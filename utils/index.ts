@@ -203,6 +203,6 @@ export const getUserName = async (provider, address) => {
 
 export function openseaGetAssetURL(tokenId, contractAddress, forceUpdate = false, mainnet = null) {
     const networkString = mainnet ? 'api.' : networkStrings.openseaAPI;
-    const forceUpdateString = forceUpdate ? '/?forceUpdate=true' : '';
+    const forceUpdateString = forceUpdate ? '/?force_update=true' : '';
     return `https://${networkString}opensea.io/api/v1/asset/${contractAddress}/${tokenId}${forceUpdateString}`;
 }
