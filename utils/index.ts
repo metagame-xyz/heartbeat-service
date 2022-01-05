@@ -168,7 +168,7 @@ export const logger =
         : new LocalLogger();
 
 export const tsToMonthAndYear = (ts: number): string => {
-    const date = new Date(ts * 1000);
+    const date = ts ? new Date(ts * 1000) : new Date();
     return date.toLocaleString('default', { month: 'long', year: 'numeric' });
 };
 

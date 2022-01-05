@@ -73,7 +73,7 @@ export async function getNFTData(
         (event: NftEvent) => event.from === blackholeAddress,
     ); // only mint events
 
-    const dateStr = tsToMonthAndYear(mintEventsFullData[0].timeStamp);
+    const dateStr = tsToMonthAndYear(mintEventsFullData[0]?.timeStamp);
 
     const mintEvents = mintEventsFullData.map(
         ({ tokenSymbol, contractAddress, tokenName, count }) => ({
