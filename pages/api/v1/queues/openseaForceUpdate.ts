@@ -29,7 +29,7 @@ const OpenseaForceUpdate = Queue(
             try {
                 const jobData = await OpenseaForceUpdate.enqueue(
                     { tokenId, attempt: attempt++ },
-                    { delay: '15s' },
+                    { delay: '15s', id: tokenId, exclusive: true },
                 );
             } catch (error) {
                 logger.error(error);
