@@ -13,8 +13,6 @@ const OpenseaForceUpdate = Queue(
     async (job: Job) => {
         let { tokenId, attempt } = job;
 
-        const totalAttempts = attempt++;
-
         const getAssetUrl = openseaGetAssetURL(tokenId, CONTRACT_ADDRESS);
         const forceUpdateUrl = openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true);
 
@@ -29,6 +27,7 @@ const OpenseaForceUpdate = Queue(
                 logger.info(forceResult);
             }
             try {
+                const totalAttempts = attempt++;
                 const jobData = await OpenseaForceUpdate.enqueue(
                     { tokenId, attempt: totalAttempts },
                     { delay: '15s' },
