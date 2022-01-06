@@ -25,3 +25,10 @@ if (process.env.NODE_ENV !== 'production') {
 //     level: 'info', // <-- will use Logtail's `info` log level,
 //     message: 'Some message', // <-- will also be passed to Logtail
 // });
+
+class LogData {
+    constructor(
+        public message: string,
+        public label: string,
+    ) {}
+}

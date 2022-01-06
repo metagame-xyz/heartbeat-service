@@ -23,8 +23,8 @@ const OpenseaForceUpdate = Queue(
         if (!(originalImageURL || '').includes('ipfs.io')) {
             logger.info(`no ipfs url found for ${tokenId}: ${originalImageURL}`);
             logger.info(`updating metadata for ${tokenId}. attempt #${attempt}`);
-            winstonLogger.info(`no ipfs url found for ${tokenId}: ${originalImageURL}`);
-            winstonLogger.info(`updating metadata for ${tokenId}. attempt #${attempt}`);
+            winstonLogger.info(`winston no ipfs url found for ${tokenId}: ${originalImageURL}`);
+            winstonLogger.info(`winston updating metadata for ${tokenId}. attempt #${attempt}`);
             const forceResult = await fetcher(forceUpdateUrl, openseaFetchOptions);
             if (forceResult.error) {
                 logger.info(forceResult);
@@ -42,7 +42,7 @@ const OpenseaForceUpdate = Queue(
             }
         } else {
             logger.info(`ipfs url found for ${tokenId} on attempt #${attempt}`);
-            winstonLogger.info(`ipfs url found for ${tokenId} on attempt #${attempt}`);
+            winstonLogger.info(`winston ipfs url found for ${tokenId} on attempt #${attempt}`);
         }
         if (openseaResult.error) {
             logger.error(openseaResult);
