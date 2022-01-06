@@ -14,24 +14,26 @@ const OpenseaForceUpdate = Queue(
     async (job: Job) => {
         let { tokenId, attempt } = job;
 
+        let totalAttempts = attempt;
+
         const getAssetUrl = openseaGetAssetURL(tokenId, CONTRACT_ADDRESS);
         const forceUpdateUrl = openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true);
-
         const openseaResult = await fetcher(getAssetUrl, openseaFetchOptions);
-
         const originalImageURL = openseaResult.image_original_url;
+        let message = `OpenSea original image url: ${originalImageURL}`;
+
         if (!(originalImageURL || '').includes('ipfs.io')) {
             // logger.info(`no ipfs url found for ${tokenId}: ${originalImageURL}`);
             // logger.info(`updating metadata for ${tokenId}. attempt #${attempt}`);
-            winstonLogger.info(`winston no ipfs url found for ${tokenId}: ${originalImageURL}`);
-            winstonLogger.info(`winston updating metadata for ${tokenId}. attempt #${attempt}`);
+            // winstonLogger.info(`winston no ipfs url found for ${tokenId}: ${originalImageURL}`);
+            // winstonLogger.info(`winston updating metadata for ${tokenId}. attempt #${attempt}`);
             const forceResult = await fetcher(forceUpdateUrl, openseaFetchOptions);
             if (forceResult.error) {
                 // logger.info(forceResult);
-                winstonLogger.info(forceResult);
+                winstonLogger.error(forceResult);
             }
             try {
-                const totalAttempts = attempt++;
+                totalAttempts++;
                 const jobData = await OpenseaForceUpdate.enqueue(
                     { tokenId, attempt: totalAttempts },
                     { delay: '15s' },
@@ -42,12 +44,20 @@ const OpenseaForceUpdate = Queue(
             }
         } else {
             // logger.info(`ipfs url found for ${tokenId} on attempt #${attempt}`);
-            winstonLogger.info(`winston ipfs url found for ${tokenId} on attempt #${attempt}`);
+            // winstonLogger.info(`winston ipfs url found for ${tokenId} on attempt #${attempt}`);
         }
         if (openseaResult.error) {
             // logger.error(openseaResult);
             winstonLogger.error(openseaResult);
         }
+
+        winstonLogger.info({
+            token_id: tokenId,
+            attempt_number: totalAttempts,
+            third_party_name: 'opensea',
+            function_name: 'openseaForceUpdate',
+            message,
+        });
     },
 );
 

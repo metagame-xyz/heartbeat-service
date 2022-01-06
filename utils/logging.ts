@@ -35,7 +35,7 @@ type LogData = {
     wallet_address?: string;
     token_id?: string;
     function_name?: string;
-    thrown_errror?: any;
+    thrown_errrr?: any;
 };
 
 // class LogData {
