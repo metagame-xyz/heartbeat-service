@@ -44,7 +44,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
     // logger.info(mintEvents);
 
-    const mintAddresses = mintEvents.map((e) => e.toAddress);
+    const mintAddressesWithDuplicates = mintEvents.map((e) => e.toAddress);
+    const mintAddresses: string[] = Array.from(mintAddressesWithDuplicates.values());
 
     logger.info({ mintAddresses });
 
