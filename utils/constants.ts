@@ -5,7 +5,6 @@ export const REDIS_URL = process.env.REDIS_URL;
 export const LOGFLARE_API_KEY = process.env.LOGFLARE_API_KEY;
 export const LOGFLARE_SOURCE_UUID = process.env.LOGFLARE_SOURCE_UUID;
 export const EVENT_FORWARDER_AUTH_TOKEN = process.env.EVENT_FORWARDER_AUTH_TOKEN;
-export const MICROLINK_API_KEY = process.env.MICROLINK_API_KEY;
 export const INFURA_IPFS_PROJECT_ID = process.env.INFURA_IPFS_PROJECT_ID;
 export const INFURA_IPFS_SECRET = process.env.INFURA_IPFS_SECRET;
 export const URL_BOX_API_SECRET = process.env.URL_BOX_API_SECRET;
@@ -14,9 +13,7 @@ export const POCKET_NETWORK_API_KEY = process.env.POCKET_NETWORK_API_KEY;
 export const POCKET_NETWORK_ID = process.env.POCKET_NETWORK_ID;
 export const ALCHEMY_NOTIFY_TOKEN = process.env.ALCHEMY_NOTIFY_TOKEN;
 export const OPENSEA_API_KEY = process.env.OPENSEA_API_KEY;
-
-export const URL2PNG_API_KEY = process.env.URL2PNG_API_KEY;
-export const URL2PNG_SECRET = process.env.URL2PNG_SECRET;
+export const LOGTAIL_SOURCE_TOKEN = process.env.LOGTAIL_SOURCE_TOKEN;
 
 /* Frontend Constants */
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS.toLowerCase();

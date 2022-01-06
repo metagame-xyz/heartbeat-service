@@ -2,6 +2,7 @@ import { Queue } from 'quirrel/next';
 
 import { fetcher, logger, openseaFetchOptions, openseaGetAssetURL } from '@utils';
 import { CONTRACT_ADDRESS } from '@utils/constants';
+import { logger as winstonLogger } from '@utils/logging';
 
 type Job = {
     tokenId: string;
@@ -22,9 +23,12 @@ const OpenseaForceUpdate = Queue(
         if (!(originalImageURL || '').includes('ipfs.io')) {
             logger.info(`no ipfs url found for ${tokenId}: ${originalImageURL}`);
             logger.info(`updating metadata for ${tokenId}. attempt #${attempt}`);
+            winstonLogger.info(`no ipfs url found for ${tokenId}: ${originalImageURL}`);
+            winstonLogger.info(`updating metadata for ${tokenId}. attempt #${attempt}`);
             const forceResult = await fetcher(forceUpdateUrl, openseaFetchOptions);
             if (forceResult.error) {
                 logger.info(forceResult);
+                winstonLogger.info(forceResult);
             }
             try {
                 const totalAttempts = attempt++;
@@ -34,12 +38,15 @@ const OpenseaForceUpdate = Queue(
                 );
             } catch (error) {
                 logger.error(error);
+                winstonLogger.error(error);
             }
         } else {
             logger.info(`ipfs url found for ${tokenId} on attempt #${attempt}`);
+            winstonLogger.info(`ipfs url found for ${tokenId} on attempt #${attempt}`);
         }
         if (openseaResult.error) {
             logger.error(openseaResult);
+            winstonLogger.error(openseaResult);
         }
     },
 );
