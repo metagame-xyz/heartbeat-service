@@ -14,7 +14,6 @@ import {
 import {
     blackholeAddress,
     ETHERSCAN_API_KEY,
-    MICROLINK_API_KEY,
     URL_BOX_API_SECRET,
     URLBOX_API_KEY,
     WEBSITE_URL,
