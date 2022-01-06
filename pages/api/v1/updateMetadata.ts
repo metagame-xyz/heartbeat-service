@@ -44,8 +44,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
     // logger.info(mintEvents);
 
-    const mintAddressesWithDuplicates = mintEvents.map((e) => e.toAddress);
-    const mintAddresses: string[] = Array.from(mintAddressesWithDuplicates.values());
+    const mintAddressesWithDuplicates = new Set(mintEvents.map((e) => e.toAddress));
+    const mintAddresses = Array.from(mintAddressesWithDuplicates.values());
 
     logger.info({ mintAddresses });
 
@@ -54,13 +54,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     for (let i = 0; i < mintAddresses.length; i++) {
         let tokenId;
         try {
-            tokenId = await getTokenIdForAddress(mintAddresses[i]);
+            tokenId = await getTokenIdForAddress(mintAddresses[i] as string);
         } catch (error) {
             logger.error(error);
             return res.status(500).send({ error });
         }
 
-        const data = await addOrUpdateNft(mintAddresses[i], tokenId);
+        const data = await addOrUpdateNft(mintAddresses[i] as string, tokenId);
 
         if (data.error) {
             logger.error(data.message);
