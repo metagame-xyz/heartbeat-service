@@ -1,8 +1,8 @@
 import { Queue } from 'quirrel/next';
 
-import { fetcher, logger, openseaFetchOptions, openseaGetAssetURL } from '@utils';
+import { fetcher, openseaFetchOptions, openseaGetAssetURL } from '@utils';
 import { CONTRACT_ADDRESS } from '@utils/constants';
-import { logger as winstonLogger } from '@utils/logging';
+import { LogData, LogDataWithLevel, logger } from '@utils/logging';
 
 type Job = {
     tokenId: string;
@@ -18,46 +18,38 @@ const OpenseaForceUpdate = Queue(
 
         const getAssetUrl = openseaGetAssetURL(tokenId, CONTRACT_ADDRESS);
         const forceUpdateUrl = openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true);
-        const openseaResult = await fetcher(getAssetUrl, openseaFetchOptions);
-        const originalImageURL = openseaResult.image_original_url;
-        let message = `OpenSea original image url: ${originalImageURL}`;
 
-        if (!(originalImageURL || '').includes('ipfs.io')) {
-            // logger.info(`no ipfs url found for ${tokenId}: ${originalImageURL}`);
-            // logger.info(`updating metadata for ${tokenId}. attempt #${attempt}`);
-            // winstonLogger.info(`winston no ipfs url found for ${tokenId}: ${originalImageURL}`);
-            // winstonLogger.info(`winston updating metadata for ${tokenId}. attempt #${attempt}`);
-            const forceResult = await fetcher(forceUpdateUrl, openseaFetchOptions);
-            if (forceResult.error) {
-                // logger.info(forceResult);
-                winstonLogger.error(forceResult);
-            }
-            try {
+        let message = 'beggining openseaForceUpdate';
+        let thrownError = null;
+
+        try {
+            const openseaResult = await fetcher(getAssetUrl, openseaFetchOptions);
+            const originalImageURL = openseaResult.image_original_url;
+            message = `OpenSea original image url: ${originalImageURL}`;
+
+            if (!(originalImageURL || '').includes('ipfs.io')) {
+                const forceResult = await fetcher(forceUpdateUrl, openseaFetchOptions);
+                thrownError = forceResult?.error;
                 totalAttempts++;
-                const jobData = await OpenseaForceUpdate.enqueue(
+                await OpenseaForceUpdate.enqueue(
                     { tokenId, attempt: totalAttempts },
                     { delay: '15s' },
                 );
-            } catch (error) {
-                // logger.error(error);
-                winstonLogger.error(error);
             }
-        } else {
-            // logger.info(`ipfs url found for ${tokenId} on attempt #${attempt}`);
-            // winstonLogger.info(`winston ipfs url found for ${tokenId} on attempt #${attempt}`);
+        } catch (error) {
+            thrownError = error;
+        } finally {
+            const logData: LogDataWithLevel = {
+                level: thrownError ? 'error' : 'info',
+                token_id: tokenId,
+                attempt_number: totalAttempts,
+                third_party_name: 'opensea',
+                function_name: 'openseaForceUpdate',
+                message,
+            };
+            thrownError ? (logData.thrown_error = thrownError) : null;
+            logger.log(logData);
         }
-        if (openseaResult.error) {
-            // logger.error(openseaResult);
-            winstonLogger.error(openseaResult);
-        }
-
-        winstonLogger.info({
-            token_id: tokenId,
-            attempt_number: totalAttempts,
-            third_party_name: 'opensea',
-            function_name: 'openseaForceUpdate',
-            message,
-        });
     },
 );
 
