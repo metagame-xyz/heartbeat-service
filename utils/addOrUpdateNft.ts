@@ -100,8 +100,8 @@ export async function addOrUpdateNft(
             },
             {
                 delay: '30s',
-                id: imgUrl,
-                exclusive: true,
+                // id: imgUrl,
+                // exclusive: true,
             },
         );
     } catch (error) {

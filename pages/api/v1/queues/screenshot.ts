@@ -110,7 +110,7 @@ export default Queue(
         try {
             const jobData = await OpenseaForceUpdate.enqueue(
                 { tokenId, attempt: 1 },
-                { delay: '15s', id: tokenId, exclusive: true },
+                { delay: '15s' },
             );
         } catch (error) {
             logger.error(error);
