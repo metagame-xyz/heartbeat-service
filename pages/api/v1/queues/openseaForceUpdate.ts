@@ -21,13 +21,13 @@ const OpenseaForceUpdate = Queue(
 
         const originalImageURL = openseaResult.image_original_url;
         if (!(originalImageURL || '').includes('ipfs.io')) {
-            logger.info(`no ipfs url found for ${tokenId}: ${originalImageURL}`);
-            logger.info(`updating metadata for ${tokenId}. attempt #${attempt}`);
+            // logger.info(`no ipfs url found for ${tokenId}: ${originalImageURL}`);
+            // logger.info(`updating metadata for ${tokenId}. attempt #${attempt}`);
             winstonLogger.info(`winston no ipfs url found for ${tokenId}: ${originalImageURL}`);
             winstonLogger.info(`winston updating metadata for ${tokenId}. attempt #${attempt}`);
             const forceResult = await fetcher(forceUpdateUrl, openseaFetchOptions);
             if (forceResult.error) {
-                logger.info(forceResult);
+                // logger.info(forceResult);
                 winstonLogger.info(forceResult);
             }
             try {
@@ -37,15 +37,15 @@ const OpenseaForceUpdate = Queue(
                     { delay: '15s' },
                 );
             } catch (error) {
-                logger.error(error);
+                // logger.error(error);
                 winstonLogger.error(error);
             }
         } else {
-            logger.info(`ipfs url found for ${tokenId} on attempt #${attempt}`);
+            // logger.info(`ipfs url found for ${tokenId} on attempt #${attempt}`);
             winstonLogger.info(`winston ipfs url found for ${tokenId} on attempt #${attempt}`);
         }
         if (openseaResult.error) {
-            logger.error(openseaResult);
+            // logger.error(openseaResult);
             winstonLogger.error(openseaResult);
         }
     },

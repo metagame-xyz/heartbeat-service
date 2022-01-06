@@ -26,9 +26,23 @@ if (process.env.NODE_ENV !== 'production') {
 //     message: 'Some message', // <-- will also be passed to Logtail
 // });
 
-class LogData {
-    constructor(
-        public message: string,
-        public label: string,
-    ) {}
-}
+type LogData = {
+    retry_needed?: boolean;
+    attempt_number?: number;
+    error_code?: number;
+    message?: string;
+    third_party_name?: string;
+    wallet_address?: string;
+    token_id?: string;
+    function_name?: string;
+    thrown_errror?: any;
+};
+
+// class LogData {
+//     constructor(
+//         public message: string,
+//         public label: string,
+//     ) {
+
+//     }
+// }
