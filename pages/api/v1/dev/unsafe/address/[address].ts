@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { defaultMainnetProvider, getUserName, logger } from '@utils';
+import { defaultMainnetProvider, getUserName } from '@utils';
 import { formatMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

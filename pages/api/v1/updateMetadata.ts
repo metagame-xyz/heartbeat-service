@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { isValidAlchemySignature, logger } from '@utils';
+import { isValidAlchemySignature } from '@utils';
 import { addOrUpdateNft } from '@utils/addOrUpdateNft';
 import { blackholeAddress, CONTRACT_ADDRESS } from '@utils/constants';
+import { logger } from '@utils/logging';
 import { getTokenIdForAddress } from '@utils/metadata';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { ioredisClient, isValidEventForwarderSignature, logger } from '@utils';
+import { ioredisClient, isValidEventForwarderSignature } from '@utils';
+import { logger } from '@utils/logging';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {

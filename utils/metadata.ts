@@ -1,8 +1,9 @@
 import { EtherscanProvider } from '@ethersproject/providers';
 import Chance from 'chance';
 
-import { fetcher, ioredisClient, logger, tsToMonthAndYear } from '@utils';
+import { fetcher, ioredisClient, tsToMonthAndYear } from '@utils';
 import { blackholeAddress, ETHERSCAN_API_KEY, networkStrings, WEBSITE_URL } from '@utils/constants';
+import { logger } from '@utils/logging';
 
 import { specialNfts } from './specialnfts2';
 

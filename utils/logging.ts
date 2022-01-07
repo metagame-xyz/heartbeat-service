@@ -45,13 +45,7 @@ export const logger = winston.createLogger({
     transports: [prodEnv ? prodTransport : devTransport],
 });
 
-// // Log as normal in Winston - your logs will sync with Logtail.com!
-// logger.log({
-//     level: 'info', // <-- will use Logtail's `info` log level,
-//     message: 'Some message', // <-- will also be passed to Logtail
-// });
-
-export type LogDatawithoutLevel = {
+export type LogDataWithoutLevel = {
     retry_needed?: boolean;
     attempt_number?: number;
     error_code?: number;
@@ -75,7 +69,7 @@ export type LogDataWithLevel = {
     thrown_error?: any;
 };
 
-export type LogData = LogDataWithLevel | LogDatawithoutLevel;
+export type LogData = LogDataWithLevel | LogDataWithoutLevel;
 
 // class LogData {
 //     constructor(

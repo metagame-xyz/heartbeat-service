@@ -8,9 +8,9 @@ import {
     getUserName,
     ioredisClient,
     isValidEventForwarderSignature,
-    logger,
 } from '@utils';
 import { doneDivClass, URL_BOX_API_SECRET, URLBOX_API_KEY } from '@utils/constants';
+import { logger } from '@utils/logging';
 import { formatMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
 
 import ScreenshotQueue from '../../queues/screenshot';

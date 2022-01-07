@@ -1,8 +1,10 @@
 import ScreenshotQueue from '@api/queues/screenshot';
 
-import { defaultProvider, getUserName, ioredisClient, logger } from '@utils';
+import { defaultProvider, getUserName, ioredisClient } from '@utils';
 import { formatMetadata, getNFTData, NFTs } from '@utils/metadata';
 import { activateUrlbox } from '@utils/urlbox';
+
+import { logger } from './logging';
 
 export type newNftResponse = {
     statusCode: number;
@@ -17,6 +19,7 @@ export async function addOrUpdateNft(
     tokenId: string,
 ): Promise<newNftResponse> {
     const address = minterAddress.toLowerCase();
+
     /****************/
     /* GET NFT DATA */
     /****************/
@@ -100,6 +103,7 @@ export async function addOrUpdateNft(
             },
             {
                 delay: '30s',
+                retry: ['15s', '30s', '1m', '5m', '10m', '30m', '1h', '2h', '4h'],
                 // id: imgUrl,
                 // exclusive: true,
             },

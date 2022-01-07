@@ -1,6 +1,6 @@
 import Urlbox from 'urlbox';
 
-import { logger } from '@utils';
+import { logger } from '@utils/logging';
 
 import { doneDivClass, URL_BOX_API_SECRET, URLBOX_API_KEY } from './constants';
 

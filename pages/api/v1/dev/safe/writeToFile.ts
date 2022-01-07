@@ -8,8 +8,6 @@ import {
     getUserName,
     ioredisClient,
     isValidEventForwarderSignature,
-    logger,
-    tsToMonthAndYear,
 } from '@utils';
 import {
     blackholeAddress,
@@ -18,6 +16,7 @@ import {
     URLBOX_API_KEY,
     WEBSITE_URL,
 } from '@utils/constants';
+import { logger } from '@utils/logging';
 import { formatMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
 import { activateUrlbox } from '@utils/urlbox';
 

@@ -4,16 +4,14 @@ import { ethers } from 'ethers';
 import Redis from 'ioredis';
 import type { NextApiRequest } from 'next';
 import fetch from 'node-fetch-retry';
-import pino from 'pino';
-import { logflarePinoVercel } from 'pino-logflare';
+
+import { logger } from '@utils/logging';
 
 import {
     ALCHEMY_NOTIFY_TOKEN,
     ALCHEMY_PROJECT_ID,
     EVENT_FORWARDER_AUTH_TOKEN,
     INFURA_PROJECT_ID,
-    LOGFLARE_API_KEY,
-    LOGFLARE_SOURCE_UUID,
     networkStrings,
     OPENSEA_API_KEY,
     POCKET_NETWORK_API_KEY,
@@ -141,39 +139,6 @@ export const checkSignature = (message: string, joinedSignature: string, walletA
 };
 
 export const ioredisClient = new Redis(REDIS_URL);
-
-// create pino-logflare console stream for serverless functions
-const { stream } = logflarePinoVercel({
-    apiKey: LOGFLARE_API_KEY,
-    sourceToken: LOGFLARE_SOURCE_UUID,
-});
-
-class LocalLogger {
-    info(message: any) {
-        console.log(message);
-    }
-    error(message: any) {
-        // TODOD schematize this to an object, error & message maybe?
-        console.error(message);
-    }
-    warn(message: any) {
-        console.warn(message);
-    }
-}
-
-// create pino loggger
-export const logger =
-    process.env.NODE_ENV === 'production'
-        ? pino(
-              {
-                  base: {
-                      env: process.env.VERCEL_ENV || 'unknown-env',
-                      revision: process.env.VERCEL_GITHUB_COMMIT_SHA,
-                  },
-              },
-              stream,
-          )
-        : new LocalLogger();
 
 export const tsToMonthAndYear = (ts: number): string => {
     const date = ts ? new Date(ts * 1000) : new Date();

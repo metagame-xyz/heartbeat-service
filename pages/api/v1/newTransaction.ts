@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { isValidEventForwarderSignature, logger } from '@utils';
+import { isValidEventForwarderSignature } from '@utils';
 import { addOrUpdateNft } from '@utils/addOrUpdateNft';
+import { logger } from '@utils/logging';
 import { addressMap } from '@utils/testAddresses';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -26,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     /****************/
     if (!isValidEventForwarderSignature(req)) {
         const error = 'invalid event-forwarder Signature';
-        logger.error({ error });
+        // logger.error({ error }); TODO
         return res.status(400).send({ error });
     }
 
