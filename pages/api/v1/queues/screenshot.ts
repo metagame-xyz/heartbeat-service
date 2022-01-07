@@ -3,8 +3,7 @@ import { Queue } from 'quirrel/next';
 import { fetcher, ioredisClient, openseaGetAssetURL } from '@utils';
 import { CONTRACT_ADDRESS } from '@utils/constants';
 import { addToIPFS, removeFromIPFS } from '@utils/ipfs';
-import { logger } from '@utils/logging';
-import { LogDataWithLevel } from '@utils/logging';
+import { LogData, logError, logger, logSuccess } from '@utils/logging';
 import { Metadata } from '@utils/metadata';
 
 import OpenseaForceUpdate from './openseaForceUpdate';
@@ -19,12 +18,11 @@ export default Queue(
     async (job: Job) => {
         const { url, tokenId } = job;
 
-        const logData: LogDataWithLevel = {
-            level: 'info',
+        const logData: LogData = {
+            level: 'debug',
             token_id: tokenId,
-            third_party_name: null,
             function_name: 'screenshot',
-            message: `beginning screenshot for ${tokenId}`,
+            message: `begin`,
         };
 
         try {
@@ -69,9 +67,9 @@ export default Queue(
 
             await OpenseaForceUpdate.enqueue({ tokenId, attempt: 1 }, { delay: '15s' });
 
-            logger.log(logData);
+            logSuccess(logData);
         } catch (error) {
-            logger.log((logData.thrown_error = error));
+            logError(logData, error);
             throw Error(error);
         } finally {
         }

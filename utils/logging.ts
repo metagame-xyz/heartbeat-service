@@ -4,78 +4,75 @@ import winston, { format } from 'winston';
 
 import { LOGTAIL_SOURCE_TOKEN } from './constants';
 
-// Create a Logtail client
+const { combine, printf, colorize } = format;
+
 const logtail = new Logtail(LOGTAIL_SOURCE_TOKEN);
 
-const colors = {
-    error: 'red',
-    warn: 'yellow',
-    info: 'green',
-    http: 'magenta',
-    debug: 'white',
-};
+// const colors = {
+//     error: 'red',
+//     warn: 'yellow',
+//     info: 'green',
+//     http: 'magenta',
+//     debug: 'white',
+// };
 
-winston.addColors(colors);
+// winston.addColors(colors);
 
-const devFormat = winston.format.combine(
-    winston.format.colorize({ all: true }),
-    winston.format.printf((info) => `${info.level}: ${info.message}`),
+const devFormat = printf((info) => `${info.level}: ${info.message}`);
+
+const debugFormat = format.prettyPrint();
+
+const prodFormat = printf(
+    (d) =>
+        `${d.level}: token_id ${d.token_id} | ${d.function_name} | ${
+            d.third_party_name ? `${d.third_party_name} | ` : ''
+        }${d.attempt_number ? `attempt ${d.attempt_number} | ` : ''}${d.message}`,
 );
-
-const ignoreDebug = format((info) => {
-    if (info.level === 'debug') {
-        return false;
-    }
-    return info;
-});
-
-const prodFormat = winston.format.combine(
-    ignoreDebug(),
-    winston.format.colorize({ all: true }),
-    winston.format.simple(),
-);
-const devTransport = new winston.transports.Console();
+const devTransport = new winston.transports.Console({ level: 'debug' });
 const prodTransport = new LogtailTransport(logtail);
 
 const prodEnv = process.env.NODE_ENV === 'production';
 
 // Create a Winston logger - passing in the Logtail transport
 export const logger = winston.createLogger({
-    format: prodEnv ? prodFormat : devFormat,
+    levels: winston.config.syslog.levels,
+    format: prodEnv ? prodFormat : combine(colorize(), prodFormat),
     transports: [prodEnv ? prodTransport : devTransport],
 });
 
-export type LogDataWithoutLevel = {
-    retry_needed?: boolean;
-    attempt_number?: number;
-    error_code?: number;
-    message: string;
-    third_party_name?: string;
-    wallet_address?: string;
-    token_id?: string;
-    function_name?: string;
-    thrown_error?: any;
+export const debugLogger = winston.createLogger({
+    levels: winston.config.syslog.levels,
+    format: debugFormat,
+    transports: [prodEnv ? prodTransport : devTransport],
+});
+
+export const debug = (message: any) => {
+    debugLogger.debug(message);
 };
-export type LogDataWithLevel = {
+
+export const logSuccess = (logData: LogData, message = 'success') => {
+    logData.level = 'info';
+    logData.message = message;
+    logData.third_party_name = null;
+    logger.log(logData);
+};
+
+export const logError = (logData: LogData, error: any) => {
+    logData.level = 'error';
+    logData.message = error?.message || 'error obj had no .message';
+    logData.thrown_error = error;
+    logger.log(logData);
+};
+
+export type LogData = {
     level: string;
     retry_needed?: boolean;
     attempt_number?: number;
     error_code?: number;
-    message: string;
+    message: any;
     third_party_name?: string;
     wallet_address?: string;
     token_id?: string;
     function_name?: string;
     thrown_error?: any;
 };
-
-export type LogData = LogDataWithLevel | LogDataWithoutLevel;
-
-// class LogData {
-//     constructor(
-//         public message: string,
-//         public label: string,
-//     ) {
-
-//     }
-// }

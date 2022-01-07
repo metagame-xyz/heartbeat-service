@@ -2,7 +2,7 @@ import { Queue } from 'quirrel/next';
 
 import { fetcher, openseaFetchOptions, openseaGetAssetURL } from '@utils';
 import { CONTRACT_ADDRESS } from '@utils/constants';
-import { LogData, LogDataWithLevel, logger } from '@utils/logging';
+import { LogData, LogData, logger } from '@utils/logging';
 
 type Job = {
     tokenId: string;
@@ -39,7 +39,7 @@ const OpenseaForceUpdate = Queue(
         } catch (error) {
             thrownError = error;
         } finally {
-            const logData: LogDataWithLevel = {
+            const logData: LogData = {
                 level: thrownError ? 'error' : 'info',
                 token_id: tokenId,
                 attempt_number: totalAttempts,
