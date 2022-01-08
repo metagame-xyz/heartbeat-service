@@ -24,6 +24,7 @@
         "chance": "^1.1.8",
         "crypto": "^1.0.1",
         "dat.gui": "^0.7.7",
+        "datadog-winston": "^1.5.1",
         "detect-gpu": "^4.0.2",
         "ethers": "^5.5.1",
         "framer-motion": "^4",

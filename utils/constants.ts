@@ -14,6 +14,7 @@ export const POCKET_NETWORK_ID = process.env.POCKET_NETWORK_ID;
 export const ALCHEMY_NOTIFY_TOKEN = process.env.ALCHEMY_NOTIFY_TOKEN;
 export const OPENSEA_API_KEY = process.env.OPENSEA_API_KEY;
 export const LOGTAIL_SOURCE_TOKEN = process.env.LOGTAIL_SOURCE_TOKEN;
+export const DATADOG_API_KEY = process.env.DATADOG_API_KEY;
 
 /* Frontend Constants */
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS.toLowerCase();

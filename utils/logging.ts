@@ -1,9 +1,9 @@
 import { Logtail } from '@logtail/node';
 import { LogtailTransport } from '@logtail/winston';
+import DatadogWinston from 'datadog-winston';
 import winston, { format } from 'winston';
-import { SyslogConfigSetLevels } from 'winston/lib/winston/config';
 
-import { LOGTAIL_SOURCE_TOKEN } from './constants';
+import { DATADOG_API_KEY, LOGTAIL_SOURCE_TOKEN } from './constants';
 
 const { combine, printf, colorize } = format;
 
@@ -29,22 +29,32 @@ const prodFormat = printf(
             d.third_party_name ? `${d.third_party_name} | ` : ''
         }${d.attempt_number ? `attempt ${d.attempt_number} | ` : ''}${d.message}`,
 );
-const devTransport = new winston.transports.Console({ level: 'debug' });
-const prodTransport = new LogtailTransport(logtail);
+const localTransports = [new winston.transports.Console({ level: 'debug' })];
 
-const prodEnv = process.env.NODE_ENV === 'production';
+const logtailTransport = new LogtailTransport(logtail);
+const datadogTransport = new DatadogWinston({
+    apiKey: DATADOG_API_KEY,
+    hostname: process.env.VERCEL_URL,
+    service: 'token-garden-logger',
+    ddsource: 'nodejs',
+    ddtags: `env:${process.env.VERCEL_ENV}`,
+});
+
+const prodTransports = [logtailTransport, datadogTransport];
+
+const isProdEnv = process.env.NODE_ENV === 'production';
 
 // Create a Winston logger - passing in the Logtail transport
 export const logger = winston.createLogger({
     levels: winston.config.syslog.levels,
-    format: prodEnv ? prodFormat : combine(colorize(), prodFormat),
-    transports: [prodEnv ? prodTransport : devTransport],
+    format: isProdEnv ? prodFormat : combine(colorize(), prodFormat),
+    transports: isProdEnv ? prodTransports : localTransports,
 });
 
 export const debugLogger = winston.createLogger({
     levels: winston.config.syslog.levels,
     format: debugFormat,
-    transports: [prodEnv ? prodTransport : devTransport],
+    transports: isProdEnv ? prodTransports : localTransports,
 });
 
 export const debug = (message: any) => {
