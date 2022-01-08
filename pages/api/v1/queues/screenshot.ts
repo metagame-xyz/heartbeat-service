@@ -26,7 +26,7 @@ export default Queue(
         };
 
         try {
-            logData.third_party_name = 'ipfs';
+            logData.third_party_name = 'ipfs_add';
             const imageIPFSPath = await addToIPFS(url);
 
             logData.third_party_name = 'redis';
@@ -41,7 +41,7 @@ export default Queue(
             const metadata: Metadata = JSON.parse(metadataStr);
 
             if (metadata.image.includes('ipfs://')) {
-                logData.third_party_name = 'ipfs';
+                logData.third_party_name = 'ipfs_remove';
                 await removeFromIPFS(metadata.image);
             }
 

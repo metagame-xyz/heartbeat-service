@@ -1,6 +1,7 @@
 import { Logtail } from '@logtail/node';
 import { LogtailTransport } from '@logtail/winston';
 import winston, { format } from 'winston';
+import { SyslogConfigSetLevels } from 'winston/lib/winston/config';
 
 import { LOGTAIL_SOURCE_TOKEN } from './constants';
 
@@ -8,15 +9,15 @@ const { combine, printf, colorize } = format;
 
 const logtail = new Logtail(LOGTAIL_SOURCE_TOKEN);
 
-// const colors = {
-//     error: 'red',
-//     warn: 'yellow',
-//     info: 'green',
-//     http: 'magenta',
-//     debug: 'white',
-// };
+const colors = {
+    error: 'red',
+    warning: 'yellow',
+    info: 'green',
+    http: 'magenta',
+    debug: 'white',
+};
 
-// winston.addColors(colors);
+winston.addColors(colors);
 
 const devFormat = printf((info) => `${info.level}: ${info.message}`);
 
@@ -51,21 +52,23 @@ export const debug = (message: any) => {
 };
 
 export const logSuccess = (logData: LogData, message = 'success') => {
-    logData.level = 'info';
-    logData.message = message;
-    logData.third_party_name = null;
-    logger.log(logData);
+    const logDataCopy = { ...logData };
+    logDataCopy.level = 'info';
+    logDataCopy.message = message;
+    logDataCopy.third_party_name = null;
+    logger.log(logDataCopy);
 };
 
 export const logError = (logData: LogData, error: any) => {
-    logData.level = 'error';
-    logData.message = error?.message || 'error obj had no .message';
-    logData.thrown_error = error;
-    logger.log(logData);
+    const logDataCopy = { ...logData };
+    logDataCopy.level = 'error';
+    logDataCopy.message = error?.message || 'error obj had no .message';
+    logDataCopy.thrown_error = error;
+    logger.log(logDataCopy);
 };
 
 export type LogData = {
-    level: string;
+    level: 'emerg' | 'alert' | 'crit' | 'error' | 'warning' | 'notice' | 'info' | 'debug';
     retry_needed?: boolean;
     attempt_number?: number;
     error_code?: number;
