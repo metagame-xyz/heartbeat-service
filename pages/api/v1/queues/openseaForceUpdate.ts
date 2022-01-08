@@ -2,7 +2,7 @@ import { Queue } from 'quirrel/next';
 
 import { fetcher, openseaFetchOptions, openseaGetAssetURL } from '@utils';
 import { CONTRACT_ADDRESS } from '@utils/constants';
-import { LogData, LogData, logger } from '@utils/logging';
+import { LogData, logger } from '@utils/logging';
 
 type Job = {
     tokenId: string;

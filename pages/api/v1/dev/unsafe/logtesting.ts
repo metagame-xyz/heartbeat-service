@@ -12,6 +12,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         message: 'asdf',
     };
 
+    logError(logData, 'some error');
+    logSuccess(logData, 'some success');
+
     logger.log(logData);
     // debug(logData);
 
