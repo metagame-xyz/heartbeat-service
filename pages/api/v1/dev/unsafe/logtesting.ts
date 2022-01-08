@@ -4,11 +4,11 @@ import { debug, LogData, logError, logger, logSuccess } from '@utils/logging';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const logData = {
-        level: 'info',
+        level: 'warn',
         token_id: '1',
         attempt_number: 40,
         third_party_name: 'opensea',
-        function_name: 'screenshot',
+        function_name: 'logtesting',
         message: 'asdf',
     };
 
