@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const logData: LogData = {
         level: 'info',
         function_name: 'updateMetadata',
-        message: `mintAddresses: ${mintAddresses}`,
+        message: `begin`,
     };
     let statusCode = 200;
 
@@ -77,7 +77,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         statusCode = data.statusCode;
     }
 
-    logSuccess(logData, `mintAddresses: ${mintAddresses}`);
+    const message = mintAddresses ? `mintAddresses: ${mintAddresses}` : 'no mint events';
+    logSuccess(logData, message);
 
     return res.status(statusCode).send({});
 }
