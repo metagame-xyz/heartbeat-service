@@ -7,7 +7,6 @@ import { LogData, logError, logger, logSuccess } from '@utils/logging';
 import { getTokenIdForAddress } from '@utils/metadata';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    logger.info(`top of growFlower`);
     if (req.method !== 'POST') {
         /**
          * During development, it's useful to un-comment this block
@@ -34,27 +33,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const activity = req.body.activity;
 
-    // logger.info(activity);
-    // logger.info(`CONTRACT_ADDRESS: ${CONTRACT_ADDRESS}`);
-
     const mintEvents = activity.filter(
         (e) =>
             e.fromAddress === blackholeAddress &&
             e.erc721TokenId !== null &&
             e.rawContract.address !== CONTRACT_ADDRESS,
     );
-    // logger.info(mintEvents);
 
     const mintAddressesWithDuplicates = new Set(mintEvents.map((e) => e.toAddress));
     const mintAddresses = Array.from(mintAddressesWithDuplicates.values()) as string[];
 
     const logData: LogData = {
         level: 'info',
-        function_name: 'updateMetadata_begin',
+        function_name: 'updateMetadata',
         message: `mintAddresses: ${mintAddresses}`,
     };
-    logger.info(logData);
-
     let statusCode = 200;
 
     for (let i = 0; i < mintAddresses.length; i++) {
@@ -83,6 +76,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         statusCode = data.statusCode;
     }
+
+    logSuccess(logData, `mintAddresses: ${mintAddresses}`);
 
     return res.status(statusCode).send({});
 }
