@@ -4,7 +4,7 @@ import { defaultProvider, getUserName, ioredisClient } from '@utils';
 import { formatMetadata, getNFTData, NFTs } from '@utils/metadata';
 import { activateUrlbox } from '@utils/urlbox';
 
-import { logger } from './logging';
+import { LogData, logError, logger, logSuccess } from './logging';
 
 export type newNftResponse = {
     statusCode: number;
@@ -19,6 +19,14 @@ export async function addOrUpdateNft(
     tokenId: string,
 ): Promise<newNftResponse> {
     const address = minterAddress.toLowerCase();
+
+    const logData: LogData = {
+        level: 'info',
+        token_id: tokenId,
+        function_name: 'addOrUpdateNft',
+        message: `begin`,
+        wallet_address: address,
+    };
 
     /****************/
     /* GET NFT DATA */
@@ -53,49 +61,25 @@ export async function addOrUpdateNft(
     /*  SAVE METADATA   */
     /*********************/
     try {
-        // index by wallet address
-        await ioredisClient.hset(address, {
-            tokenId,
-            metadata: JSON.stringify(metadata),
-        });
-    } catch (error) {
-        logger.error({ error });
-        return {
-            statusCode: 500,
-            error,
-            message: `ioredisClient index by wallet address for ${address}`,
-        };
-    }
+        logData.third_party_name = 'redis';
+        await ioredisClient.hset(address, { tokenId, metadata: JSON.stringify(metadata) });
+        await ioredisClient.hset(tokenId, { address: address, metadata: JSON.stringify(metadata) });
 
-    try {
-        // index by tokenId
-        await ioredisClient.hset(tokenId, {
-            address: address,
-            metadata: JSON.stringify(metadata),
-        });
-    } catch (error) {
-        logger.error({ error });
-        return {
-            statusCode: 500,
-            error,
-            message: `ioredisClient index by tokenId for ${address}`,
-        };
-    }
+        /************************/
+        /* SCREENSHOT NFT IMAGE */
+        /************************/
+        logData.third_party_name = 'urlbox';
+        const imgUrl = await activateUrlbox(tokenId, metadata.totalNFTCount, true);
 
-    /************************/
-    /* SCREENSHOT NFT IMAGE */
-    /************************/
+        // logger.info(`imgUrl for tokenId ${tokenId}: ${imgUrl}`);
 
-    const imgUrl = await activateUrlbox(tokenId, metadata.totalNFTCount, true);
+        /************************/
+        /*  QUEUE UPDATING IMG  */
+        /************************/
 
-    logger.info(`imgUrl for tokenId ${tokenId}: ${imgUrl}`);
+        // TODO skip if already queued: https://docs.quirrel.dev/api/queue#getbyid
 
-    /************************/
-    /*  QUEUE UPDATING IMG  */
-    /************************/
-
-    // TODO skip if already queued: https://docs.quirrel.dev/api/queue#getbyid
-    try {
+        logData.third_party_name = 'queue/screenshot';
         const jobData = await ScreenshotQueue.enqueue(
             {
                 url: imgUrl,
@@ -109,9 +93,12 @@ export async function addOrUpdateNft(
             },
         );
     } catch (error) {
-        logger.error(error);
+        logError(logData, error);
+        // logger.error(error);
         return { statusCode: 500, error, message: `screenshot queueing for ${address}` };
     }
+
+    logSuccess(logData);
 
     return {
         statusCode: 200,

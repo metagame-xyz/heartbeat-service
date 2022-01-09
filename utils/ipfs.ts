@@ -23,6 +23,7 @@ export const addToIPFS = async (url: string): Promise<string> => {
 };
 
 export const removeFromIPFS = async (ipfsURL: string): Promise<CID> => {
-    const cid = await client.pin.rm(ipfsURL);
-    return cid;
+    const cid = CID.parse(ipfsURL.replace(ipfsScheme, ''));
+    const result = await client.pin.rm(cid);
+    return result;
 };

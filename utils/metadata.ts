@@ -57,7 +57,7 @@ export async function getNFTData(
         } catch (error) {
             logger.error(`Error in fetcher from etherscan: ${error}`);
             // logger.error({ status, message, result });
-            throw { status, message, result };
+            throw error;
         }
 
         if (message != 'No transactions found' && status != 1) {

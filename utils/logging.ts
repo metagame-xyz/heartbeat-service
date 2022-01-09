@@ -31,7 +31,7 @@ const prodFormat = printf(
 );
 const localTransports = [new winston.transports.Console({ level: 'debug' })];
 
-const logtailTransport = new LogtailTransport(logtail);
+// const logtailTransport = new LogtailTransport(logtail);
 const datadogTransport = new DatadogWinston({
     apiKey: DATADOG_API_KEY,
     hostname: process.env.VERCEL_URL,
@@ -40,7 +40,7 @@ const datadogTransport = new DatadogWinston({
     ddtags: `env:${process.env.VERCEL_ENV}`,
 });
 
-const prodTransports = [logtailTransport, datadogTransport];
+const prodTransports = [datadogTransport];
 
 const isProdEnv = process.env.NODE_ENV === 'production';
 

@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { isValidAlchemySignature } from '@utils';
 import { addOrUpdateNft } from '@utils/addOrUpdateNft';
 import { blackholeAddress, CONTRACT_ADDRESS } from '@utils/constants';
-import { logger } from '@utils/logging';
+import { LogData, logError, logger, logSuccess } from '@utils/logging';
 import { getTokenIdForAddress } from '@utils/metadata';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -48,23 +48,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const mintAddressesWithDuplicates = new Set(mintEvents.map((e) => e.toAddress));
     const mintAddresses = Array.from(mintAddressesWithDuplicates.values()) as string[];
 
-    logger.info({ mintAddresses });
+    const logData: LogData = {
+        level: 'info',
+        function_name: 'updateMetadata_begin',
+        message: `mintAddresses: ${mintAddresses}`,
+    };
+    logger.info(logData);
 
     let statusCode = 200;
 
     for (let i = 0; i < mintAddresses.length; i++) {
         let tokenId;
+        const logData: LogData = {
+            level: 'info',
+            function_name: 'updateMetadata_in_loop',
+            message: `mintAddresses[${i}]: ${mintAddresses[i]}`,
+            wallet_address: mintAddresses[i],
+        };
         try {
+            logData.third_party_name = 'redis';
             tokenId = await getTokenIdForAddress(mintAddresses[i]);
+            logData.token_id = tokenId;
         } catch (error) {
-            logger.error(error);
+            logError(logData, error);
             return res.status(500).send({ error });
         }
 
         const data = await addOrUpdateNft(mintAddresses[i], tokenId);
 
         if (data.error) {
-            logger.error(data.message);
+            logError(logData, data.error);
             return res.status(data.statusCode).send({});
         }
 
