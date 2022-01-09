@@ -80,16 +80,18 @@ export async function addOrUpdateNft(
         // TODO skip if already queued: https://docs.quirrel.dev/api/queue#getbyid
 
         logData.third_party_name = 'queue/screenshot';
+        const id = `${tokenId}-${metadata.totalNFTCount}`;
         const jobData = await ScreenshotQueue.enqueue(
             {
+                id,
                 url: imgUrl,
                 tokenId,
             },
             {
                 delay: '30s',
                 retry: ['15s', '30s', '1m', '5m', '10m', '30m', '1h', '2h', '4h'],
-                // id: imgUrl,
-                // exclusive: true,
+                id,
+                override: false,
             },
         );
     } catch (error) {

@@ -2,19 +2,22 @@ import { Queue } from 'quirrel/next';
 
 import { fetcher, openseaFetchOptions, openseaGetAssetURL } from '@utils';
 import { CONTRACT_ADDRESS } from '@utils/constants';
+import { ipfsUrlToCIDString } from '@utils/ipfs';
 import { LogData, logger } from '@utils/logging';
 
 type Job = {
     tokenId: string;
     attempt: number;
+    newImageUrl: string;
 };
 
 const OpenseaForceUpdate = Queue(
     'api/v1/queues/openseaForceUpdate', // 👈 the route it's reachable on
     async (job: Job) => {
-        let { tokenId, attempt } = job;
+        let { tokenId, attempt, newImageUrl } = job;
 
         let totalAttempts = attempt;
+        const newImageCID = ipfsUrlToCIDString(newImageUrl);
 
         const getAssetUrl = openseaGetAssetURL(tokenId, CONTRACT_ADDRESS);
         const forceUpdateUrl = openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true);
@@ -27,13 +30,13 @@ const OpenseaForceUpdate = Queue(
             const originalImageURL = openseaResult.image_original_url;
             message = `OpenSea original image url: ${originalImageURL}`;
 
-            if (!(originalImageURL || '').includes('ipfs.io')) {
+            if (!(originalImageURL || '').includes(newImageCID)) {
                 const forceResult = await fetcher(forceUpdateUrl, openseaFetchOptions);
                 thrownError = forceResult?.error;
                 totalAttempts++;
                 await OpenseaForceUpdate.enqueue(
-                    { tokenId, attempt: totalAttempts },
-                    { delay: '15s' },
+                    { tokenId, attempt: totalAttempts, newImageUrl },
+                    { delay: '15s', id: tokenId },
                 );
             }
         } catch (error) {

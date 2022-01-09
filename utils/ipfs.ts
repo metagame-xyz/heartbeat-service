@@ -16,6 +16,9 @@ const client = create({
 
 const gatewayURL = 'https://ipfs.infura.io/ipfs/';
 const ipfsScheme = 'ipfs://';
+export const ipfsUrlToCIDString = (url: string): string => {
+    return url.replace(ipfsScheme, '');
+};
 
 export const addToIPFS = async (url: string): Promise<string> => {
     const file = await client.add(urlSource(url).content);
@@ -23,7 +26,7 @@ export const addToIPFS = async (url: string): Promise<string> => {
 };
 
 export const removeFromIPFS = async (ipfsURL: string): Promise<CID> => {
-    const cid = CID.parse(ipfsURL.replace(ipfsScheme, ''));
+    const cid = CID.parse(ipfsUrlToCIDString(ipfsURL));
     const result = await client.pin.rm(cid);
     return result;
 };

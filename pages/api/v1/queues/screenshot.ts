@@ -8,15 +8,16 @@ import { Metadata } from '@utils/metadata';
 
 import OpenseaForceUpdate from './openseaForceUpdate';
 
-type Job = {
+type ScreenshotJob = {
+    id: string;
     url: string;
     tokenId: string;
 };
 
 export default Queue(
     'api/v1/queues/screenshot', // 👈 the route it's reachable on
-    async (job: Job) => {
-        const { url, tokenId } = job;
+    async (job: ScreenshotJob) => {
+        const { url, tokenId, id } = job;
 
         const logData: LogData = {
             level: 'debug',
@@ -65,9 +66,12 @@ export default Queue(
             logData.third_party_name = 'opensea';
             await fetcher(openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true));
 
-            await OpenseaForceUpdate.enqueue({ tokenId, attempt: 1 }, { delay: '15s' });
+            await OpenseaForceUpdate.enqueue(
+                { tokenId, attempt: 1, newImageUrl: metadata.image },
+                { delay: '15s' },
+            );
 
-            logSuccess(logData);
+            logSuccess(logData, `success: ${id}`);
         } catch (error) {
             logError(logData, error);
             throw Error(error);
