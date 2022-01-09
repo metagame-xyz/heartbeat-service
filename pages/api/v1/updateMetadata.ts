@@ -77,7 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         statusCode = data.statusCode;
     }
 
-    const message = mintAddresses ? `mintAddresses: ${mintAddresses}` : 'no mint events';
+    const message = mintAddresses.length ? `mintAddresses: ${mintAddresses}` : 'no mint events';
     logSuccess(logData, message);
 
     return res.status(statusCode).send({});
