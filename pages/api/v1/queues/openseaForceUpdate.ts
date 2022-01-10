@@ -3,7 +3,7 @@ import { Queue } from 'quirrel/next';
 import { fetcher, openseaFetchOptions, openseaGetAssetURL } from '@utils';
 import { CONTRACT_ADDRESS } from '@utils/constants';
 import { ipfsUrlToCIDString } from '@utils/ipfs';
-import { LogData, logError, logger, logSuccess } from '@utils/logging';
+import { LogData, logError, logSuccess } from '@utils/logging';
 
 type Job = {
     tokenId: string;
@@ -22,11 +22,10 @@ const OpenseaForceUpdate = Queue(
         const getAssetUrl = openseaGetAssetURL(tokenId, CONTRACT_ADDRESS);
         const forceUpdateUrl = openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true);
 
-        let message = 'beggining openseaForceUpdate';
-        let thrownError = null;
+        let message = 'image url is up-to-date';
 
         const logData: LogData = {
-            level: thrownError ? 'error' : 'info',
+            level: 'info',
             token_id: tokenId,
             attempt_number: totalAttempts,
             third_party_name: 'opensea',
@@ -37,16 +36,19 @@ const OpenseaForceUpdate = Queue(
         try {
             const openseaResult = await fetcher(getAssetUrl, openseaFetchOptions);
             const originalImageURL = openseaResult.image_original_url;
-            message = `${newImageCID} included in ${originalImageURL}. No retry needed.`;
 
             if (!(originalImageURL || '').includes(newImageCID)) {
                 message = `${newImageCID} not included in ${originalImageURL}. Queueing again.`;
                 await fetcher(forceUpdateUrl, openseaFetchOptions);
                 totalAttempts++;
-                await OpenseaForceUpdate.enqueue(
+                const jobData = await OpenseaForceUpdate.enqueue(
                     { tokenId, attempt: totalAttempts, newImageUrl },
-                    { delay: '15s', id: tokenId },
+                    { delay: '15s' },
                 );
+
+                const newAttemptNumber = jobData.body.attempt;
+                message += ` attempt #${newAttemptNumber}`;
+                logData.job_data = jobData;
             }
         } catch (error) {
             logError(logData, error);

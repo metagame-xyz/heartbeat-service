@@ -82,4 +82,5 @@ export type LogData = {
     token_id?: string;
     function_name?: string;
     thrown_error?: any;
+    job_data?: any;
 };
