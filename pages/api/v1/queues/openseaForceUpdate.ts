@@ -3,7 +3,7 @@ import { Queue } from 'quirrel/next';
 import { fetcher, openseaFetchOptions, openseaGetAssetURL } from '@utils';
 import { CONTRACT_ADDRESS } from '@utils/constants';
 import { ipfsUrlToCIDString } from '@utils/ipfs';
-import { LogData, logger } from '@utils/logging';
+import { LogData, logError, logger, logSuccess } from '@utils/logging';
 
 type Job = {
     tokenId: string;
@@ -25,14 +25,23 @@ const OpenseaForceUpdate = Queue(
         let message = 'beggining openseaForceUpdate';
         let thrownError = null;
 
+        const logData: LogData = {
+            level: thrownError ? 'error' : 'info',
+            token_id: tokenId,
+            attempt_number: totalAttempts,
+            third_party_name: 'opensea',
+            function_name: 'openseaForceUpdate',
+            message,
+        };
+
         try {
             const openseaResult = await fetcher(getAssetUrl, openseaFetchOptions);
             const originalImageURL = openseaResult.image_original_url;
-            message = `OpenSea original image url: ${originalImageURL}`;
+            message = `${newImageCID} included in ${originalImageURL}. No retry needed.`;
 
             if (!(originalImageURL || '').includes(newImageCID)) {
-                const forceResult = await fetcher(forceUpdateUrl, openseaFetchOptions);
-                thrownError = forceResult?.error;
+                message = `${newImageCID} not included in ${originalImageURL}. Queueing again.`;
+                await fetcher(forceUpdateUrl, openseaFetchOptions);
                 totalAttempts++;
                 await OpenseaForceUpdate.enqueue(
                     { tokenId, attempt: totalAttempts, newImageUrl },
@@ -40,19 +49,10 @@ const OpenseaForceUpdate = Queue(
                 );
             }
         } catch (error) {
-            thrownError = error;
-        } finally {
-            const logData: LogData = {
-                level: thrownError ? 'error' : 'info',
-                token_id: tokenId,
-                attempt_number: totalAttempts,
-                third_party_name: 'opensea',
-                function_name: 'openseaForceUpdate',
-                message,
-            };
-            thrownError ? (logData.thrown_error = thrownError) : null;
-            logger.log(logData);
+            logError(logData, error);
         }
+
+        logSuccess(logData, message);
     },
 );
 

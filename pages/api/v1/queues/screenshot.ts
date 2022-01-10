@@ -64,7 +64,7 @@ export default Queue(
             /*********************/
 
             logData.third_party_name = 'opensea';
-            await fetcher(openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true));
+            fetcher(openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true)); //dont need to wait this
 
             await OpenseaForceUpdate.enqueue(
                 { tokenId, attempt: 1, newImageUrl: metadata.image },
