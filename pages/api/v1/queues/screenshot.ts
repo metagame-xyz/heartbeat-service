@@ -68,7 +68,7 @@ export default Queue(
 
             await OpenseaForceUpdate.enqueue(
                 { tokenId, attempt: 1, newImageUrl: metadata.image },
-                { delay: '15s' },
+                { delay: '15s', id: tokenId, override: true },
             );
 
             logSuccess(logData, `success: ${id}`);

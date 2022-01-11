@@ -16,11 +16,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const metadata = JSON.parse(metadataStr);
 
-    const jobData = await OpenseaForceUpdate.enqueue({
-        tokenId: tokenIdString,
-        attempt: 1,
-        newImageUrl: metadata.image,
-    });
+    const jobData = await OpenseaForceUpdate.enqueue(
+        {
+            tokenId: tokenIdString,
+            attempt: 1,
+            newImageUrl: metadata.image,
+        },
+        { id: tokenIdString, override: true },
+    );
     res.send(jobData);
     // res.send({});
 }
