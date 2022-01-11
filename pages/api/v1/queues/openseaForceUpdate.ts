@@ -43,7 +43,7 @@ const OpenseaForceUpdate = Queue(
                 totalAttempts++;
                 const jobData = await OpenseaForceUpdate.enqueue(
                     { tokenId, attempt: totalAttempts, newImageUrl },
-                    { delay: '15s' },
+                    { delay: '15s', id: tokenId, override: true },
                 );
 
                 const newAttemptNumber = jobData.body.attempt;
