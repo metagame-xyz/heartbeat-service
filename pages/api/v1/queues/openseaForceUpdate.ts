@@ -60,12 +60,12 @@ const OpenseaForceUpdate = Queue(
                 totalAttempts++;
                 const delay = attemptToDelay[totalAttempts];
                 message = `${newImageCID} not included in ${originalImageURL}. Waiting ${delay} to try again.`;
-                const jobData = await OpenseaForceUpdate.enqueue(
-                    { tokenId, attempt: totalAttempts, newImageUrl },
-                    { delay, id: tokenId, override: true },
-                );
+                // const jobData = await OpenseaForceUpdate.enqueue(
+                //     { tokenId, attempt: totalAttempts, newImageUrl },
+                //     { delay, id: tokenId, override: true },
+                // );
 
-                logData.job_data = jobData;
+                // logData.job_data = jobData;
             }
         } catch (error) {
             logError(logData, error);
