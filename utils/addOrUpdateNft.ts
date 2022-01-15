@@ -1,9 +1,10 @@
 import ScreenshotQueue from '@api/queues/screenshot';
 
-import { defaultProvider, getUserName, ioredisClient } from '@utils';
-import { formatMetadata, getNFTData, NFTs } from '@utils/metadata';
+import { defaultProvider, fetcher, getUserName, ioredisClient, openseaGetAssetURL } from '@utils';
+import { formatMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
 import { activateUrlbox } from '@utils/urlbox';
 
+import { CONTRACT_ADDRESS } from './constants';
 import { LogData, logError, logger, logSuccess } from './logging';
 
 export type newNftResponse = {
@@ -60,47 +61,51 @@ export async function addOrUpdateNft(
     /*********************/
     /*  SAVE METADATA   */
     /*********************/
+    let message = 'shouldnt ever see this';
     try {
         logData.third_party_name = 'redis';
+        const oldMetadata: Metadata = JSON.parse(await ioredisClient.hget(tokenId, 'metadata'));
         await ioredisClient.hset(address, { tokenId, metadata: JSON.stringify(metadata) });
         await ioredisClient.hset(tokenId, { address: address, metadata: JSON.stringify(metadata) });
 
-        /************************/
-        /* SCREENSHOT NFT IMAGE */
-        /************************/
-        logData.third_party_name = 'urlbox';
-        const imgUrl = await activateUrlbox(tokenId, metadata.totalNFTCount, true);
+        if (oldMetadata.uniqueNFTCount !== metadata.uniqueNFTCount) {
+            message = 'uniqueNFTCount changed, new screenshot';
+            /************************/
+            /* SCREENSHOT NFT IMAGE */
+            /************************/
+            logData.third_party_name = 'urlbox';
+            const imgUrl = await activateUrlbox(tokenId, metadata.totalNFTCount, true);
 
-        // logger.info(`imgUrl for tokenId ${tokenId}: ${imgUrl}`);
+            /************************/
+            /*  QUEUE UPDATING IMG  */
+            /************************/
 
-        /************************/
-        /*  QUEUE UPDATING IMG  */
-        /************************/
-
-        // TODO skip if already queued: https://docs.quirrel.dev/api/queue#getbyid
-
-        logData.third_party_name = 'queue/screenshot';
-        const id = `${tokenId}-${metadata.totalNFTCount}`;
-        const jobData = await ScreenshotQueue.enqueue(
-            {
-                id,
-                url: imgUrl,
-                tokenId,
-            },
-            {
-                delay: '30s',
-                retry: ['15s', '30s', '1m', '5m', '10m', '30m', '1h', '2h', '4h'],
-                id,
-                override: false,
-            },
-        );
+            logData.third_party_name = 'queue/screenshot';
+            const id = `${tokenId}-${metadata.totalNFTCount}`;
+            const jobData = await ScreenshotQueue.enqueue(
+                {
+                    id,
+                    url: imgUrl,
+                    tokenId,
+                },
+                {
+                    delay: '30s',
+                    retry: ['15s', '30s', '1m', '5m', '10m', '30m', '1h', '2h', '4h'],
+                    id,
+                    override: false,
+                },
+            );
+        } else {
+            message = 'uniqueNFTCount did not change, no new screenshot';
+            // if no new unique nfts, just update the metadata on OpenSea
+            fetcher(openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true));
+        }
     } catch (error) {
         logError(logData, error);
-        // logger.error(error);
         return { statusCode: 500, error, message: `screenshot queueing for ${address}` };
     }
 
-    logSuccess(logData);
+    logSuccess(logData, message);
 
     return {
         statusCode: 200,
