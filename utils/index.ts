@@ -4,9 +4,9 @@ import { createHmac } from 'crypto';
 import { ethers } from 'ethers';
 import Redis from 'ioredis';
 import type { NextApiRequest } from 'next';
-// import fetch from 'node-fetch-retry';
-import fetch, { Response } from 'node-fetch';
+import fetch from 'node-fetch-retry';
 
+// import fetch, { Response } from 'node-fetch';
 import { LogData, logError, logger, logWarning } from '@utils/logging';
 
 import {
