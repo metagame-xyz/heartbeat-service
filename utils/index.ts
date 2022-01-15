@@ -6,7 +6,7 @@ import Redis from 'ioredis';
 import type { NextApiRequest } from 'next';
 import fetch from 'node-fetch-retry';
 
-import { logger } from '@utils/logging';
+import { LogData, logError, logger, logWarning } from '@utils/logging';
 
 import {
     ALCHEMY_NOTIFY_TOKEN,
@@ -40,11 +40,17 @@ export const defaultMainnetProvider = getDefaultProvider('homestead', {
     },
 });
 
+const fetchRetryLogData: LogData = {
+    level: 'warning',
+    function_name: 'node-fetch-retry',
+    message: 'fetcher retry log',
+};
+
 const fetchOptions = {
-    retry: 12,
-    pause: 2000,
+    retry: 4,
+    pause: 1000,
     callback: (retry: any) => {
-        logger.warn(`Retrying: ${retry}`);
+        logWarning(fetchRetryLogData, `retry #${retry}`);
     },
     body: null,
 };
@@ -76,9 +82,16 @@ export class FetcherError extends Error {
             statusText: this.statusText,
             url: this.url,
             bodySent: this.bodySent,
+            message: this.message,
         };
     }
 }
+
+const fetcherLogData: LogData = {
+    level: 'error',
+    function_name: 'fetcher',
+    message: 'null??',
+};
 
 export function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -97,9 +110,11 @@ export async function fetcher(url: string, options = fetchOptions) {
                 bodySent: options.body ? JSON.parse(options.body) : null,
                 message: await response.text(),
             };
-            logger.error(error); // TODO logflare and slack?
+            fetcherLogData.thrown_error = error;
+            logWarning(fetcherLogData, 'fetcher retry warning');
             retry--;
             if (retry === 0) {
+                logError(fetcherLogData, error);
                 throw new FetcherError(error);
             }
             await sleep(2000);
