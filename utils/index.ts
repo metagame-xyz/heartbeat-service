@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 import Redis from 'ioredis';
 import type { NextApiRequest } from 'next';
 // import fetch from 'node-fetch-retry';
-import fetch from 'node-fetch';
+import fetch, { Response } from 'node-fetch';
 
 import { LogData, logError, logger, logWarning } from '@utils/logging';
 
@@ -100,9 +100,9 @@ export function sleep(ms) {
 export async function fetcher(url: string, options = fetchOptions) {
     let retry = 3;
     while (retry > 0) {
-        const response = await fetch(url, options);
+        const response: Response = await fetch(url, options);
         if (response.ok) {
-            return response.json();
+            return response.json() as Promise<any>;
         } else {
             const error = {
                 status: response.status,
