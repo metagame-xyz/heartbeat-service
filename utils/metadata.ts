@@ -116,7 +116,10 @@ export type Metadata = {
     nfts: NFTs;
 };
 
-export function formatMetadata(
+const desc = (dateStr, uniqueNFTCount) =>
+    `A garden that's been growing since ${dateStr}. It has ${uniqueNFTCount} flowers so far.`;
+
+export function formatNewMetadata(
     minterAddress: string,
     nfts: NFTs,
     dateStr: string,
@@ -127,10 +130,30 @@ export function formatMetadata(
 
     const metadata: Metadata = {
         name: `${userName}'s Token Garden`,
-        description: `A garden that's been growning since ${dateStr}. It has ${uniqueNFTCount} flowers so far.`,
+        description: desc(dateStr, uniqueNFTCount),
         image: `https://${WEBSITE_URL}/growing.png`,
         external_url: `https://${WEBSITE_URL}/garden/${tokenId}`,
         address: minterAddress,
+        uniqueNFTCount,
+        totalNFTCount: Object.values(nfts).reduce((t, n) => t + n.count, 0),
+        nfts,
+    };
+
+    return metadata;
+}
+
+export function updateMetadata(
+    oldMetadata: Metadata,
+    nfts: NFTs,
+    dateStr: string,
+    userName: string,
+): Metadata {
+    const uniqueNFTCount = Object.keys(nfts).length;
+
+    const metadata: Metadata = {
+        ...oldMetadata,
+        name: `${userName}'s Token Garden`,
+        description: desc(dateStr, uniqueNFTCount),
         uniqueNFTCount,
         totalNFTCount: Object.values(nfts).reduce((t, n) => t + n.count, 0),
         nfts,

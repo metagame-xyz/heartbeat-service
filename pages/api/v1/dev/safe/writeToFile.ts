@@ -17,7 +17,7 @@ import {
     WEBSITE_URL,
 } from '@utils/constants';
 import { logger } from '@utils/logging';
-import { formatMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
+import { formatNewMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
 import { activateUrlbox } from '@utils/urlbox';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -68,7 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     let metadata: Metadata;
     try {
-        metadata = await formatMetadata(minterAddress, nfts, dateStr, userName, tokenId);
+        metadata = await formatNewMetadata(minterAddress, nfts, dateStr, userName, tokenId);
     } catch (error) {
         logger.error(error);
         return res.status(500).send(error);

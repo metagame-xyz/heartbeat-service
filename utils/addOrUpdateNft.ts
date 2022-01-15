@@ -1,7 +1,7 @@
 import ScreenshotQueue from '@api/queues/screenshot';
 
 import { defaultProvider, fetcher, getUserName, ioredisClient, openseaGetAssetURL } from '@utils';
-import { formatMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
+import { formatNewMetadata, getNFTData, Metadata, NFTs, updateMetadata } from '@utils/metadata';
 import { activateUrlbox } from '@utils/urlbox';
 
 import { CONTRACT_ADDRESS } from './constants';
@@ -47,8 +47,6 @@ export async function addOrUpdateNft(
         special: true,
     };
 
-    // logger.info(nfts);
-
     /*********************/
     /* DRAFT OF METADATA */
     /*********************/
@@ -56,7 +54,7 @@ export async function addOrUpdateNft(
     // this will log an error if it fails but not stop the rest of this function
     const userName = await getUserName(defaultProvider, address);
 
-    const metadata = formatMetadata(address, nfts, dateStr, userName, tokenId);
+    let metadata = formatNewMetadata(address, nfts, dateStr, userName, tokenId);
 
     /*********************/
     /*  SAVE METADATA   */
@@ -65,10 +63,14 @@ export async function addOrUpdateNft(
     try {
         logData.third_party_name = 'redis';
         const oldMetadata: Metadata = JSON.parse(await ioredisClient.hget(tokenId, 'metadata'));
+        if (oldMetadata) {
+            metadata = updateMetadata(oldMetadata, nfts, dateStr, userName);
+        }
+
         await ioredisClient.hset(address, { tokenId, metadata: JSON.stringify(metadata) });
         await ioredisClient.hset(tokenId, { address: address, metadata: JSON.stringify(metadata) });
 
-        if (oldMetadata.uniqueNFTCount !== metadata.uniqueNFTCount) {
+        if (oldMetadata?.uniqueNFTCount !== metadata.uniqueNFTCount) {
             message = 'uniqueNFTCount changed, new screenshot';
             /************************/
             /* SCREENSHOT NFT IMAGE */

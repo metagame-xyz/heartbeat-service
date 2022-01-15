@@ -11,7 +11,7 @@ import {
 } from '@utils';
 import { doneDivClass, URL_BOX_API_SECRET, URLBOX_API_KEY } from '@utils/constants';
 import { logger } from '@utils/logging';
-import { formatMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
+import { formatNewMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
 
 import ScreenshotQueue from '../../queues/screenshot';
 
@@ -64,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     let metadata: Metadata;
     try {
-        metadata = await formatMetadata(address, nfts, dateStr, userName, tokenId);
+        metadata = await formatNewMetadata(address, nfts, dateStr, userName, tokenId);
     } catch (error) {
         logger.error(error);
         return res.status(500).send(error);
