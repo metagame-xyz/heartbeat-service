@@ -34,9 +34,9 @@ export default Queue(
             const metadataStr = await ioredisClient.hget(tokenId, 'metadata');
 
             if (!metadataStr) {
-                logData.thrown_error = `metadataStr is null`;
-                logger.log(logData);
-                throw Error(logData.thrown_error);
+                const error = `metadataStr is null`;
+                logError(logData, error);
+                throw Error(error);
             }
 
             const metadata: Metadata = JSON.parse(metadataStr);
@@ -66,10 +66,12 @@ export default Queue(
             logData.third_party_name = 'opensea';
             fetcher(openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true)); //dont need to wait for this
 
-            OpenseaForceUpdate.enqueue( // dont need to wait for this either
+            const jobData = await OpenseaForceUpdate.enqueue(
+                // dont need to wait for this either
                 { tokenId, attempt: 1, newImageUrl: metadata.image },
                 { delay: '15s', id: tokenId, override: true },
             );
+            logData.job_data = jobData;
 
             logSuccess(logData, `success: ${id}`);
         } catch (error) {

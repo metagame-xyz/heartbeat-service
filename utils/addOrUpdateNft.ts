@@ -100,6 +100,7 @@ export async function addOrUpdateNft(
                     override: false,
                 },
             );
+            logData.job_data = jobData;
         } else {
             message = 'uniqueNFTCount did not change, no new screenshot';
             // if no new unique nfts, just update the metadata on OpenSea
