@@ -64,7 +64,7 @@ export default Queue(
             /*********************/
 
             logData.third_party_name = 'opensea';
-            fetcher(openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true)); //dont need to wait for this
+            await fetcher(openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true)); //dont need to wait for this
 
             const jobData = await OpenseaForceUpdate.enqueue(
                 // dont need to wait for this either

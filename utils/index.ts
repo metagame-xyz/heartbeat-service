@@ -4,7 +4,8 @@ import { createHmac } from 'crypto';
 import { ethers } from 'ethers';
 import Redis from 'ioredis';
 import type { NextApiRequest } from 'next';
-import fetch from 'node-fetch-retry';
+// import fetch from 'node-fetch-retry';
+import fetch from 'node-fetch';
 
 import { LogData, logError, logger, logWarning } from '@utils/logging';
 
@@ -40,18 +41,18 @@ export const defaultMainnetProvider = getDefaultProvider('homestead', {
     },
 });
 
-const fetchRetryLogData: LogData = {
-    level: 'warning',
-    function_name: 'node-fetch-retry',
-    message: 'fetcher retry log',
-};
+// const fetchRetryLogData: LogData = {
+//     level: 'warning',
+//     function_name: 'node-fetch-retry',
+//     message: 'fetcher retry log',
+// };
 
 const fetchOptions = {
-    retry: 4,
-    pause: 1000,
-    callback: (retry: any) => {
-        logWarning(fetchRetryLogData, `retry #${retry}`);
-    },
+    // retry: 4,
+    // pause: 1000,
+    // callback: (retry: any) => {
+    //     logWarning(fetchRetryLogData, `retry #${retry}`);
+    // },
     body: null,
 };
 
