@@ -18,6 +18,7 @@ export type newNftResponse = {
 export async function addOrUpdateNft(
     minterAddress: string,
     tokenId: string,
+    forceScreenshot = false,
 ): Promise<newNftResponse> {
     const address = minterAddress.toLowerCase();
 
@@ -70,8 +71,10 @@ export async function addOrUpdateNft(
         await ioredisClient.hset(address, { tokenId, metadata: JSON.stringify(metadata) });
         await ioredisClient.hset(tokenId, { address: address, metadata: JSON.stringify(metadata) });
 
-        if (oldMetadata?.uniqueNFTCount !== metadata.uniqueNFTCount) {
-            message = 'uniqueNFTCount changed, new screenshot';
+        if (oldMetadata?.uniqueNFTCount !== metadata.uniqueNFTCount || forceScreenshot) {
+            message = forceScreenshot
+                ? 'screenshot manually forced'
+                : 'uniqueNFTCount changed, new screenshot';
             /************************/
             /* SCREENSHOT NFT IMAGE */
             /************************/

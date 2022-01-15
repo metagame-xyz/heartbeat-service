@@ -2,11 +2,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { isValidEventForwarderSignature } from '@utils';
 import { addOrUpdateNft } from '@utils/addOrUpdateNft';
-import { logger } from '@utils/logging';
+import { LogData, logError, logSuccess } from '@utils/logging';
 import { addressMap } from '@utils/testAddresses';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    logger.info(`top of newTransaction for tokenId ${req.body.tokenId}`);
     if (req.method !== 'POST') {
         /**
          * During development, it's useful to un-comment this block
@@ -32,18 +31,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const { minterAddress, tokenId } = req.body;
+    const forceScreenshot = req.body.forceScreenshot ? req.body.forceScreenshot : false;
     let address: string = minterAddress.toLowerCase();
+
+    const logData: LogData = {
+        level: 'info',
+        function_name: 'newTransaction',
+        message: `begin`,
+        token_id: tokenId,
+        wallet_address: address,
+    };
 
     if (process.env.VERCEL_ENV !== 'production') {
         address = addressMap[tokenId.toString()];
     }
 
-    const { statusCode, message, error, result } = await addOrUpdateNft(address, tokenId);
+    const { statusCode, message, error, result } = await addOrUpdateNft(
+        address,
+        tokenId,
+        forceScreenshot,
+    );
 
     if (statusCode !== 200) {
-        logger.error(message);
+        logError(logData, error);
         return res.status(statusCode).send({ error });
     } else {
+        logSuccess(logData);
         res.status(statusCode).send({
             status: statusCode === 200 ? 1 : 0,
             message,
