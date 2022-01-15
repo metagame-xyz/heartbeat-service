@@ -12,6 +12,7 @@ export const POCKET_NETWORK_ID = process.env.POCKET_NETWORK_ID;
 export const ALCHEMY_NOTIFY_TOKEN = process.env.ALCHEMY_NOTIFY_TOKEN;
 export const OPENSEA_API_KEY = process.env.OPENSEA_API_KEY;
 export const DATADOG_API_KEY = process.env.DATADOG_API_KEY;
+export const SLACK_API_TOKEN = process.env.SLACK_API_TOKEN;
 
 /* Frontend Constants */
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS.toLowerCase();
@@ -67,3 +68,5 @@ function getNetworkString(network: string): NetworkStrings {
 }
 
 export const blackholeAddress = '0x0000000000000000000000000000000000000000';
+
+export const slackErrorsChannelId = ''

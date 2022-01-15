@@ -3,7 +3,7 @@ import { Queue } from 'quirrel/next';
 import { fetcher, openseaFetchOptions, openseaGetAssetURL } from '@utils';
 import { CONTRACT_ADDRESS } from '@utils/constants';
 import { ipfsUrlToCIDString } from '@utils/ipfs';
-import { LogData, logError, logSuccess } from '@utils/logging';
+import { LogData, logError, logSuccess, logWarning } from '@utils/logging';
 
 type Job = {
     tokenId: string;
@@ -12,7 +12,6 @@ type Job = {
 };
 
 const attemptToDelay = [
-    null,
     null,
     '15s',
     '30s',
@@ -57,15 +56,20 @@ const OpenseaForceUpdate = Queue(
             const originalImageURL = openseaResult.image_original_url;
 
             if (!(originalImageURL || '').includes(newImageCID)) {
-                totalAttempts++;
-                const delay = attemptToDelay[totalAttempts];
+                const delay = attemptToDelay[attempt];
                 message = `${newImageCID} not included in ${originalImageURL}. Waiting ${delay} to try again.`;
-                // const jobData = await OpenseaForceUpdate.enqueue(
-                //     { tokenId, attempt: totalAttempts, newImageUrl },
-                //     { delay, id: tokenId, override: true },
-                // );
 
-                // logData.job_data = jobData;
+                if (delay) {
+                    totalAttempts++;
+                    const jobData = await OpenseaForceUpdate.enqueue(
+                        { tokenId, attempt: totalAttempts, newImageUrl },
+                        { delay, id: tokenId, override: true },
+                    );
+
+                    logData.job_data = jobData;
+                } else {
+                    logWarning(logData, 'attempts exhausted. Call OpenSea on the phone');
+                }
             }
         } catch (error) {
             logError(logData, error);

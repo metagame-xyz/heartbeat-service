@@ -1,4 +1,5 @@
 import { getDefaultProvider } from '@ethersproject/providers';
+// import { WebClient } from '@slack/web-api';
 import { createHmac } from 'crypto';
 import { ethers } from 'ethers';
 import Redis from 'ioredis';
@@ -18,6 +19,8 @@ import {
     POCKET_NETWORK_ID,
     REDIS_URL,
 } from './constants';
+
+// const slackClient = new WebClient(SLACK_API_TOKEN);
 
 export const defaultProvider = getDefaultProvider(networkStrings.ethers, {
     infura: INFURA_PROJECT_ID,

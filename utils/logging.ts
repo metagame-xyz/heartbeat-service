@@ -71,6 +71,14 @@ export const logError = (logData: LogData, error: any) => {
     logger.log(logDataCopy);
 };
 
+export const logWarning = (logData: LogData, message = 'warning') => {
+    const logDataCopy = { ...logData };
+    logDataCopy.level = 'warning';
+    logDataCopy.message = message;
+    logDataCopy.alert = true;
+    logger.log(logDataCopy);
+};
+
 export type LogData = {
     level: 'emerg' | 'alert' | 'crit' | 'error' | 'warning' | 'notice' | 'info' | 'debug';
     retry_needed?: boolean;
@@ -83,4 +91,5 @@ export type LogData = {
     function_name?: string;
     thrown_error?: any;
     job_data?: any;
+    alert?: boolean;
 };
