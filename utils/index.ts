@@ -12,6 +12,7 @@ import { LogData, logError, logger, logWarning } from '@utils/logging';
 import {
     ALCHEMY_NOTIFY_TOKEN,
     ALCHEMY_PROJECT_ID,
+    CONTRACT_ADDRESS,
     EVENT_FORWARDER_AUTH_TOKEN,
     INFURA_PROJECT_ID,
     networkStrings,
@@ -123,7 +124,11 @@ export async function fetcher(url: string, options = fetchOptions) {
     }
 }
 
-// export const fetcher = (url: string) => fetch(url, fetchOptions).then((r: any) => r.json());
+export async function forceUpdateOpenSeaMetadata(tokenId, forceMainnet = false): Promise<any> {
+    const networkString = forceMainnet ? 'api.' : networkStrings.openseaAPI;
+    const url = `https://${networkString}opensea.io/api/v1/asset/${CONTRACT_ADDRESS}/${tokenId}/?force_update=true`;
+    return fetcher(url, openseaFetchOptions);
+}
 
 export const isValidEventForwarderSignature = (request: NextApiRequest) => {
     const token = EVENT_FORWARDER_AUTH_TOKEN;
@@ -184,9 +189,3 @@ export const getUserName = async (provider, address) => {
     }
     return ensName || address.substr(0, 6);
 };
-
-export function openseaGetAssetURL(tokenId, contractAddress, forceUpdate = false, mainnet = null) {
-    const networkString = mainnet ? 'api.' : networkStrings.openseaAPI;
-    const forceUpdateString = forceUpdate ? '/?force_update=true' : '';
-    return `https://${networkString}opensea.io/api/v1/asset/${contractAddress}/${tokenId}${forceUpdateString}`;
-}

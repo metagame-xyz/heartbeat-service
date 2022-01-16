@@ -1,7 +1,6 @@
 import { Queue } from 'quirrel/next';
 
-import { fetcher, openseaFetchOptions, openseaGetAssetURL } from '@utils';
-import { CONTRACT_ADDRESS } from '@utils/constants';
+import { forceUpdateOpenSeaMetadata } from '@utils';
 import { ipfsUrlToCIDString } from '@utils/ipfs';
 import { LogData, logError, logSuccess, logWarning } from '@utils/logging';
 
@@ -38,7 +37,6 @@ const OpenseaForceUpdate = Queue(
 
         let totalAttempts = attempt;
         const newImageCID = ipfsUrlToCIDString(newImageUrl);
-        const forceUpdateUrl = openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true);
 
         let message = 'image url is up-to-date';
 
@@ -52,7 +50,7 @@ const OpenseaForceUpdate = Queue(
         };
 
         try {
-            const openseaResult = await fetcher(forceUpdateUrl, openseaFetchOptions);
+            const openseaResult = await forceUpdateOpenSeaMetadata(tokenId);
             const originalImageURL = openseaResult.image_original_url;
 
             if (!(originalImageURL || '').includes(newImageCID)) {

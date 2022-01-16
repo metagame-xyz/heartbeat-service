@@ -1,10 +1,9 @@
 import ScreenshotQueue from '@api/queues/screenshot';
 
-import { defaultProvider, fetcher, getUserName, ioredisClient, openseaGetAssetURL } from '@utils';
+import { defaultProvider, forceUpdateOpenSeaMetadata, getUserName, ioredisClient } from '@utils';
 import { formatNewMetadata, getNFTData, Metadata, NFTs, updateMetadata } from '@utils/metadata';
 import { activateUrlbox } from '@utils/urlbox';
 
-import { CONTRACT_ADDRESS } from './constants';
 import { LogData, logError, logger, logSuccess } from './logging';
 
 export type newNftResponse = {
@@ -104,7 +103,7 @@ export async function addOrUpdateNft(
         } else {
             message = 'uniqueNFTCount did not change, no new screenshot';
             // if no new unique nfts, just update the metadata on OpenSea
-            fetcher(openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true));
+            forceUpdateOpenSeaMetadata(tokenId);
         }
     } catch (error) {
         logError(logData, error);

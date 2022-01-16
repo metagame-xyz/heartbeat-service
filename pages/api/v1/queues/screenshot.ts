@@ -1,7 +1,6 @@
 import { Queue } from 'quirrel/next';
 
-import { fetcher, ioredisClient, openseaGetAssetURL } from '@utils';
-import { CONTRACT_ADDRESS } from '@utils/constants';
+import { fetcher, forceUpdateOpenSeaMetadata, ioredisClient } from '@utils';
 import { addToIPFS, removeFromIPFS } from '@utils/ipfs';
 import { LogData, logError, logger, logSuccess } from '@utils/logging';
 import { Metadata } from '@utils/metadata';
@@ -64,7 +63,7 @@ export default Queue(
             /*********************/
 
             logData.third_party_name = 'opensea';
-            await fetcher(openseaGetAssetURL(tokenId, CONTRACT_ADDRESS, true)); //dont need to wait for this
+            await forceUpdateOpenSeaMetadata(tokenId);
 
             const jobData = await OpenseaForceUpdate.enqueue(
                 // dont need to wait for this either
