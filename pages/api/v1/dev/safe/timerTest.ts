@@ -101,7 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     /* SCREENSHOT NFT IMAGE */
     /************************/
 
-    const url = `https://dev.tokengarden.art/privateGarden/${tokenId}`; //TODO un-hardcode
+    const url = `https://dev.heartbeat.art/privateGarden/${tokenId}`; //TODO un-hardcode
 
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
     const baseOptions = {
@@ -140,7 +140,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     logger.info(`fetching image took ${(end - start) / 1000} seconds`);
     logger.info(cachedData);
 
-    // const url = `https://dev.tokengarden.art/privateGarden/${tokenId}`; //TODO un-hardcode
+    // const url = `https://dev.heartbeat.art/privateGarden/${tokenId}`; //TODO un-hardcode
     // logger.info(`begin screenshot of ${url}`);
     // const start = performance.now();
     // const { status, data, response } = await mql(url, {

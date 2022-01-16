@@ -109,7 +109,7 @@ export type Metadata = {
     name: string;
     description: string;
     image: string; //
-    external_url: string; // tokengarden.art/garden/[tokenId]
+    external_url: string; // heartbeat.art/garden/[tokenId]
     address: string;
     uniqueNFTCount: number;
     totalNFTCount: number;

@@ -20,7 +20,7 @@ export const NETWORK = process.env.NEXT_PUBLIC_NETWORK.toLowerCase();
 export const INFURA_PROJECT_ID = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID;
 export const ALCHEMY_PROJECT_ID = process.env.NEXT_PUBLIC_ALCHEMY_PROJECT_ID;
 export const GOOGLE_ANALYTICS_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
-// tokengarden.loca.lt, dev.tokengarden.art, tokengarden.art
+// heartbeat.loca.lt, dev.heartbeat.art, heartbeat.art
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL;
 export const networkStrings = getNetworkString(NETWORK);
 export const THE_METAGAME_ETH_ADDRESS = '0x902A37155438982884ca26A5DBccf73f5ae8194b';

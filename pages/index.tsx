@@ -18,8 +18,8 @@ import { debug, event } from '@utils/frontend';
 import GardenGrower from '@utils/Garden';
 import { Metadata, NFTs } from '@utils/metadata';
 
-import TokenGardenImage from '../images/example-token-garden.png';
-import TokenGarden from '../tokenGarden.json';
+import heartbeatImage from '../images/example-token-garden.png';
+import heartbeat from '../heartbeat.json';
 
 export const getServerSideProps = async () => {
     const metadata = await ioredisClient.hget('homepageExample', 'metadata');
@@ -58,7 +58,7 @@ function Home({ metadata: metadataStr }) {
     const { provider, signer, userAddress, userName, eventParams, openWeb3Modal, toast } =
         useEthereum();
 
-    const tokenGardenContract = new Contract(CONTRACT_ADDRESS, TokenGarden.abi, provider);
+    const heartbeatContract = new Contract(CONTRACT_ADDRESS, heartbeat.abi, provider);
 
     let [minted, setMinted] = useState(false);
     let [minting, setMinting] = useState(false);
@@ -74,11 +74,11 @@ function Home({ metadata: metadataStr }) {
             let tokenId = null;
             try {
                 if (userAddress) {
-                    const filter = tokenGardenContract.filters.Transfer(
+                    const filter = heartbeatContract.filters.Transfer(
                         blackholeAddress,
                         userAddress,
                     );
-                    const [event] = await tokenGardenContract.queryFilter(filter); // get first event, should only be one
+                    const [event] = await heartbeatContract.queryFilter(filter); // get first event, should only be one
                     if (event) {
                         tokenId = event.args[2].toNumber();
                     }
@@ -99,7 +99,7 @@ function Home({ metadata: metadataStr }) {
         async function getMintedCount() {
             try {
                 console.log('getting mint count');
-                const mintCount: BigNumber = await tokenGardenContract.mintedCount();
+                const mintCount: BigNumber = await heartbeatContract.mintedCount();
                 setMintCount(mintCount.toNumber());
             } catch (error) {
                 debug({ error });
@@ -119,10 +119,10 @@ function Home({ metadata: metadataStr }) {
         }
 
         setMinting(true);
-        const tokenGardenContractWritable = tokenGardenContract.connect(signer);
+        const heartbeatContractWritable = heartbeatContract.connect(signer);
         const value = parseEther('0.01');
         try {
-            const data = await tokenGardenContractWritable.mint({ value });
+            const data = await heartbeatContractWritable.mint({ value });
             const moreData = await data.wait();
             const [fromAddress, toAddress, tokenId] = moreData.events.find(
                 (e) => (e.event = 'Transfer'),
@@ -249,7 +249,7 @@ function Home({ metadata: metadataStr }) {
                         h="60vw"></Box>
                 ) : (
                     <Image
-                        src={TokenGardenImage.src}
+                        src={heartbeatImage.src}
                         alt={`${copy.nameLowercase} image`}
                         layout="intrinsic"
                         width={1069}

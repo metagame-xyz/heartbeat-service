@@ -6,7 +6,7 @@ import { doneDivClass, URL_BOX_API_SECRET, URLBOX_API_KEY } from './constants';
 
 export async function activateUrlbox(tokenId, totalNFTCount, timer = false): Promise<string> {
     const env = process.env.VERCEL_ENV === 'production' ? 'www' : 'dev';
-    const url = `https://${env}.tokengarden.art/privateGarden/${tokenId}`;
+    const url = `https://${env}.heartbeat.art/privateGarden/${tokenId}`;
 
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
     const baseOptions = {
