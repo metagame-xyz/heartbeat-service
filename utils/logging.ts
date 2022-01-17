@@ -92,7 +92,7 @@ export type LogData = {
     alert?: boolean;
 };
 
-export type LogDataWithLevelAndMessage = LogData & {
+export type LogDataWithLevelAnd = LogData & {
     level: 'emerg' | 'alert' | 'crit' | 'error' | 'warning' | 'notice' | 'info' | 'debug';
     message: any;
 };

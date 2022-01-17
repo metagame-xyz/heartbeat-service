@@ -1,32 +1,44 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { defaultMainnetProvider, getUserName } from '@utils';
-import { formatNewMetadata, Metadata, NFTs } from '@utils/metadata';
+import { getUserName } from '@utils';
+import { LogData, logError } from '@utils/logging';
+import { formatNewMetadata, getTxnData, Metadata, TxnCounts } from '@utils/metadata';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    // const { address } = req.query;
-    // const addressString: string = Array.isArray(address) ? address[0] : address;
+    const { address } = req.query as { address: string };
 
-    // /****************/
-    // /* GET NFT DATA */
-    // /****************/
-    // let nfts: NFTs, dateStr: string;
-    // try {
-    //     [nfts, dateStr] = await getNFTData(addressString);
-    // } catch (error) {
-    //     logger.error(error);
-    // }
+    const logData: LogData = {
+        level: 'info',
+        token_id: null,
+        function_name: 'addOrUpdateNft',
+        message: `begin`,
+        wallet_address: address,
+    };
 
-    // // this will log an error if it fails but not stop the rest of this function
-    // const userName = await getUserName(defaultMainnetProvider, addressString);
+    /****************/
+    /* GET TXN DATA */
+    /****************/
+    let txnCounts: TxnCounts;
+    try {
+        txnCounts = await getTxnData(address);
+    } catch (error) {
+        logError(logData, error);
+        return { statusCode: 500, error, message: 'Error in getNFTData' };
+    }
 
-    // let metadata: Metadata;
-    // try {
-    //     metadata = await formatMetadata(addressString, nfts, dateStr, userName, '1');
-    // } catch (error) {
-    //     logger.error(error);
-    // }
+    /*********************/
+    /* DRAFT OF METADATA */
+    /*********************/
 
-    // res.send(metadata);
-    res.send({});
+    let metadata: Metadata;
+    try {
+        const userName = await getUserName(address);
+        metadata = formatNewMetadata(address, txnCounts, userName, '1');
+    } catch (error) {
+        console.log(error);
+        logError(logData, error);
+    }
+
+    res.send(metadata);
+    // res.send({ test: 'test', txnCounts });
 }

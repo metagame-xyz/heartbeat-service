@@ -16,7 +16,7 @@ import { blackholeAddress, CONTRACT_ADDRESS, networkStrings, WEBSITE_URL } from 
 import { copy } from '@utils/content';
 import { debug, event } from '@utils/frontend';
 import GardenGrower from '@utils/Heart';
-import { Metadata, NFTs } from '@utils/metadata';
+import { Metadata } from '@utils/metadata';
 
 import heartbeat from '../heartbeat.json';
 import heartbeatImage from '../images/example-token-garden.png';

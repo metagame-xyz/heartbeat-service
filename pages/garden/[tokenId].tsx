@@ -7,7 +7,7 @@ import Countdown, { zeroPad } from 'react-countdown';
 import { ioredisClient } from '@utils';
 import { CONTRACT_ADDRESS, networkStrings } from '@utils/constants';
 import GardenGrower from '@utils/Heart';
-import { Metadata, NFTs } from '@utils/metadata';
+import { Metadata } from '@utils/metadata';
 
 const toastInfoData = (title: string, description: string): UseToastOptions => ({
     title,

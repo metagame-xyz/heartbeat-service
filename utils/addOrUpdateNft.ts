@@ -2,7 +2,7 @@ import OpenseaForceUpdate from '@api/queues/openseaForceUpdate';
 import ScreenshotQueue from '@api/queues/screenshot';
 
 import { defaultProvider, getUserName, ioredisClient } from '@utils';
-import { formatNewMetadata, getTxnData, Metadata, NFTs, updateMetadata } from '@utils/metadata';
+import { formatNewMetadata, getTxnData, Metadata, updateMetadata } from '@utils/metadata';
 import { forceUpdateOpenSeaMetadata } from '@utils/requests';
 import { activateUrlbox, generateGIFWithUrlbox } from '@utils/urlbox';
 
@@ -48,7 +48,7 @@ export async function addOrUpdateNft(
     /*********************/
 
     // this will log an error if it fails but not stop the rest of this function
-    const userName = await getUserName(defaultProvider, address);
+    const userName = await getUserName(address);
 
     /*********************/
     /*  SAVE METADATA   */

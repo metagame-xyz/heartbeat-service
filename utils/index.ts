@@ -7,16 +7,14 @@ import type { NextApiRequest } from 'next';
 import fetch from 'node-fetch-retry';
 
 // import fetch, { Response } from 'node-fetch';
-import { LogData, logError, logger, logWarning } from '@utils/logging';
+import { logger } from '@utils/logging';
 
 import {
     ALCHEMY_NOTIFY_TOKEN,
     ALCHEMY_PROJECT_ID,
-    CONTRACT_ADDRESS,
     EVENT_FORWARDER_AUTH_TOKEN,
     INFURA_PROJECT_ID,
     networkStrings,
-    OPENSEA_API_KEY,
     POCKET_NETWORK_API_KEY,
     POCKET_NETWORK_ID,
     REDIS_URL,
@@ -91,7 +89,7 @@ export const formatDateObjToTime = (dateObj: Record<string, number>): string => 
     return `${ampmHour}:${minuteStr}:${secondStr} ${ampm}`;
 };
 
-export const getUserName = async (provider, address) => {
+export const getUserName = async (address: string, provider = defaultMainnetProvider) => {
     let ensName = null;
     try {
         ensName = await provider.lookupAddress(address);

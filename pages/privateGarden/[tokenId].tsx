@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 
 import { ioredisClient } from '@utils';
 import GardenGrower from '@utils/Heart';
-import { Metadata, NFTs } from '@utils/metadata';
+import { Metadata } from '@utils/metadata';
 
 export const getServerSideProps = async (context) => {
     const { tokenId } = context.query;
