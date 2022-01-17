@@ -1,5 +1,3 @@
-import { logger } from 'ethers';
-
 import { ioredisClient } from '@utils';
 import { ProductionNetworks, WEBSITE_URL } from '@utils/constants';
 
@@ -10,7 +8,7 @@ import { getAllTransactions } from './requests';
 /****************/
 /* GET TXN DATA */
 /****************/
-export async function getTxnData(minterAddress: string): Promise<any> {
+export async function getTxnData(minterAddress: string): Promise<TxnCounts> {
     const address = minterAddress.toLowerCase();
 
     const txnCounts: TxnCounts = {};
@@ -54,10 +52,10 @@ export async function getTxnData(minterAddress: string): Promise<any> {
         });
 
         txnCounts[network] = {
-            total: txnTotalCount,
-            lastDay: txnsInLastDay,
-            lastWeek: txnsInLastWeek,
-            lastMonth: txnsInLastMonth,
+            totalTransactions: txnTotalCount,
+            transactionsYesterday: txnsInLastDay,
+            transactionsLastWeek: txnsInLastWeek,
+            transactionsLastMonth: txnsInLastMonth,
         };
     }
 
@@ -67,13 +65,15 @@ export async function getTxnData(minterAddress: string): Promise<any> {
 export type TxnCounts = {
     ethereum?: SingleNetworkTxnCounts;
     polygon?: SingleNetworkTxnCounts;
+    fantom?: SingleNetworkTxnCounts;
+    avalanche?: SingleNetworkTxnCounts;
 };
 
 export type SingleNetworkTxnCounts = {
-    total: number;
-    lastDay: number;
-    lastWeek: number;
-    lastMonth: number;
+    totalTransactions: number;
+    transactionsYesterday: number;
+    transactionsLastWeek: number;
+    transactionsLastMonth: number;
 };
 
 export type Metadata = {
@@ -97,7 +97,10 @@ const desc = (networkCount, beatsPerMinute) =>
 
 const getNetworkCount = (txnCounts: TxnCounts) => {
     debug(txnCounts);
-    return Object.values(txnCounts).reduce((acc, curr) => (acc += curr.total ? 1 : 0), 0);
+    return Object.values(txnCounts).reduce(
+        (acc, curr) => (acc += curr.totalTransactions ? 1 : 0),
+        0,
+    );
 };
 
 export function formatNewMetadata(
@@ -108,7 +111,10 @@ export function formatNewMetadata(
 ): Metadata {
     const networkCount = getNetworkCount(txnCounts);
     const beatsPerMinute =
-        getBeatsPerMinute(txnCounts.ethereum.lastDay, txnCounts.ethereum.lastWeek) || 0;
+        getBeatsPerMinute(
+            txnCounts.ethereum.transactionsYesterday,
+            txnCounts.ethereum.transactionsLastWeek,
+        ) || 0;
 
     const metadata: Metadata = {
         name: `${userName}'s Heartbeat`,
@@ -162,6 +168,15 @@ export type OpenSeaMetadata = {
     attributes: Attributes[];
 };
 
+const camelCaseToSnakeCase = (str: string) =>
+    str.replace(/([A-Z])/g, (match) => `_${match.toLowerCase()}`);
+const snakeCaseToHumanReadable = (str: string) => str.replace(/_/g, ' ');
+const camelCaseToHumanReadable = (str: string) =>
+    snakeCaseToHumanReadable(camelCaseToSnakeCase(str));
+const ccTohr = (str: string) => camelCaseToHumanReadable(str);
+const titleCaseEveryWord = (str: string) =>
+    str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+
 export function metadataToOpenSeaMetadata(metadata: Metadata): OpenSeaMetadata {
     const openseaMetadata: OpenSeaMetadata = {
         name: metadata.name,
@@ -171,20 +186,33 @@ export function metadataToOpenSeaMetadata(metadata: Metadata): OpenSeaMetadata {
         animation_url: metadata.animationUrl,
         iframe_url: metadata.animationUrl,
         attributes: [
-            // properties
             {
                 trait_type: 'address',
                 value: metadata.address,
             },
+            {
+                trait_type: 'Active Network Count',
+                value: metadata.networkCount,
+            },
+            {
+                trait_type: 'Beats Per Minute',
+                value: metadata.beatsPerMinute,
+            },
         ],
     };
 
-    // for (const nft of specialNFTs) {
-    //     openseaMetadata.attributes.push({
-    //         trait_type: nft.tokenName,
-    //         value: `mints: ${nft.count}`,
-    //     });
-    // }
+    for (const network in metadata.txnCounts) {
+        const txnCounts = metadata.txnCounts[network];
+        for (const key in txnCounts) {
+            const value = txnCounts[key];
+            if (value) {
+                openseaMetadata.attributes.push({
+                    trait_type: titleCaseEveryWord(`${network} ${ccTohr(key)}`),
+                    value: Number(value),
+                });
+            }
+        }
+    }
 
     return openseaMetadata;
 }

@@ -2,7 +2,13 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { getUserName } from '@utils';
 import { LogData, logError } from '@utils/logging';
-import { formatNewMetadata, getTxnData, Metadata, TxnCounts } from '@utils/metadata';
+import {
+    formatNewMetadata,
+    getTxnData,
+    Metadata,
+    metadataToOpenSeaMetadata,
+    TxnCounts,
+} from '@utils/metadata';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { address } = req.query as { address: string };
@@ -39,6 +45,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         logError(logData, error);
     }
 
-    res.send(metadata);
+    const OpenSeaMetadata = metadataToOpenSeaMetadata(metadata);
+
+    const returnData = {
+        metadata,
+        OpenSeaMetadata,
+    };
+
+    res.send(returnData);
     // res.send({ test: 'test', txnCounts });
 }
