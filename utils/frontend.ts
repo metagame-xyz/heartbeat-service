@@ -23,3 +23,7 @@ export type EventParams = {
     errorReason?: string;
     errorMessage?: string;
 };
+
+export function getBeatsPerMinute(txnsInLastDay: number, txnsInLastWeek: number): number {
+    return txnsInLastDay || Math.round(txnsInLastWeek / 7); // TODO: fix this
+}

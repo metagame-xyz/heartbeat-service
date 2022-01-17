@@ -21,6 +21,7 @@ export const ipfsUrlToCIDString = (url: string): string => {
 };
 
 export const addToIPFS = async (url: string): Promise<string> => {
+    // TODO: use the mutable folder structure
     const file = await client.add(urlSource(url).content);
     return ipfsScheme + file.path;
 };

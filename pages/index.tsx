@@ -15,11 +15,11 @@ import { ioredisClient } from '@utils';
 import { blackholeAddress, CONTRACT_ADDRESS, networkStrings, WEBSITE_URL } from '@utils/constants';
 import { copy } from '@utils/content';
 import { debug, event } from '@utils/frontend';
-import GardenGrower from '@utils/Garden';
+import GardenGrower from '@utils/Heart';
 import { Metadata, NFTs } from '@utils/metadata';
 
-import heartbeatImage from '../images/example-token-garden.png';
 import heartbeat from '../heartbeat.json';
+import heartbeatImage from '../images/example-token-garden.png';
 
 export const getServerSideProps = async () => {
     const metadata = await ioredisClient.hget('homepageExample', 'metadata');
@@ -202,25 +202,14 @@ function Home({ metadata: metadataStr }) {
 
             const metadata: Metadata = JSON.parse(metadataStr);
             const minterAddress = metadata.address;
-            const nfts: NFTs = metadata.nfts;
             const garden = new GardenGrower(gardenEl, true);
 
-            await garden.addGround('flat_base_ground');
-            garden.renderGround();
-            await garden.addPebbles(minterAddress);
-            garden.renderPebbles();
-            await garden.addPlants(minterAddress);
-            garden.renderPlants();
             garden.renderAllFlowers();
-
-            for (let [address, nft] of Object.entries(nfts)) {
-                await garden.growFlowerInSquare(address, nft.count, minterAddress);
-            }
 
             garden.positionCamera();
             garden.done();
 
-            // garden.addGUI();
+            // garden.addGUI();q
         }
         growGarden();
     }, []);

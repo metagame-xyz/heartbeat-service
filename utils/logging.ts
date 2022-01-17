@@ -30,7 +30,7 @@ const localTransports = [new winston.transports.Console({ level: 'debug' })];
 const datadogTransport = new DatadogWinston({
     apiKey: DATADOG_API_KEY,
     hostname: process.env.VERCEL_URL,
-    service: 'token-garden-logger',
+    service: 'heartbeat-logger',
     ddsource: 'nodejs',
     ddtags: `env:${process.env.VERCEL_ENV}`,
 });
@@ -56,35 +56,33 @@ export const debug = (message: any) => {
 };
 
 export const logSuccess = (logData: LogData, message = 'success') => {
-    const logDataCopy = { ...logData };
-    logDataCopy.level = 'info';
-    logDataCopy.message = message;
+    const logDataCopy = { ...logData, level: 'info', message };
     logDataCopy.third_party_name = null;
     logger.log(logDataCopy);
 };
 
 export const logError = (logData: LogData, error: any) => {
-    const logDataCopy = { ...logData };
-    logDataCopy.level = 'error';
-    logDataCopy.message = error?.message || 'error obj had no .message';
+    const logDataCopy = {
+        ...logData,
+        level: 'error',
+        message: error?.message || 'error obj had no .message',
+    };
     logDataCopy.thrown_error = error;
     logger.log(logDataCopy);
 };
 
 export const logWarning = (logData: LogData, message = 'warning') => {
-    const logDataCopy = { ...logData };
-    logDataCopy.level = 'warning';
-    logDataCopy.message = message;
+    const logDataCopy = { ...logData, level: 'warning', message };
     logDataCopy.alert = true;
     logger.log(logDataCopy);
 };
 
 export type LogData = {
-    level: 'emerg' | 'alert' | 'crit' | 'error' | 'warning' | 'notice' | 'info' | 'debug';
+    level?: 'emerg' | 'alert' | 'crit' | 'error' | 'warning' | 'notice' | 'info' | 'debug';
     retry_needed?: boolean;
     attempt_number?: number;
     error_code?: number;
-    message: any;
+    message?: any;
     third_party_name?: string;
     wallet_address?: string;
     token_id?: string;
@@ -92,4 +90,9 @@ export type LogData = {
     thrown_error?: any;
     job_data?: any;
     alert?: boolean;
+};
+
+export type LogDataWithLevelAndMessage = LogData & {
+    level: 'emerg' | 'alert' | 'crit' | 'error' | 'warning' | 'notice' | 'info' | 'debug';
+    message: any;
 };

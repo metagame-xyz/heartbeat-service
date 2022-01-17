@@ -1,9 +1,12 @@
+import OpenseaForceUpdate from '@api/queues/openseaForceUpdate';
 import ScreenshotQueue from '@api/queues/screenshot';
 
-import { defaultProvider, forceUpdateOpenSeaMetadata, getUserName, ioredisClient } from '@utils';
-import { formatNewMetadata, getNFTData, Metadata, NFTs, updateMetadata } from '@utils/metadata';
-import { activateUrlbox } from '@utils/urlbox';
+import { defaultProvider, getUserName, ioredisClient } from '@utils';
+import { formatNewMetadata, getTxnData, Metadata, NFTs, updateMetadata } from '@utils/metadata';
+import { forceUpdateOpenSeaMetadata } from '@utils/requests';
+import { activateUrlbox, generateGIFWithUrlbox } from '@utils/urlbox';
 
+import { addToIPFS } from './ipfs';
 import { LogData, logError, logger, logSuccess } from './logging';
 
 export type newNftResponse = {
@@ -30,22 +33,15 @@ export async function addOrUpdateNft(
     };
 
     /****************/
-    /* GET NFT DATA */
+    /* GET TXN DATA */
     /****************/
-    let nfts: NFTs, dateStr: string;
+    let txnCounts;
     try {
-        [nfts, dateStr] = await getNFTData(address, 'homestead');
+        txnCounts = await getTxnData(address);
     } catch (error) {
-        logger.error(error);
+        logError(logData, error);
         return { statusCode: 500, error, message: 'Error in getNFTData' };
     }
-
-    nfts['0x7d414bc0482432d2d74021095256aab2e6d3f6b8'] = {
-        tokenSymbol: 'TGRDN',
-        tokenName: 'Token Garden',
-        count: 1,
-        special: true,
-    };
 
     /*********************/
     /* DRAFT OF METADATA */
@@ -54,63 +50,53 @@ export async function addOrUpdateNft(
     // this will log an error if it fails but not stop the rest of this function
     const userName = await getUserName(defaultProvider, address);
 
-    let metadata = formatNewMetadata(address, nfts, dateStr, userName, tokenId);
-
     /*********************/
     /*  SAVE METADATA   */
     /*********************/
-    let message = 'shouldnt ever see this';
     try {
         logData.third_party_name = 'redis';
         const oldMetadata: Metadata = JSON.parse(await ioredisClient.hget(tokenId, 'metadata'));
-        if (oldMetadata) {
-            metadata = updateMetadata(oldMetadata, nfts, dateStr, userName);
-        }
+        const firstTime = !oldMetadata;
+
+        let metadata = firstTime
+            ? formatNewMetadata(address, txnCounts, userName, tokenId)
+            : updateMetadata(oldMetadata, txnCounts, userName);
 
         await ioredisClient.hset(address, { tokenId, metadata: JSON.stringify(metadata) });
         await ioredisClient.hset(tokenId, { address: address, metadata: JSON.stringify(metadata) });
 
-        if (oldMetadata?.uniqueNFTCount !== metadata.uniqueNFTCount || forceScreenshot) {
-            message = forceScreenshot
-                ? 'screenshot manually forced'
-                : 'uniqueNFTCount changed, new screenshot';
-            /************************/
-            /* SCREENSHOT NFT IMAGE */
-            /************************/
-            logData.third_party_name = 'urlbox';
-            const imgUrl = await activateUrlbox(tokenId, metadata.totalNFTCount, true);
+        /************************/
+        /*  GENERATE GLTF FILE  */
+        /************************/
+        logData.third_party_name = 'urlbox';
+        const urlboxResponse = await generateGIFWithUrlbox(tokenId, true);
 
-            /************************/
-            /*  QUEUE UPDATING IMG  */
-            /************************/
+        const ifpsURL = await addToIPFS(urlboxResponse.image_url); // TODO update image_url to be the right key
 
-            logData.third_party_name = 'queue/screenshot';
-            const id = `${tokenId}-${metadata.totalNFTCount}`;
-            const jobData = await ScreenshotQueue.enqueue(
-                {
-                    id,
-                    url: imgUrl,
-                    tokenId,
-                },
-                {
-                    delay: '30s',
-                    retry: ['15s', '30s', '1m', '5m', '10m', '30m', '1h', '2h', '4h'],
-                    id,
-                    override: false,
-                },
-            );
-            logData.job_data = jobData;
-        } else {
-            message = 'uniqueNFTCount did not change, no new screenshot';
-            // if no new unique nfts, just update the metadata on OpenSea
-            forceUpdateOpenSeaMetadata(tokenId);
+        // we start with a "loading" image and then update to gif when it's ready
+        if (firstTime) {
+            metadata.image = ifpsURL; // TODO: update this
+            await ioredisClient.hset(address, { tokenId, metadata: JSON.stringify(metadata) });
+            await ioredisClient.hset(tokenId, {
+                address: address,
+                metadata: JSON.stringify(metadata),
+            });
         }
+
+        /************************/
+        /*    UPDATE OPENSEA    */
+        /************************/
+        const jobData = await OpenseaForceUpdate.enqueue(
+            { tokenId, attempt: 1, newImageUrl: metadata.image },
+            { id: tokenId, override: true },
+        );
+        logData.job_data = jobData;
     } catch (error) {
         logError(logData, error);
         return { statusCode: 500, error, message: `screenshot queueing for ${address}` };
     }
 
-    logSuccess(logData, message);
+    logSuccess(logData);
 
     return {
         statusCode: 200,

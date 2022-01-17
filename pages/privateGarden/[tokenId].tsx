@@ -3,7 +3,7 @@ import { InferGetServerSidePropsType } from 'next';
 import React, { useEffect } from 'react';
 
 import { ioredisClient } from '@utils';
-import GardenGrower from '@utils/Garden';
+import GardenGrower from '@utils/Heart';
 import { Metadata, NFTs } from '@utils/metadata';
 
 export const getServerSideProps = async (context) => {
@@ -26,20 +26,8 @@ function Garden({ metadata: metadataStr }: InferGetServerSidePropsType<typeof ge
 
             const metadata: Metadata = JSON.parse(metadataStr);
             const minterAddress = metadata.address;
-            const nfts: NFTs = metadata.nfts;
             const garden = new GardenGrower(gardenEl);
-
-            await garden.addGround('flat_base_ground');
-            garden.renderGround();
-            await garden.addPebbles(minterAddress);
-            garden.renderPebbles();
-            await garden.addPlants(minterAddress);
-            garden.renderPlants();
             garden.renderAllFlowers();
-
-            for (let [address, nft] of Object.entries(nfts)) {
-                await garden.growFlowerInSquare(address, nft.count, minterAddress);
-            }
 
             garden.positionCamera();
             garden.done();

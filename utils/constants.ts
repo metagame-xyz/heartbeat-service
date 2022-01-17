@@ -1,5 +1,6 @@
 // export const NETWORK = process.env.NETWORK;
 export const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+export const POLYSCAN_API_KEY = process.env.POLYSCAN_API_KEY;
 export const CONTRACT_BIRTHBLOCK = Number(process.env.CONTRACT_BIRTHBLOCK);
 export const REDIS_URL = process.env.REDIS_URL;
 export const EVENT_FORWARDER_AUTH_TOKEN = process.env.EVENT_FORWARDER_AUTH_TOKEN;
@@ -36,6 +37,7 @@ type NetworkStrings = {
     ethers: string;
     etherscan: string;
     etherscanAPI: string;
+    polyscanAPI: string;
     opensea: string;
     openseaAPI: string;
     web3Modal: string;
@@ -49,6 +51,7 @@ function getNetworkString(network: string): NetworkStrings {
                 ethers: 'homestead',
                 etherscan: '',
                 etherscanAPI: 'api.',
+                polyscanAPI: 'api.',
                 opensea: '',
                 openseaAPI: 'api.',
                 web3Modal: 'mainnet',
@@ -60,6 +63,7 @@ function getNetworkString(network: string): NetworkStrings {
                 ethers: network,
                 etherscan: `${network}.`,
                 etherscanAPI: `api-${network}.`,
+                polyscanAPI: `api-testnet.`,
                 opensea: 'testnets.',
                 openseaAPI: `${network}-api.`, // rinkeby only for now
                 web3Modal: network,
@@ -67,6 +71,26 @@ function getNetworkString(network: string): NetworkStrings {
     }
 }
 
+
+
+export type ProductionNetworks = 'ethereum' | 'polygon' | 'fantom' | 'avax';
+
+export const networkScanAPIKeys = {
+    ethereum: ETHERSCAN_API_KEY,
+    polygon: POLYSCAN_API_KEY,
+    // fantom: FTMSCAN_API_KEY, // fantom
+    // avax: SNOWTRACE_API_KEY, // avax
+};
+
+export const productionNetworkApiURLs = {
+    ethereum: 'api.etherscan.io',
+    polygon: 'api.polyscan.com',
+    fantom: 'api.ftmscan.com',
+    avax: 'api.snowtrace.io',
+
+
+}
+
 export const blackholeAddress = '0x0000000000000000000000000000000000000000';
 
-export const slackErrorsChannelId = ''
+export const slackErrorsChannelId = '';

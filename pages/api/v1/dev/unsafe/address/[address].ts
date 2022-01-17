@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { defaultMainnetProvider, getUserName } from '@utils';
-import { formatNewMetadata, getNFTData, Metadata, NFTs } from '@utils/metadata';
+import { formatNewMetadata, Metadata, NFTs } from '@utils/metadata';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // const { address } = req.query;

@@ -1,9 +1,10 @@
 import { Queue } from 'quirrel/next';
 
-import { fetcher, forceUpdateOpenSeaMetadata, ioredisClient } from '@utils';
+import { ioredisClient } from '@utils';
 import { addToIPFS, removeFromIPFS } from '@utils/ipfs';
-import { LogData, logError, logger, logSuccess } from '@utils/logging';
+import { LogData, logError, logSuccess } from '@utils/logging';
 import { Metadata } from '@utils/metadata';
+import { forceUpdateOpenSeaMetadata } from '@utils/requests';
 
 import OpenseaForceUpdate from './openseaForceUpdate';
 

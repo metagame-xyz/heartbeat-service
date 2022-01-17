@@ -1,11 +1,11 @@
-import { EtherscanProvider } from '@ethersproject/providers';
 import Chance from 'chance';
 
-import { fetcher, ioredisClient, tsToMonthAndYear } from '@utils';
-import { blackholeAddress, ETHERSCAN_API_KEY, networkStrings, WEBSITE_URL } from '@utils/constants';
+import { ioredisClient } from '@utils';
+import { WEBSITE_URL } from '@utils/constants';
 import { logger } from '@utils/logging';
 
-import { specialNfts } from './specialnfts2';
+import { getBeatsPerMinute } from './frontend';
+import { getAllTransactions } from './requests';
 
 export type NftEvent = {
     tokenSymbol: string;
@@ -22,121 +22,83 @@ export type NFTs = {
 };
 
 /****************/
-/* GET NFT DATA */
+/* GET TXN DATA */
 /****************/
-export async function getNFTData(
-    minterAddress: string,
-    network = networkStrings.etherscanAPI,
-): Promise<[NFTs, string]> {
+export async function getTxnData(minterAddress: string): Promise<any> {
     const address = minterAddress.toLowerCase();
-    const etherscanProvider = new EtherscanProvider(network, ETHERSCAN_API_KEY);
 
-    const offset = 1000;
-    let page = 1;
-    let eventsInLastPage = offset;
+    const ethereumTransactions = await getAllTransactions(address, 'ethereum');
 
-    function getEtherscanUrl(page: number): string {
-        return etherscanProvider.getUrl('account', {
-            action: 'tokennfttx',
-            address,
-            startblock: '0',
-            endblock: 'latest',
-            page: page.toString(),
-            offset: offset.toString(),
-        });
-    }
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).getTime();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).getTime();
 
-    let totalResult = [];
+    let txnsInLastDay = 0;
+    let txnsInLastWeek = 0;
+    const txnTotalCount = ethereumTransactions.length;
 
-    while (eventsInLastPage === 1000) {
-        let status, message, result;
-        try {
-            ({ status, message, result } = await fetcher(getEtherscanUrl(page)));
-            eventsInLastPage = result.length;
-            page++;
-        } catch (error) {
-            logger.error(`Error in fetcher from etherscan: ${error}`);
-            // logger.error({ status, message, result });
-            throw error;
+    ethereumTransactions.every((txn) => {
+        const timestamp = txn.timeStamp * 1000;
+        if (timestamp > oneDayAgo) {
+            txnsInLastDay++;
         }
 
-        if (message != 'No transactions found' && status != 1) {
-            logger.error(`etherscan status: ${status}. ${result}. returning a 500`);
-            // probably" Max rate limit reached", 5/sec
-            logger.error({ status, message, result });
-            throw { status, message, result };
-        }
-
-        totalResult.push(...result);
-    }
-
-    const mintEventsFullData: NftEvent[] = totalResult.filter(
-        (event: NftEvent) => event.from === blackholeAddress,
-    ); // only mint events
-
-    const dateStr = tsToMonthAndYear(mintEventsFullData[0]?.timeStamp);
-
-    const mintEvents = mintEventsFullData.map(
-        ({ tokenSymbol, contractAddress, tokenName, count }) => ({
-            tokenSymbol,
-            contractAddress,
-            tokenName,
-            count,
-        }),
-    );
-
-    const nfts: NFTs = mintEvents.reduce((newEventObj, event) => {
-        if (newEventObj[event.contractAddress]) {
-            newEventObj[event.contractAddress].count += 1;
+        if (timestamp > oneWeekAgo) {
+            txnsInLastWeek++;
         } else {
-            newEventObj[event.contractAddress] = event;
-            newEventObj[event.contractAddress].count = 1;
-
-            // add creator for special tokens
-            if (specialNfts[event.contractAddress]) {
-                newEventObj[event.contractAddress].special = true;
-            }
-            delete event.contractAddress;
+            return false;
         }
+        return true;
+    });
 
-        return newEventObj;
-    }, {});
-
-    return [nfts, dateStr];
+    return {
+        ethereum: [txnsInLastDay, txnsInLastWeek, txnTotalCount],
+    };
 }
+
+type TxnCounts = {
+    total: number;
+    lastDay: number;
+    lastWeek: number;
+};
 
 export type Metadata = {
     name: string;
     description: string;
-    image: string; //
-    external_url: string; // heartbeat.art/garden/[tokenId]
+    image: string;
+    externalUrl: string;
+    animationUrl: string;
     address: string;
-    uniqueNFTCount: number;
-    totalNFTCount: number;
-    nfts: NFTs;
+    txnCounts: TxnCounts[];
+    networkCount: number;
+    beatsPerSecond: number;
 };
 
-const desc = (dateStr, uniqueNFTCount) =>
-    `A garden that's been growing since ${dateStr}. It has ${uniqueNFTCount} flowers so far.`;
+const desc = (networkCount, beatsPerMinute) =>
+    `A heart beating ${beatsPerMinute} beats per second across ${networkCount} chain${
+        networkCount > 1 ? 's' : ''
+    }.`;
 
 export function formatNewMetadata(
     minterAddress: string,
-    nfts: NFTs,
-    dateStr: string,
+    txnCounts: TxnCounts[], // update
     userName: string,
     tokenId: string,
 ): Metadata {
-    const uniqueNFTCount = Object.keys(nfts).length;
+    const networkCount = txnCounts.reduce((acc, curr) => (acc + curr.total ? 1 : 0), 0);
+
+    const beatsPerSecond = getBeatsPerMinute(txnCounts[0].lastDay, txnCounts[1].lastWeek);
 
     const metadata: Metadata = {
-        name: `${userName}'s Token Garden`,
-        description: desc(dateStr, uniqueNFTCount),
+        name: `${userName}'s Heartbeat`,
+        description: desc(networkCount, beatsPerSecond),
         image: `https://${WEBSITE_URL}/growing.png`,
-        external_url: `https://${WEBSITE_URL}/garden/${tokenId}`,
+        externalUrl: `https://${WEBSITE_URL}/heart/${tokenId}`,
+        animationUrl: `https://${WEBSITE_URL}/view/${tokenId}`,
         address: minterAddress,
-        uniqueNFTCount,
-        totalNFTCount: Object.values(nfts).reduce((t, n) => t + n.count, 0),
-        nfts,
+        networkCount,
+        beatsPerSecond,
+        txnCounts,
     };
 
     return metadata;
@@ -144,19 +106,20 @@ export function formatNewMetadata(
 
 export function updateMetadata(
     oldMetadata: Metadata,
-    nfts: NFTs,
-    dateStr: string,
+    txnCounts: TxnCounts[], // update
     userName: string,
 ): Metadata {
-    const uniqueNFTCount = Object.keys(nfts).length;
+    const networkCount = txnCounts.reduce((acc, curr) => (acc + curr.total ? 1 : 0), 0);
+
+    const beatsPerSecond = getBeatsPerMinute(txnCounts[0].lastDay, txnCounts[1].lastWeek);
 
     const metadata: Metadata = {
         ...oldMetadata,
-        name: `${userName}'s Token Garden`,
-        description: desc(dateStr, uniqueNFTCount),
-        uniqueNFTCount,
-        totalNFTCount: Object.values(nfts).reduce((t, n) => t + n.count, 0),
-        nfts,
+        name: `${userName}'s Heartbeat`,
+        description: desc(networkCount, beatsPerSecond),
+        networkCount,
+        beatsPerSecond,
+        txnCounts,
     };
 
     return metadata;
@@ -168,66 +131,39 @@ type Attributes = {
     value: any;
 };
 
-// birthblock.art/api/v1/metadata/[tokenId]
 export type OpenSeaMetadata = {
     name: string;
     description: string;
-    image: string; // birthblock.art/api/v1/image/[tokenId]
-    external_url: string; // birthblock.art/birthblock/[tokenId]
+    image: string;
+    external_url: string;
+    animation_url: string;
+    iframe_url: string;
     attributes: Attributes[];
 };
 
 export function metadataToOpenSeaMetadata(metadata: Metadata): OpenSeaMetadata {
-    const specialNFTs = Object.values(metadata.nfts).filter(({ special }) => special);
-
     const openseaMetadata: OpenSeaMetadata = {
         name: metadata.name,
         description: metadata.description,
         image: metadata.image,
-        external_url: metadata.external_url,
+        external_url: metadata.externalUrl,
+        animation_url: metadata.animationUrl,
+        iframe_url: metadata.animationUrl,
         attributes: [
             // properties
             {
                 trait_type: 'address',
                 value: metadata.address,
             },
-            {
-                trait_type: 'unique NFTs',
-                value: metadata.uniqueNFTCount.toString(),
-            },
-            {
-                trait_type: 'total NFTs',
-                value: metadata.totalNFTCount.toString(),
-            },
-            {
-                trait_type: 'special NFTs',
-                value: specialNFTs.length.toString(),
-            },
-            {
-                trait_type: 'unique NFTs',
-                value: metadata.uniqueNFTCount,
-            },
-            {
-                trait_type: 'total NFTs',
-                value: metadata.totalNFTCount,
-            },
-            {
-                trait_type: 'special NFTs',
-                value: specialNFTs.length,
-            },
-            {
-                trait_type: 'Color set',
-                value: (new Chance(metadata.address).integer({ min: 0, max: 2 }) + 1).toString(),
-            },
         ],
     };
 
-    for (const nft of specialNFTs) {
-        openseaMetadata.attributes.push({
-            trait_type: nft.tokenName,
-            value: `mints: ${nft.count}`,
-        });
-    }
+    // for (const nft of specialNFTs) {
+    //     openseaMetadata.attributes.push({
+    //         trait_type: nft.tokenName,
+    //         value: `mints: ${nft.count}`,
+    //     });
+    // }
 
     return openseaMetadata;
 }
