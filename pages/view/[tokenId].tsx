@@ -1,4 +1,4 @@
-import { Box, IControlBox } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import { InferGetServerSidePropsType } from 'next';
 import { useEffect } from 'react';
 

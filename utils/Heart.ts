@@ -32,6 +32,7 @@ import THREE, {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+// import '@utils/coi-serviceworker';
 import '@utils/gif.worker';
 
 import { doneDivClass } from './constants';
@@ -122,6 +123,7 @@ export default class GardenGrower {
             console.log('frame:', this.frameCount);
         }
         if (this.frameCount === 60) {
+            this.frameCount++;
             CanvasCapture.stopRecord();
         }
 
