@@ -1,9 +1,11 @@
+import * as CanvasCapture from 'canvas-capture';
 import Chance from 'chance';
 import { GUI } from 'dat.gui';
-import {
+import THREE, {
     AxesHelper,
     Box3,
     Box3Helper,
+    BoxGeometry,
     BoxHelper,
     Color,
     DirectionalLight,
@@ -14,6 +16,7 @@ import {
     LoadingManager,
     MathUtils,
     Mesh,
+    MeshBasicMaterial,
     MeshStandardMaterial,
     Object3D,
     PerspectiveCamera,
@@ -29,10 +32,17 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import { doneDivClass } from './constants';
-import { degreeToCoords } from './extras';
+import '@utils/gif.worker';
 
-type Coords = [number, number, number];
+import { doneDivClass } from './constants';
+
+const GIF_OPTIONS = {
+    name: 'demo-gif',
+    quality: 1,
+    fps: 60,
+    onExportProgress: (progress: number) => console.log(`GIF export progress: ${progress}.`),
+    onExportFinish: () => console.log(`Finished GIF export.`),
+};
 
 export default class GardenGrower {
     el: HTMLElement;
@@ -45,12 +55,6 @@ export default class GardenGrower {
 
     axesHelper: AxesHelper;
     gridHelper: GridHelper;
-
-    centerFlowers: Group;
-    sideFlowers: Group;
-    ground: Group;
-
-    randomFlowerCount: number;
 
     state = {
         // environment: environments[1].name,
@@ -65,15 +69,16 @@ export default class GardenGrower {
     };
     activeCamera: any;
     pmremGenerator: any;
-    grass: any;
-    pebbles: any;
+
     controlsDestination: Vector3;
     timeToPositionCamera: boolean;
-    initialPositionSet: boolean;
-    positionCameraSlowly: boolean;
-    plants: Group;
 
-    constructor(el: HTMLElement, positionCameraSlowly = false) {
+    heart: Object3D;
+    canvasCapture: any;
+    frameCount: number;
+
+    cube: Object3D;
+    constructor(el: HTMLElement) {
         this.el = el;
         this.scene = new Scene();
 
@@ -91,31 +96,17 @@ export default class GardenGrower {
         this.pmremGenerator.compileEquirectangularShader();
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.positionCameraSlowly = positionCameraSlowly;
-
-        this.controls.addEventListener('change', (event) => {
-            const pos = this.controls.object.position;
-            const target = this.controls.target;
-            // console.log(`Position: ${Math.round(pos.x)} ${Math.round(pos.y)} ${Math.round(pos.z)}`);
-            // console.log(
-            //     `Target: ${Math.round(target.x)} ${Math.round(target.y)} ${Math.round(target.z)}`,
-            // );
-        });
-
-        this.initialPositionSet = false;
 
         this.initControlsPosition();
 
+        this.renderHeart();
+
         this.el.appendChild(this.renderer.domElement);
+        console.log(CanvasCapture);
 
-        this.centerFlowers = new Group();
-        this.sideFlowers = new Group();
-        this.ground = new Group();
-        this.grass = new Group();
-        this.pebbles = new Group();
-        this.plants = new Group();
+        console.log('browser supprots gif capture', CanvasCapture.browserSupportsGIF());
 
-        this.randomFlowerCount = 0;
+        this.frameCount = 0;
 
         this.animate = this.animate.bind(this);
         requestAnimationFrame(this.animate);
@@ -125,29 +116,26 @@ export default class GardenGrower {
         requestAnimationFrame(this.animate.bind(this));
         this.controls.update();
 
-        function areVectorsSame(v1: Vector3, v2: Vector3) {
-            return (
-                Math.abs(v1.x - v2.x) < 0.05 &&
-                Math.abs(v1.y - v2.y) < 0.05 &&
-                Math.abs(v1.z - v2.z) < 0.05
-            );
+        if (CanvasCapture.isRecording()) {
+            CanvasCapture.recordFrame();
+            this.frameCount++;
+            console.log('frame:', this.frameCount);
         }
-        if (areVectorsSame(this.controls.object.position, this.controlsDestination)) {
-            this.initialPositionSet = true;
+        if (this.frameCount === 60) {
+            CanvasCapture.stopRecord();
         }
 
-        if (!this.initialPositionSet && this.timeToPositionCamera && this.positionCameraSlowly) {
-            this.controls.object.position.lerp(this.controlsDestination, 0.07);
-        }
-
+        this.cube.rotation.x += 0.01;
+        this.cube.rotation.y += 0.01;
         this.renderer.render(this.scene, this.camera);
     }
 
     initControlsPosition() {
-        const intialPosition = new Vector3(-1, 76, -124);
-        this.controlsDestination = new Vector3(0, 0, 0);
-        this.controls.object.position.set(intialPosition.x, intialPosition.y, intialPosition.z);
-        this.controls.target.set(-1, 3, 6);
+        const intialPosition = new Vector3(0, 20, 40);
+        this.camera.position.set(intialPosition.x, intialPosition.y, intialPosition.z);
+        // this.controlsDestination = new Vector3(0, 0, 0);
+        // this.controls.object.position.set(intialPosition.x, intialPosition.y, intialPosition.z);
+        // this.controls.target.set(-1, 3, 6);
     }
 
     initLights() {
@@ -177,135 +165,6 @@ export default class GardenGrower {
         });
     }
 
-    positionCamera() {
-        const angle = 30;
-        // console.log(this.flowers);
-        const bbox = new Box3().setFromObject(this.centerFlowers);
-        // this.scene.add(new Box3Helper(bbox, new Color(0xff0000)));
-        // console.log(bbox);
-
-        const center = new Vector3();
-        bbox.getCenter(center);
-        center.x = 0;
-        // console.log('center:', center);
-
-        const bsphere = bbox.getBoundingSphere(new Sphere());
-        // console.log(bsphere);
-
-        // let m = new MeshStandardMaterial({
-        //     color: 0xffffff,
-        //     opacity: 0.3,
-        //     transparent: true,
-        // });
-        // var geometry = new SphereGeometry(bsphere.radius, 32, 32);
-        // let sMesh = new Mesh(geometry, m);
-        // this.scene.add(sMesh);
-        // sMesh.position.copy(center);
-        this.controls.target = center;
-
-        const vFoV = this.camera.getEffectiveFOV();
-        const hFoV = this.camera.fov * this.camera.aspect;
-        const halfFovInRadians = MathUtils.degToRad(hFoV) / 2;
-        const distance = (bsphere.radius / Math.sin(halfFovInRadians)) * 1.1;
-
-        const rad = MathUtils.degToRad(angle);
-        const z = Math.cos(rad) * (center.z - distance);
-        const y = Math.sin(rad) * (center.y + distance);
-
-        this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.1;
-
-        if (!this.positionCameraSlowly) {
-            this.controls.object.position.set(center.x, y, z);
-        } else {
-            // limit controls if it's on the user-accessible page
-            this.controls.maxPolarAngle = MathUtils.degToRad(75);
-            this.controls.maxDistance = distance * 2;
-            this.controls.enablePan = false;
-        }
-
-        const destination = new Vector3(center.x, y, z);
-        this.controlsDestination = destination;
-        this.timeToPositionCamera = true;
-    }
-
-    async addGround(str) {
-        const ground = await this.getModel(`ground/${str}`);
-        ground.name = 'ground';
-        // ground.receiveShadow = true;
-        ground.position.set(0, 0, 0);
-        const scale = 1;
-        ground.scale.set(scale, scale, scale);
-        // this.modelsToLoad.push(ground);
-        // this.scene.add(ground);
-
-        const width = 4;
-        const front = 4;
-        const back = -4;
-
-        for (let i = -width; i <= width; i++) {
-            for (let j = back; j <= front; j++) {
-                const size = 18.9;
-                const clone = ground.clone();
-                clone.position.set(i * size, 0, j * size);
-                this.ground.add(clone);
-            }
-        }
-    }
-    async addPlants(address: string) {
-        const getPlant = this.getPlant.bind(this);
-        const plants = this.plants;
-        function coordMultiplier(coords: Coords, multiplier: number): Coords {
-            return coords.map((c) => c * multiplier) as Coords;
-        }
-        async function getFillerRowCoords(
-            treeTypes: number[],
-            frequency: number,
-            distance: number,
-            offset = 0,
-            jitter = 0.1,
-            start = 0,
-            end = 360,
-            scale = 1,
-        ) {
-            const chance = new Chance(address);
-
-            const degrees = (end - start) / frequency;
-            const startDegree = start + (degrees * offset) / 2;
-            const totalPlants = frequency - offset;
-
-            for (let i = 0; i < totalPlants; i++) {
-                const plantType = treeTypes[i % treeTypes.length];
-                const plant = await getPlant(`filler/background_plant_${plantType}`, address);
-
-                let coords = degreeToCoords(startDegree + degrees * i);
-                const jitterX = chance.floating({ min: -jitter, max: jitter });
-                const jitterZ = chance.floating({ min: -jitter, max: jitter });
-                coords[0] += jitterX;
-                coords[2] += jitterZ;
-                coords = coordMultiplier(coords, distance);
-                if (plantType == 3) {
-                    scale = 0.7;
-                }
-                plant.scale.set(scale, scale, scale);
-
-                plant.position.set(...coords);
-                plants.add(plant);
-            }
-        }
-
-        const distances = [24, 30, 36, 42, 48, 54, 60];
-        const defaultFreq = 90;
-
-        await getFillerRowCoords([8, 9], defaultFreq * 2, distances[0]); // small bushes
-        await getFillerRowCoords([3, 7], defaultFreq, distances[1], 0, 0.1, 0, 360); // big bushes
-        await getFillerRowCoords([3], defaultFreq, distances[2], 0, 0.1, 0, 360, 0.7); // big bushes
-        await getFillerRowCoords([2], defaultFreq, distances[3], 0, 0.1, 0, 180); // small trees
-        await getFillerRowCoords([4, 5], defaultFreq / 2, distances[4], 0, 0.1, 0, 180, 0.6); // big trees
-        await getFillerRowCoords([5, 4], defaultFreq / 2, distances[5], 1, 0.1, 0, 180, 0.7); // big trees
-        await getFillerRowCoords([5, 4], defaultFreq * 5, distances[6], 1, 0.1, 0, 180, 0.7); // big trees
-    }
-
     getModel(modelName: string): Promise<Object3D<Event>> {
         return new Promise((resolve, reject) => {
             const loader = new GLTFLoader(new LoadingManager());
@@ -321,65 +180,19 @@ export default class GardenGrower {
         });
     }
 
-    async getPlant(modelString: string, minterAddress = ''): Promise<Object3D<Event>> {
-        // console.log(modelString);
-        let model;
-
-        if (this.plants[modelString]) {
-            model = this.plants[modelString].clone();
-        } else {
-            model = await this.getModel(modelString);
-            this.plants[modelString] = model;
-        }
-
-        const chance = new Chance(minterAddress);
-        const random = chance.floating({ min: -1, max: 1 });
-        model.rotateY(random * 2 + 180);
-        return model;
+    renderHeart() {
+        const geometry = new BoxGeometry();
+        const material = new MeshBasicMaterial({ color: 0x00ff00 });
+        this.cube = new Mesh(geometry, material);
+        this.scene.add(this.cube);
+        // this.scene.add(this.heart);
     }
 
-    async getFlower(modelString: string, minterAddress = ''): Promise<Object3D<Event>> {
-        // console.log(modelString);
-        let model;
+    startRecording() {
+        console.log('start recording');
+        CanvasCapture.init(this.renderer.domElement);
 
-        if (this.centerFlowers[modelString]) {
-            model = this.centerFlowers[modelString].clone();
-        } else {
-            model = await this.getModel(modelString);
-            this.centerFlowers[modelString] = model;
-        }
-
-        const chance = new Chance(minterAddress);
-        const random = chance.floating({ min: -1, max: 1 });
-        model.rotateY(random * 2 + 180);
-        return model;
-    }
-
-    renderAllFlowers() {
-        this.scene.add(this.centerFlowers);
-        this.scene.add(this.sideFlowers);
-    }
-
-    renderGround() {
-        this.scene.add(this.ground);
-    }
-
-    renderGrass() {
-        this.scene.add(this.grass);
-    }
-
-    renderPebbles() {
-        this.scene.add(this.pebbles);
-    }
-
-    renderPlants() {
-        this.scene.add(this.plants);
-    }
-
-    renderAllModels() {
-        this.renderGround();
-        this.renderAllFlowers();
-        // this.updateEnvironment();
+        CanvasCapture.beginGIFRecord(GIF_OPTIONS);
     }
 
     done() {

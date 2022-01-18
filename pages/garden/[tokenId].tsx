@@ -72,11 +72,8 @@ function Garden({
 
             const metadata: Metadata = JSON.parse(metadataStr);
             const minterAddress = metadata.address;
-            const garden = new GardenGrower(gardenEl, true);
+            const garden = new GardenGrower(gardenEl);
 
-            garden.renderAllFlowers();
-
-            garden.positionCamera();
             garden.done();
 
             if (showToast) {

@@ -15,7 +15,7 @@ import { ioredisClient } from '@utils';
 import { blackholeAddress, CONTRACT_ADDRESS, networkStrings, WEBSITE_URL } from '@utils/constants';
 import { copy } from '@utils/content';
 import { debug, event } from '@utils/frontend';
-import GardenGrower from '@utils/Heart';
+import HeartGenerator from '@utils/Heart';
 import { Metadata } from '@utils/metadata';
 
 import heartbeat from '../heartbeat.json';
@@ -185,7 +185,7 @@ function Home({ metadata: metadataStr }) {
     };
 
     useEffect(() => {
-        async function growGarden() {
+        async function createHeart() {
             const gpuTier = await getGPUTier();
 
             console.log('gpuTier', gpuTier);
@@ -195,23 +195,21 @@ function Home({ metadata: metadataStr }) {
                 return false;
             }
 
-            let gardenEl = document.getElementById('garden');
-            while (gardenEl.firstChild) {
-                gardenEl.removeChild(gardenEl.firstChild);
+            let heartEl = document.getElementById('garden');
+            while (heartEl.firstChild) {
+                heartEl.removeChild(heartEl.firstChild);
             }
 
             const metadata: Metadata = JSON.parse(metadataStr);
-            const minterAddress = metadata.address;
-            const garden = new GardenGrower(gardenEl, true);
+            // const minterAddress = metadata.address;
+            const garden = new HeartGenerator(heartEl);
+            garden.initDevHelper();
 
-            garden.renderAllFlowers();
-
-            garden.positionCamera();
             garden.done();
 
-            // garden.addGUI();q
+            // garden.addGUI();
         }
-        growGarden();
+        createHeart();
     }, []);
 
     return (
