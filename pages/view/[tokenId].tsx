@@ -30,8 +30,6 @@ function View({ tokenId: tokenIdStr }: InferGetServerSidePropsType<typeof getSer
 
             const heart = new HeartGrower(wrapperEl);
 
-            await heart.done();
-
             // garden.addGUI();
         }
         growHeart();

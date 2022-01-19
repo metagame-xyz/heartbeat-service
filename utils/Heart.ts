@@ -136,8 +136,8 @@ export default class HeartGrower {
                 this.capturer.save(async (blob: Blob) => {
                     const url = await addBlobToIPFS(this.IPFSClient, blob);
                     console.log('url:', clickableIPFSLink(url));
+                    this.done();
                 });
-                // this.capturer.save();
             }
             this.frameCount++;
         }
@@ -163,13 +163,15 @@ export default class HeartGrower {
         this.capturer.start();
     }
 
-    async done() {
+    async wait() {
         function sleep(ms) {
             return new Promise((resolve) => setTimeout(resolve, ms));
         }
 
         await sleep(1);
+    }
 
+    done() {
         // console.log(this.renderer.info.render);
         const doneDiv = document.createElement('div');
         this.el.appendChild(doneDiv);

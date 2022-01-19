@@ -3,7 +3,12 @@ import { InferGetServerSidePropsType } from 'next';
 import { useEffect } from 'react';
 
 import { ioredisClient } from '@utils';
-// import { INFURA_IPFS_PROJECT_ID, INFURA_IPFS_SECRET } from '@utils/constants';
+import {
+    INFURA_IPFS_PROJECT_ID,
+    INFURA_IPFS_PROJECT_ID_HEADER,
+    INFURA_IPFS_SECRET,
+    INFURA_IPFS_SECRET_HEADER,
+} from '@utils/constants';
 import HeartGrower from '@utils/Heart';
 import { Metadata } from '@utils/metadata';
 
@@ -12,16 +17,16 @@ export const getServerSideProps = async ({ query, params, req, res }) => {
     console.log(tokenId);
     console.log('params', params);
     console.log('query', query);
-    const INFURA_IPFS_PROJECT_ID = req.headers['x-ipfs-project-id'];
-    const INFURA_IPFS_SECRET = req.headers['x-ipfs-project-secret'];
-    console.log('req', INFURA_IPFS_PROJECT_ID);
-    console.log('req', INFURA_IPFS_SECRET);
+    // const INFURA_IPFS_PROJECT_ID = req.headers[INFURA_IPFS_PROJECT_ID_HEADER];
+    // const INFURA_IPFS_SECRET = req.headers[INFURA_IPFS_SECRET_HEADER];
+    // console.log('req', INFURA_IPFS_PROJECT_ID);
+    // console.log('req', INFURA_IPFS_SECRET);
 
-    if (!(INFURA_IPFS_PROJECT_ID && INFURA_IPFS_SECRET)) {
-        return {
-            notFound: true,
-        };
-    }
+    // if (!(INFURA_IPFS_PROJECT_ID && INFURA_IPFS_SECRET)) {
+    //     return {
+    //         notFound: true,
+    //     };
+    // }
 
     // const metadata = await ioredisClient.hget(tokenId, 'metadata');
     return {
@@ -52,7 +57,7 @@ function View({
             const heart = new HeartGrower(wrapperEl);
             heart.enableIPFSUpload(INFURA_IPFS_PROJECT_ID, INFURA_IPFS_SECRET);
 
-            await heart.done();
+            await heart.wait();
 
             // heart.startRecording();
 

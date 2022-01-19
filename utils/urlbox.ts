@@ -2,11 +2,19 @@ import Urlbox from 'urlbox';
 
 import { logger } from '@utils/logging';
 
-import { doneDivClass, URL_BOX_API_SECRET, URLBOX_API_KEY } from './constants';
+import {
+    doneDivClass,
+    INFURA_IPFS_PROJECT_ID,
+    INFURA_IPFS_PROJECT_ID_HEADER,
+    INFURA_IPFS_SECRET,
+    INFURA_IPFS_SECRET_HEADER,
+    URL_BOX_API_SECRET,
+    URLBOX_API_KEY,
+} from './constants';
 
 export async function generateGIFWithUrlbox(tokenId: string, timer = false): Promise<any> {
     const env = process.env.VERCEL_ENV === 'production' ? 'heartbeat' : 'heartbeat-dev';
-    const url = `https://${env}.themetagame.xyz/privateView/${tokenId}`;
+    const url = `https://${env}.themetagame.xyz/generateGif/${tokenId}`;
 
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
     const baseOptions = {
@@ -20,6 +28,10 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
         gpu: true,
         wait_for: `.${doneDivClass}`,
         fail_if_selector_missing: true,
+        header: [
+            `${INFURA_IPFS_PROJECT_ID_HEADER}=${INFURA_IPFS_PROJECT_ID}`,
+            `${INFURA_IPFS_SECRET_HEADER}=${INFURA_IPFS_SECRET}`,
+        ],
     };
 
     // force and wait for the image to load
