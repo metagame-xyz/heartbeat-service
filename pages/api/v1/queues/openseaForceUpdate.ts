@@ -10,25 +10,28 @@ type Job = {
     newImageUrl: string;
 };
 
-const attemptToDelay = [
-    null,
-    '15s',
-    '30s',
-    '1m',
-    '2m',
-    '5m',
-    '10m',
-    '20m',
-    '30m',
-    '1h',
-    '1h',
-    '1h',
-    '2h',
-    '2h',
-    '2h',
-    '3h',
-    '3h',
-];
+const attemptToDelay =
+    process.env.NODE_ENV === 'production'
+        ? [
+              null,
+              '15s',
+              '30s',
+              '1m',
+              '2m',
+              '5m',
+              '10m',
+              '20m',
+              '30m',
+              '1h',
+              '1h',
+              '1h',
+              '2h',
+              '2h',
+              '2h',
+              '3h',
+              '3h',
+          ]
+        : [null, '10s'];
 
 const OpenseaForceUpdate = Queue(
     'api/v1/queues/openseaForceUpdate', // 👈 the route it's reachable on
@@ -78,3 +81,12 @@ const OpenseaForceUpdate = Queue(
 );
 
 export default OpenseaForceUpdate;
+
+export async function startOpenseaForceUpdateLoop(tokenId: string, newImageUrl: string) {
+    const jobData = await OpenseaForceUpdate.enqueue(
+        { tokenId, attempt: 1, newImageUrl },
+        { id: tokenId, override: true },
+    );
+
+    return jobData;
+}

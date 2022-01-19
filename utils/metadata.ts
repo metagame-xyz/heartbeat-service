@@ -131,7 +131,7 @@ export function formatNewMetadata(
     return metadata;
 }
 
-export function updateMetadata(
+export function formatMetadataWithOldMetadata(
     oldMetadata: Metadata,
     txnCounts: TxnCounts,
     userName: string,
@@ -235,4 +235,24 @@ export async function getTokenIdForAddress(address: string): Promise<string> {
     }
 
     return tokenId.toString();
+}
+
+export async function getAddressForTokenId(tokenId: string): Promise<string> {
+    const address = await ioredisClient.hget(tokenId.toLowerCase(), 'address');
+
+    if (!address) {
+        throw new Error(`address for tokenId ${tokenId} not found`);
+    }
+
+    return address.toString();
+}
+
+export async function updateMetadata(metadata: Metadata, tokenId: string, address = null) {
+    if (!address) {
+        address = await getAddressForTokenId(tokenId);
+    }
+
+    await ioredisClient.hset(tokenId.toLowerCase(), 'metadata', JSON.stringify(metadata));
+    await ioredisClient.hset(address.toLowerCase(), 'metadata', JSON.stringify(metadata));
+    
 }

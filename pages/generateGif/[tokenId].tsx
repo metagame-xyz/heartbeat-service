@@ -4,9 +4,9 @@ import { useEffect } from 'react';
 
 import { ioredisClient } from '@utils';
 import {
-    INFURA_IPFS_PROJECT_ID,
-    INFURA_IPFS_PROJECT_ID_HEADER,
-    INFURA_IPFS_SECRET,
+    // EVENT_FORWARDER_AUTH_TOKEN,
+    EVENT_FORWARDER_AUTH_TOKEN_HEADER, // INFURA_IPFS_PROJECT_ID,
+    INFURA_IPFS_PROJECT_ID_HEADER, // INFURA_IPFS_SECRET,
     INFURA_IPFS_SECRET_HEADER,
 } from '@utils/constants';
 import HeartGrower from '@utils/Heart';
@@ -17,32 +17,34 @@ export const getServerSideProps = async ({ query, params, req, res }) => {
     console.log(tokenId);
     console.log('params', params);
     console.log('query', query);
-    // const INFURA_IPFS_PROJECT_ID = req.headers[INFURA_IPFS_PROJECT_ID_HEADER];
-    // const INFURA_IPFS_SECRET = req.headers[INFURA_IPFS_SECRET_HEADER];
-    // console.log('req', INFURA_IPFS_PROJECT_ID);
-    // console.log('req', INFURA_IPFS_SECRET);
+    const INFURA_IPFS_PROJECT_ID = req.headers[INFURA_IPFS_PROJECT_ID_HEADER];
+    const INFURA_IPFS_SECRET = req.headers[INFURA_IPFS_SECRET_HEADER];
+    const EVENT_FORWARDER_AUTH_TOKEN = req.headers[EVENT_FORWARDER_AUTH_TOKEN_HEADER];
 
-    // if (!(INFURA_IPFS_PROJECT_ID && INFURA_IPFS_SECRET)) {
-    //     return {
-    //         notFound: true,
-    //     };
-    // }
+    if (!(INFURA_IPFS_PROJECT_ID && INFURA_IPFS_SECRET)) {
+        return {
+            notFound: true,
+        };
+    }
 
-    // const metadata = await ioredisClient.hget(tokenId, 'metadata');
+    const metadataStr = await ioredisClient.hget(tokenId, 'metadata');
     return {
         props: {
-            // metadata,
             tokenId,
+            metadataStr,
             INFURA_IPFS_PROJECT_ID,
             INFURA_IPFS_SECRET,
+            EVENT_FORWARDER_AUTH_TOKEN,
         },
     };
 };
 
 function View({
-    tokenId: tokenIdStr,
+    tokenId,
+    metadataStr,
     INFURA_IPFS_PROJECT_ID,
     INFURA_IPFS_SECRET,
+    EVENT_FORWARDER_AUTH_TOKEN,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     useEffect(() => {
         async function growHeart() {
@@ -55,11 +57,16 @@ function View({
             // const minterAddress = metadata.address;
 
             const heart = new HeartGrower(wrapperEl);
-            heart.enableIPFSUpload(INFURA_IPFS_PROJECT_ID, INFURA_IPFS_SECRET);
+            heart.enableIPFSUpload(
+                INFURA_IPFS_PROJECT_ID,
+                INFURA_IPFS_SECRET,
+                EVENT_FORWARDER_AUTH_TOKEN,
+                tokenId,
+            );
 
             await heart.wait();
 
-            // heart.startRecording();
+            heart.startRecording();
 
             // garden.addGUI();
         }

@@ -3,23 +3,12 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { isValidAlchemySignature } from '@utils';
 import { addOrUpdateNft } from '@utils/addOrUpdateNft';
 import { blackholeAddress, CONTRACT_ADDRESS } from '@utils/constants';
-import { LogData, logError, logger, logSuccess } from '@utils/logging';
+import { LogData, logError, logSuccess } from '@utils/logging';
 import { getTokenIdForAddress } from '@utils/metadata';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
-        /**
-         * During development, it's useful to un-comment this block
-         * so you can test some of your code by just hitting this page locally
-         *
-         */
-
-        // const minterAddress = '0x3B3525F60eeea4a1eF554df5425912c2a532875D';
-        // const tokenId = '1';
-
-        const metadata = {};
-        res.setHeader('Content-Type', 'application/json');
-        return res.status(200).send(metadata);
+        return res.status(404).send({});
     }
 
     /****************/
@@ -27,8 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     /****************/
     if (!isValidAlchemySignature(req)) {
         const error = 'invalid event-forwarder Signature';
-        logger.error({ error });
-        return res.status(400).send({ error });
+        return res.status(403).send({ error });
     }
 
     const activity = req.body.activity;

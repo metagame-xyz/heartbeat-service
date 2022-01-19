@@ -37,7 +37,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import '@utils/gif.worker';
 
 import { doneDivClass } from './constants';
-import { addBlobToIPFS, clickableIPFSLink } from './frontend';
+import { addBlobToIPFS, clickableIPFSLink, updateImage } from './frontend';
 import { createIPFSClient } from './frontend';
 import { removeFromIPFS } from './ipfs';
 
@@ -84,6 +84,8 @@ export default class HeartGrower {
 
     capturer: any;
     IPFSClient: IPFS;
+    eventForwardAuthToken: string;
+    tokenId: string;
 
     constructor(el: HTMLElement) {
         this.el = el;
@@ -135,6 +137,11 @@ export default class HeartGrower {
                 this.capturer.stop();
                 this.capturer.save(async (blob: Blob) => {
                     const url = await addBlobToIPFS(this.IPFSClient, blob);
+                    const response = await updateImage(
+                        this.tokenId,
+                        url,
+                        this.eventForwardAuthToken,
+                    );
                     console.log('url:', clickableIPFSLink(url));
                     this.done();
                 });
@@ -153,8 +160,15 @@ export default class HeartGrower {
         // this.scene.add(this.heart);
     }
 
-    enableIPFSUpload(projectId: string, secret: string) {
+    enableIPFSUpload(
+        projectId: string,
+        secret: string,
+        eventForwardAuthToken: string,
+        tokenId: string,
+    ) {
         this.IPFSClient = createIPFSClient(projectId, secret);
+        this.eventForwardAuthToken = eventForwardAuthToken;
+        this.tokenId = tokenId;
     }
 
     startRecording() {

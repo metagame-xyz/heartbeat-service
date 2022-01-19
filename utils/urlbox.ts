@@ -4,6 +4,8 @@ import { logger } from '@utils/logging';
 
 import {
     doneDivClass,
+    EVENT_FORWARDER_AUTH_TOKEN,
+    EVENT_FORWARDER_AUTH_TOKEN_HEADER,
     INFURA_IPFS_PROJECT_ID,
     INFURA_IPFS_PROJECT_ID_HEADER,
     INFURA_IPFS_SECRET,
@@ -31,6 +33,7 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
         header: [
             `${INFURA_IPFS_PROJECT_ID_HEADER}=${INFURA_IPFS_PROJECT_ID}`,
             `${INFURA_IPFS_SECRET_HEADER}=${INFURA_IPFS_SECRET}`,
+            `${EVENT_FORWARDER_AUTH_TOKEN_HEADER}=${EVENT_FORWARDER_AUTH_TOKEN}`,
         ],
     };
 

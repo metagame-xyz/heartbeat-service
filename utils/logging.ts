@@ -27,10 +27,13 @@ const prodFormat = printf(
 );
 const localTransports = [new winston.transports.Console({ level: 'debug' })];
 
+const service =
+    process.env.VERCEL_ENV === 'production' ? 'heartbeat-logger' : 'heartbeat-dev-logger';
+
 const datadogTransport = new DatadogWinston({
     apiKey: DATADOG_API_KEY,
     hostname: process.env.VERCEL_URL,
-    service: 'heartbeat-logger',
+    service,
     ddsource: 'nodejs',
     ddtags: `env:${process.env.VERCEL_ENV}`,
 });
