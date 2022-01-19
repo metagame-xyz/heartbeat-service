@@ -1,6 +1,7 @@
-import * as CanvasCapture from 'canvas-capture';
+import CCapture from 'ccapture.js-npmfixed';
 import Chance from 'chance';
 import { GUI } from 'dat.gui';
+import { IPFS } from 'ipfs-core-types';
 import THREE, {
     AxesHelper,
     Box3,
@@ -36,6 +37,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import '@utils/gif.worker';
 
 import { doneDivClass } from './constants';
+import { addBlobToIPFS, clickableIPFSLink } from './frontend';
+import { createIPFSClient } from './frontend';
+import { removeFromIPFS } from './ipfs';
 
 const GIF_OPTIONS = {
     name: 'demo-gif',
@@ -45,7 +49,7 @@ const GIF_OPTIONS = {
     onExportFinish: () => console.log(`Finished GIF export.`),
 };
 
-export default class GardenGrower {
+export default class HeartGrower {
     el: HTMLElement;
     scene: Scene;
     camera: PerspectiveCamera;
@@ -72,13 +76,15 @@ export default class GardenGrower {
     pmremGenerator: any;
 
     controlsDestination: Vector3;
-    timeToPositionCamera: boolean;
 
     heart: Object3D;
-    canvasCapture: any;
     frameCount: number;
 
     cube: Object3D;
+
+    capturer: any;
+    IPFSClient: IPFS;
+
     constructor(el: HTMLElement) {
         this.el = el;
         this.scene = new Scene();
@@ -103,9 +109,6 @@ export default class GardenGrower {
         this.renderHeart();
 
         this.el.appendChild(this.renderer.domElement);
-        console.log(CanvasCapture);
-
-        console.log('browser supprots gif capture', CanvasCapture.browserSupportsGIF());
 
         this.frameCount = 0;
 
@@ -114,22 +117,63 @@ export default class GardenGrower {
     }
 
     animate() {
-        requestAnimationFrame(this.animate.bind(this));
+        this.renderer.render(this.scene, this.camera);
         this.controls.update();
 
-        if (CanvasCapture.isRecording()) {
-            CanvasCapture.recordFrame();
+        this.cube.rotation.x += 0.05;
+        this.cube.rotation.y += 0.05;
+
+        const totalFrames = 120;
+
+        if (this.capturer) {
+            if (this.frameCount < totalFrames) {
+                this.capturer.capture(this.renderer.domElement);
+                // this.frameCount++;
+                console.log('frame:', this.frameCount);
+            }
+            if (this.frameCount === totalFrames) {
+                this.capturer.stop();
+                this.capturer.save(async (blob: Blob) => {
+                    const url = await addBlobToIPFS(this.IPFSClient, blob);
+                    console.log('url:', clickableIPFSLink(url));
+                });
+                // this.capturer.save();
+            }
             this.frameCount++;
-            console.log('frame:', this.frameCount);
-        }
-        if (this.frameCount === 60) {
-            this.frameCount++;
-            CanvasCapture.stopRecord();
         }
 
-        this.cube.rotation.x += 0.01;
-        this.cube.rotation.y += 0.01;
-        this.renderer.render(this.scene, this.camera);
+        requestAnimationFrame(this.animate.bind(this));
+    }
+
+    renderHeart() {
+        const geometry = new BoxGeometry();
+        const material = new MeshBasicMaterial({ color: 0x00ff00 });
+        this.cube = new Mesh(geometry, material);
+        this.scene.add(this.cube);
+        // this.scene.add(this.heart);
+    }
+
+    enableIPFSUpload(projectId: string, secret: string) {
+        this.IPFSClient = createIPFSClient(projectId, secret);
+    }
+
+    startRecording() {
+        console.log('start recording');
+        this.capturer = new CCapture({ format: 'gif', workersPath: '../gif.worker' });
+        this.capturer.start();
+    }
+
+    async done() {
+        function sleep(ms) {
+            return new Promise((resolve) => setTimeout(resolve, ms));
+        }
+
+        await sleep(1);
+
+        // console.log(this.renderer.info.render);
+        const doneDiv = document.createElement('div');
+        this.el.appendChild(doneDiv);
+        doneDiv.classList.add(doneDivClass);
     }
 
     initControlsPosition() {
@@ -180,28 +224,6 @@ export default class GardenGrower {
                 reject,
             );
         });
-    }
-
-    renderHeart() {
-        const geometry = new BoxGeometry();
-        const material = new MeshBasicMaterial({ color: 0x00ff00 });
-        this.cube = new Mesh(geometry, material);
-        this.scene.add(this.cube);
-        // this.scene.add(this.heart);
-    }
-
-    startRecording() {
-        console.log('start recording');
-        CanvasCapture.init(this.renderer.domElement);
-
-        CanvasCapture.beginGIFRecord(GIF_OPTIONS);
-    }
-
-    done() {
-        // console.log(this.renderer.info.render);
-        const doneDiv = document.createElement('div');
-        this.el.appendChild(doneDiv);
-        doneDiv.classList.add(doneDivClass);
     }
 
     initDevHelper() {

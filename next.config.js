@@ -6,6 +6,9 @@ module.exports = {
             exclude: /node_modules/,
             use: ['raw-loader', 'glslify-loader'],
         });
+        if (!options.isServer) {
+            config.resolve.fallback.fs = false;
+        }
 
         return config;
     },
