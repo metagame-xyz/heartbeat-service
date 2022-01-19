@@ -2,71 +2,109 @@ import { Box } from '@chakra-ui/react';
 import { InferGetServerSidePropsType } from 'next';
 import { useEffect } from 'react';
 
+import Heart from '@components/heart';
+
 import { ioredisClient } from '@utils';
 import {
-    INFURA_IPFS_PROJECT_ID,
-    INFURA_IPFS_PROJECT_ID_HEADER,
-    INFURA_IPFS_SECRET,
+    // EVENT_FORWARDER_AUTH_TOKEN,
+    EVENT_FORWARDER_AUTH_TOKEN_HEADER, // INFURA_IPFS_PROJECT_ID,
+    INFURA_IPFS_PROJECT_ID_HEADER, // INFURA_IPFS_SECRET,
     INFURA_IPFS_SECRET_HEADER,
 } from '@utils/constants';
+import { addBlobToIPFS, clickableIPFSLink, createIPFSClient, updateImage } from '@utils/frontend';
 import HeartGrower from '@utils/Heart';
 import { Metadata } from '@utils/metadata';
+import { getParametersFromTxnCounts } from '@utils/parameters';
 
 export const getServerSideProps = async ({ query, params, req, res }) => {
     const { tokenId } = params;
-    console.log(tokenId);
-    console.log('params', params);
-    console.log('query', query);
-    // const INFURA_IPFS_PROJECT_ID = req.headers[INFURA_IPFS_PROJECT_ID_HEADER];
-    // const INFURA_IPFS_SECRET = req.headers[INFURA_IPFS_SECRET_HEADER];
-    // console.log('req', INFURA_IPFS_PROJECT_ID);
-    // console.log('req', INFURA_IPFS_SECRET);
+    const INFURA_IPFS_PROJECT_ID = req.headers[INFURA_IPFS_PROJECT_ID_HEADER];
+    const INFURA_IPFS_SECRET = req.headers[INFURA_IPFS_SECRET_HEADER];
+    const EVENT_FORWARDER_AUTH_TOKEN = req.headers[EVENT_FORWARDER_AUTH_TOKEN_HEADER];
 
-    // if (!(INFURA_IPFS_PROJECT_ID && INFURA_IPFS_SECRET)) {
-    //     return {
-    //         notFound: true,
-    //     };
-    // }
+    if (!(INFURA_IPFS_PROJECT_ID && INFURA_IPFS_SECRET)) {
+        return {
+            notFound: true,
+        };
+    }
 
-    // const metadata = await ioredisClient.hget(tokenId, 'metadata');
+    const metadataStr = await ioredisClient.hget(tokenId, 'metadata');
     return {
         props: {
-            // metadata,
             tokenId,
+            metadataStr,
             INFURA_IPFS_PROJECT_ID,
             INFURA_IPFS_SECRET,
+            EVENT_FORWARDER_AUTH_TOKEN,
         },
     };
 };
 
 function View({
-    tokenId: tokenIdStr,
+    tokenId,
+    metadataStr,
     INFURA_IPFS_PROJECT_ID,
     INFURA_IPFS_SECRET,
+    EVENT_FORWARDER_AUTH_TOKEN,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    useEffect(() => {
-        async function growHeart() {
-            let wrapperEl = document.getElementById('heart');
-            while (wrapperEl.firstChild) {
-                wrapperEl.removeChild(wrapperEl.firstChild);
-            }
+    // useEffect(() => {
+    //     async function growHeart() {
+    //         const startTime = Date.now();
+    //         let wrapperEl = document.getElementById('heart');
+    //         while (wrapperEl.firstChild) {
+    //             wrapperEl.removeChild(wrapperEl.firstChild);
+    //         }
 
-            // const metadata: Metadata = JSON.parse(metadataStr);
-            // const minterAddress = metadata.address;
+    //         const metadata: Metadata = JSON.parse(metadataStr);
+    //         // const minterAddress = metadata.address;
 
-            const heart = new HeartGrower(wrapperEl);
-            heart.enableIPFSUpload(INFURA_IPFS_PROJECT_ID, INFURA_IPFS_SECRET);
+    //         const heart = new HeartGrower(wrapperEl);
+    //         heart.renderHeart(metadata);
+    //         heart.enableIPFSUpload(
+    //             INFURA_IPFS_PROJECT_ID,
+    //             INFURA_IPFS_SECRET,
+    //             EVENT_FORWARDER_AUTH_TOKEN,
+    //             tokenId,
+    //             startTime,
+    //         );
 
-            await heart.wait();
+    //         await heart.wait();
 
-            // heart.startRecording();
+    //         heart.startRecording();
 
-            // garden.addGUI();
-        }
-        growHeart();
-    }, []);
+    //         // garden.addGUI();
+    //     }
+    //     growHeart();
+    // }, []);
+    async function onSaveGif(blob, startTime) {
+        const IPFSClient = createIPFSClient(INFURA_IPFS_PROJECT_ID, INFURA_IPFS_SECRET);
 
-    return <Box id="heart" bgColor="grey" width="400px" h="400px"></Box>;
+        const url = await addBlobToIPFS(IPFSClient, blob);
+        const secondsElapsed = (Date.now() - startTime) / 1000;
+        const response = await updateImage(
+            tokenId,
+            url,
+            EVENT_FORWARDER_AUTH_TOKEN,
+            secondsElapsed,
+        );
+        console.log('url:', clickableIPFSLink(url));
+    }
+
+    const metadata = JSON.parse(metadataStr);
+
+    const size = '350px';
+
+    return (
+        <Box h={size} w={size}>
+            <Heart
+                address={metadata.address}
+                record={true}
+                attributes={getParametersFromTxnCounts(metadata.txnCounts)}
+                onSaveGif={onSaveGif}
+                frameCount={120}
+            />
+        </Box>
+    );
 }
 
 export default View;

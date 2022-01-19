@@ -1,9 +1,11 @@
 import Urlbox from 'urlbox';
 
-import { logger } from '@utils/logging';
+import { LogData, logError, logger, logSuccess } from '@utils/logging';
 
 import {
     doneDivClass,
+    EVENT_FORWARDER_AUTH_TOKEN,
+    EVENT_FORWARDER_AUTH_TOKEN_HEADER,
     INFURA_IPFS_PROJECT_ID,
     INFURA_IPFS_PROJECT_ID_HEADER,
     INFURA_IPFS_SECRET,
@@ -15,87 +17,72 @@ import {
 export async function generateGIFWithUrlbox(tokenId: string, timer = false): Promise<any> {
     const env = process.env.VERCEL_ENV === 'production' ? 'heartbeat' : 'heartbeat-dev';
     const url = `https://${env}.themetagame.xyz/generateGif/${tokenId}`;
+    const loggerUrl = `https://${env}.themetagame.xyz/api/v1/webhooks/urlboxLogger`;
 
-    const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
-    const baseOptions = {
-        url,
+    // const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
+    const baseParams = {
+        url: url,
         unique: tokenId,
-        format: 'jpg',
-        quality: 100,
-        width: 1024,
-        height: 1024,
-        // retina: true,
-        gpu: true,
+        width: 512,
+        height: 512,
+        // gpu: true,
         wait_for: `.${doneDivClass}`,
+        wait_timeout: 180_000,
         fail_if_selector_missing: true,
         header: [
             `${INFURA_IPFS_PROJECT_ID_HEADER}=${INFURA_IPFS_PROJECT_ID}`,
             `${INFURA_IPFS_SECRET_HEADER}=${INFURA_IPFS_SECRET}`,
+            `${EVENT_FORWARDER_AUTH_TOKEN_HEADER}=${EVENT_FORWARDER_AUTH_TOKEN}`,
         ],
+        webhook_url: loggerUrl,
     };
 
     // force and wait for the image to load
-    const optionsWithForce = {
-        ...baseOptions,
+    const paramsWithForce = {
+        ...baseParams,
         force: true,
     };
 
-    const forceImgUrl = urlbox.buildUrl(optionsWithForce);
-
-    if (timer && process.env.NODE_ENV !== 'production') {
-        logger.info(`begin screenshot of ${forceImgUrl}`);
-        logger.info(`force URL: ${forceImgUrl}`);
-        let start = performance.now();
-        const data = await fetch(forceImgUrl);
-        let end = performance.now();
-        logger.info(`fetching image took ${(end - start) / 1000} seconds`);
-        logger.info(data);
-        return data;
-    }
-
-    return await fetch(forceImgUrl);
-}
-
-export async function activateUrlbox(tokenId, totalNFTCount, timer = false): Promise<string> {
-    const env = process.env.VERCEL_ENV === 'production' ? 'www' : 'dev';
-    const url = `https://${env}.heartbeat.art/privateGarden/${tokenId}`;
-
-    const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
-    const baseOptions = {
-        url,
-        unique: ''.concat(tokenId, '-', totalNFTCount),
-        format: 'jpg',
-        quality: 100,
-        width: 1024,
-        height: 1024,
-        // retina: true,
-        gpu: true,
-        wait_for: `.${doneDivClass}`,
-        fail_if_selector_missing: true,
+    const urlboxOptions = {
+        method: 'POST',
+        body: JSON.stringify(paramsWithForce),
+        headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${URL_BOX_API_SECRET}`,
+        },
     };
 
-    // force and wait for the image to load
-    const optionsWithForce = {
-        ...baseOptions,
-        force: true,
+    const urlboxPostUrl = `https://api.urlbox.io/v1/render`;
+
+    const logData: LogData = {
+        level: 'info',
+        token_id: tokenId,
+        function_name: 'generateGIFWithUrlbox',
     };
-
-    const forceImgUrl = urlbox.buildUrl(optionsWithForce);
-    const imgUrl = urlbox.buildUrl(baseOptions);
-
-    if (timer && process.env.NODE_ENV !== 'production') {
-        logger.info(`begin screenshot of ${imgUrl}`);
-        logger.info(`force URL: ${forceImgUrl}`);
-        let start = performance.now();
-        const data = await fetch(forceImgUrl);
-        let end = performance.now();
-        logger.info(`fetching image took ${(end - start) / 1000} seconds`);
-        logger.info(data);
-        return imgUrl;
+    let response;
+    try {
+        response = await fetch(urlboxPostUrl, urlboxOptions);
+        const data = await response.json();
+        // console.log(data);
+        // console.log(response.headers);
+        logData.extra = data;
+        logSuccess(logData);
+        return true;
+    } catch (error) {
+        logError(logData, error);
+        throw error;
     }
 
-    // send and forget
-    fetch(forceImgUrl);
+    // const forceImgUrl = urlbox.buildUrl(paramsWithForce);
+    // if (timer && process.env.NODE_ENV !== 'production') {
+    //     logger.info(`begin screenshot of ${forceImgUrl}`);
+    //     let start = performance.now();
+    //     const data = await fetch(forceImgUrl);
+    //     let end = performance.now();
+    //     logger.info(`fetching image took ${(end - start) / 1000} seconds`);
+    //     return data;
+    // }
 
-    return imgUrl;
+    // const data = await fetch(forceImgUrl, options);
+    // return data;
 }

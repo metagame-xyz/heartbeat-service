@@ -15,17 +15,17 @@ import { ioredisClient } from '@utils';
 import { blackholeAddress, CONTRACT_ADDRESS, networkStrings, WEBSITE_URL } from '@utils/constants';
 import { copy } from '@utils/content';
 import { debug, event } from '@utils/frontend';
-import HeartGenerator from '@utils/Heart';
 import { Metadata } from '@utils/metadata';
+import { getParametersFromTxnCounts } from '@utils/parameters';
 
+import Heart from '../components/heart/index.jsx';
 import heartbeat from '../heartbeat.json';
-import heartbeatImage from '../images/example-token-garden.png';
 
 export const getServerSideProps = async () => {
-    const metadata = await ioredisClient.hget('homepageExample', 'metadata');
+    const metadata = await ioredisClient.hget('2', 'metadata');
     return {
         props: {
-            metadata,
+            metadata: JSON.parse(metadata),
         },
     };
 };
@@ -36,7 +36,7 @@ function About({ heading, text }) {
             <Heading as="h2" fontSize="24px">
                 {heading}
             </Heading>
-            <Text align={['center', 'center', 'center', 'left']}>{text}</Text>
+            <Text align="center">{text}</Text>
         </VStack>
     );
 }
@@ -54,9 +54,11 @@ function gardenLink(tokenId: number): string {
     return `https://${WEBSITE_URL}/garden/${tokenId}?showToast=true`;
 }
 
-function Home({ metadata: metadataStr }) {
+function Home({ metadata }) {
     const { provider, signer, userAddress, userName, eventParams, openWeb3Modal, toast } =
         useEthereum();
+
+    console.log(metadata);
 
     const heartbeatContract = new Contract(CONTRACT_ADDRESS, heartbeat.abi, provider);
 
@@ -183,35 +185,6 @@ function Home({ metadata: metadataStr }) {
             );
         }
     };
-
-    useEffect(() => {
-        async function createHeart() {
-            const gpuTier = await getGPUTier();
-
-            console.log('gpuTier', gpuTier);
-
-            if (gpuTier.tier === 0 || gpuTier.isMobile) {
-                setHasGPU(false);
-                return false;
-            }
-
-            let heartEl = document.getElementById('garden');
-            while (heartEl.firstChild) {
-                heartEl.removeChild(heartEl.firstChild);
-            }
-
-            const metadata: Metadata = JSON.parse(metadataStr);
-            // const minterAddress = metadata.address;
-            const garden = new HeartGenerator(heartEl);
-            garden.initDevHelper();
-
-            garden.done();
-
-            // garden.addGUI();
-        }
-        createHeart();
-    }, []);
-
     return (
         <Box align="center">
             <Head>
@@ -224,25 +197,17 @@ function Home({ metadata: metadataStr }) {
                 <Text fontSize={[16, 22, 30]} fontWeight="light" maxW={['container.md']} pb={4}>
                     {copy.heroSubheading}
                 </Text>
-                {hasGPU ? (
-                    <Box
-                        alignSelf="center"
-                        mx="auto"
-                        id="garden"
-                        bgColor="grey"
-                        maxWidth="1066px"
-                        maxHeight="800px"
-                        w="80vw"
-                        h="60vw"></Box>
-                ) : (
-                    <Image
-                        src={heartbeatImage.src}
-                        alt={`${copy.nameLowercase} image`}
-                        layout="intrinsic"
-                        width={1069}
-                        height={760}
+                <div
+                    style={{
+                        aspectRatio: '1/1',
+                        width: '80%',
+                        maxWidth: '800px',
+                    }}>
+                    <Heart
+                        address={metadata.address}
+                        attributes={getParametersFromTxnCounts(metadata.txnCounts)}
                     />
-                )}
+                </div>
             </Box>
 
             <Box px={8} py={8} width="fit-content" margin="auto" maxW={maxW}>

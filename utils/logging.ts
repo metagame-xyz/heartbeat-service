@@ -3,7 +3,7 @@ import winston, { format } from 'winston';
 
 import { DATADOG_API_KEY } from './constants';
 
-const { combine, printf, colorize } = format;
+const { combine, printf, colorize, errors } = format;
 
 const colors = {
     error: 'red',
@@ -27,19 +27,22 @@ const prodFormat = printf(
 );
 const localTransports = [new winston.transports.Console({ level: 'debug' })];
 
+const service =
+    process.env.VERCEL_ENV === 'production' ? 'heartbeat-logger' : 'heartbeat-dev-logger';
+
 const datadogTransport = new DatadogWinston({
     apiKey: DATADOG_API_KEY,
-    hostname: process.env.VERCEL_URL,
-    service: 'heartbeat-logger',
+    hostname: 'vercel',
+    service,
     ddsource: 'nodejs',
-    ddtags: `env:${process.env.VERCEL_ENV}`,
+    ddtags: `env:${process.env.VERCEL_ENV}, git_sha:${process.env.VERCEL_GIT_COMMIT_SHA}, git_ref:${process.env.VERCEL_GIT_COMMIT_REF}`,
 });
 
 const prodTransports = [datadogTransport];
 
 const isProdEnv = process.env.NODE_ENV === 'production';
 
-export const logger = winston.createLogger({
+export const winstonLogger = winston.createLogger({
     levels: winston.config.syslog.levels,
     format: isProdEnv ? prodFormat : combine(colorize(), prodFormat),
     transports: isProdEnv ? prodTransports : localTransports,
@@ -51,6 +54,8 @@ export const debugLogger = winston.createLogger({
     transports: isProdEnv ? prodTransports : localTransports,
 });
 
+export const logger = isProdEnv ? winstonLogger : console;
+
 export const debug = (message: any) => {
     debugLogger.debug(message);
 };
@@ -61,11 +66,12 @@ export const logSuccess = (logData: LogData, message = 'success') => {
     logger.log(logDataCopy);
 };
 
-export const logError = (logData: LogData, error: any) => {
+export const logError = (logData: LogData, error: any, alert = false) => {
     const logDataCopy = {
         ...logData,
         level: 'error',
         message: error?.message || 'error obj had no .message',
+        alert,
     };
     logDataCopy.thrown_error = error;
     logger.log(logDataCopy);
@@ -73,7 +79,6 @@ export const logError = (logData: LogData, error: any) => {
 
 export const logWarning = (logData: LogData, message = 'warning') => {
     const logDataCopy = { ...logData, level: 'warning', message };
-    logDataCopy.alert = true;
     logger.log(logDataCopy);
 };
 
@@ -90,6 +95,8 @@ export type LogData = {
     thrown_error?: any;
     job_data?: any;
     alert?: boolean;
+    seconds_elapsed?: number;
+    extra?: any;
 };
 
 export type LogDataWithLevelAnd = LogData & {

@@ -7,6 +7,7 @@ export const SNOWTRACE_API_KEY = process.env.SNOWTRACE_API_KEY;
 export const CONTRACT_BIRTHBLOCK = Number(process.env.CONTRACT_BIRTHBLOCK);
 export const REDIS_URL = process.env.REDIS_URL;
 export const EVENT_FORWARDER_AUTH_TOKEN = process.env.EVENT_FORWARDER_AUTH_TOKEN;
+export const EVENT_FORWARDER_AUTH_TOKEN_HEADER = 'x-event-forwarder-auth-token';
 export const INFURA_IPFS_PROJECT_ID = process.env.INFURA_IPFS_PROJECT_ID;
 export const INFURA_IPFS_SECRET = process.env.INFURA_IPFS_SECRET;
 export const INFURA_IPFS_PROJECT_ID_HEADER = `x-ipfs-project-id`;

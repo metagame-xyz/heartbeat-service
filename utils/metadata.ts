@@ -8,7 +8,7 @@ import { getAllTransactions } from './requests';
 /****************/
 /* GET TXN DATA */
 /****************/
-export async function getTxnData(minterAddress: string): Promise<TxnCounts> {
+export async function getTxnData(minterAddress: string, tokenId = null): Promise<TxnCounts> {
     const address = minterAddress.toLowerCase();
 
     const txnCounts: TxnCounts = {};
@@ -23,8 +23,9 @@ export async function getTxnData(minterAddress: string): Promise<TxnCounts> {
     for (const network of networks) {
         let transactions = [];
         try {
-            transactions = await getAllTransactions(address, network);
+            transactions = await getAllTransactions(address, network, tokenId);
         } catch (error) {
+            error.third_party_name = network;
             throw error;
         }
 
@@ -90,7 +91,7 @@ export type Metadata = {
 
 const desc = (networkCount, beatsPerMinute) =>
     beatsPerMinute
-        ? `A heart beating ${beatsPerMinute} beats per second across ${networkCount} chain${
+        ? `A heart beating ${beatsPerMinute} beats per minute across ${networkCount} chain${
               networkCount != 1 ? 's' : ''
           }.`
         : `A flatlining heart`;
@@ -110,11 +111,7 @@ export function formatNewMetadata(
     tokenId: string,
 ): Metadata {
     const networkCount = getNetworkCount(txnCounts);
-    const beatsPerMinute =
-        getBeatsPerMinute(
-            txnCounts.ethereum.transactionsYesterday,
-            txnCounts.ethereum.transactionsLastWeek,
-        ) || 0;
+    const beatsPerMinute = getBeatsPerMinute(txnCounts);
 
     const metadata: Metadata = {
         name: `${userName}'s Heartbeat`,
@@ -131,14 +128,16 @@ export function formatNewMetadata(
     return metadata;
 }
 
-export function updateMetadata(
+export function formatMetadataWithOldMetadata(
     oldMetadata: Metadata,
     txnCounts: TxnCounts,
     userName: string,
 ): Metadata {
     const networkCount = getNetworkCount(txnCounts);
 
-    const beatsPerMinute = getBeatsPerMinute(txnCounts[0].lastDay, txnCounts[1].lastWeek);
+    debug(txnCounts);
+
+    const beatsPerMinute = getBeatsPerMinute(txnCounts);
 
     const metadata: Metadata = {
         ...oldMetadata,
@@ -235,4 +234,23 @@ export async function getTokenIdForAddress(address: string): Promise<string> {
     }
 
     return tokenId.toString();
+}
+
+export async function getAddressForTokenId(tokenId: string): Promise<string> {
+    const address = await ioredisClient.hget(tokenId.toLowerCase(), 'address');
+
+    if (!address) {
+        throw new Error(`address for tokenId ${tokenId} not found`);
+    }
+
+    return address.toString();
+}
+
+export async function updateMetadata(metadata: Metadata, tokenId: string, address = null) {
+    if (!address) {
+        address = await getAddressForTokenId(tokenId);
+    }
+
+    await ioredisClient.hset(tokenId.toLowerCase(), 'metadata', JSON.stringify(metadata));
+    await ioredisClient.hset(address.toLowerCase(), 'metadata', JSON.stringify(metadata));
 }

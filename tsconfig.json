@@ -6,6 +6,7 @@
         "skipLibCheck": true,
         "strict": false,
         "forceConsistentCasingInFileNames": true,
+        "downlevelIteration": true,
         "noEmit": true,
         "esModuleInterop": true,
         "module": "esnext",
@@ -22,6 +23,6 @@
             "@utils": ["utils/index.ts"]
         }
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "components/heart/index.jsx"],
     "exclude": ["node_modules"]
 }

@@ -7,7 +7,7 @@ export interface MetaProps {
     type?: string;
 }
 
-const description = 'A beating heart based on your on-chain activity'
+const description = 'A beating heart based on your on-chain activity';
 
 export const headMetadata: MetaProps = {
     title: 'Heartbeat',
@@ -20,13 +20,12 @@ export const copy = {
     title: 'Heartbeat',
     nameLowercase: 'heartbeat',
     heroSubheading: description,
-    heading1: 'Continuously Growing',
-    text1: 'Each time you mint an NFT, a flower will sprout or grow bigger in your garden.',
-    heading2: 'Naturally Scarce',
-    text2: 'The number, size, and color of flowers in your garden is based on your on-chain data instead of an artificial limit.',
-    heading3: 'Minted, not Purchased',
-    text3: 'Heartbeats are based on the NFTs you’ve minted, not purchased. You can’t buy your way to a full garden, you have to grow it!',
+    heading1: 'Living, Breathing',
+    text1: 'Every night, your heartbeat is updated using your recent on-chain activity.',
+    heading2: 'Multi-chain',
+    text2: 'Activity is tracked arcoss Ethereum, Polygon, Fantom, and Avalanche.',
+    heading3: 'Earned Attributes',
+    text3: 'The layers, speed, colors, and spikes are each based on a different length of time. What can you do to make yours more unique?',
     bottomSectonHeading: 'The Metagame',
-    bottomSectionText:
-        'Token Garden is the second NFT in an infinite series of achievements you earn by playing a game many of us are already playing whether we know it or not: The Metagame. These earned achievements will allow access to private spaces gated by shared experiences. Each achievement will contribute to leveling up your character. Follow along: ',
+    bottomSectionText: `Heartbeat is the third and final NFT of Metagame's Phase 1. Phase 2 will be an infinite series of achievements you earn by playing a game many of us are already playing whether we know it or not: The Metagame. These earned achievements will allow access to private spaces gated by shared experiences. Each achievement will contribute to leveling up your character. Follow along: `,
 };
