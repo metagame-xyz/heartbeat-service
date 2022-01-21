@@ -8,16 +8,19 @@ import { Metadata } from '@utils/metadata';
 
 export const getServerSideProps = async (context) => {
     const { tokenId } = context.query;
-    // const metadata = await ioredisClient.hget(tokenId, 'metadata');
+    const metadata = await ioredisClient.hget(tokenId, 'metadata');
     return {
         props: {
-            // metadata,
+            metadata,
             tokenId,
         },
     };
 };
 
-function View({ tokenId: tokenIdStr }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+function View({
+    tokenId,
+    metadata: metadataStr,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     useEffect(() => {
         async function growHeart() {
             let wrapperEl = document.getElementById('heart');
@@ -25,10 +28,11 @@ function View({ tokenId: tokenIdStr }: InferGetServerSidePropsType<typeof getSer
                 wrapperEl.removeChild(wrapperEl.firstChild);
             }
 
-            // const metadata: Metadata = JSON.parse(metadataStr);
+            const metadata: Metadata = JSON.parse(metadataStr);
             // const minterAddress = metadata.address;
 
             const heart = new HeartGrower(wrapperEl);
+            heart.renderHeart(metadata);
 
             // garden.addGUI();
         }
