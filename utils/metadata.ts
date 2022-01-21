@@ -90,7 +90,7 @@ export type Metadata = {
 
 const desc = (networkCount, beatsPerMinute) =>
     beatsPerMinute
-        ? `A heart beating ${beatsPerMinute} beats per second across ${networkCount} chain${
+        ? `A heart beating ${beatsPerMinute} beats per minute across ${networkCount} chain${
               networkCount != 1 ? 's' : ''
           }.`
         : `A flatlining heart`;

@@ -39,7 +39,7 @@ function View({
         growHeart();
     }, []);
 
-    return <Box id="heart" bgColor="grey" width="100vw" h="100vh"></Box>;
+    return <Box position="absolute" id="heart" bgColor="blue" w="400px" h="400px"></Box>;
 }
 
 export default View;
