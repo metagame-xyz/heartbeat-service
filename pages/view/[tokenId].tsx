@@ -35,7 +35,7 @@ function View({ tokenId: tokenIdStr }: InferGetServerSidePropsType<typeof getSer
         growHeart();
     }, []);
 
-    return <Box id="heart" bgColor="grey" width="400px" h="400px"></Box>;
+    return <Box id="heart" bgColor="grey" width="100vw" h="100vh"></Box>;
 }
 
 export default View;

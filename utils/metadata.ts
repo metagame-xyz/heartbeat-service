@@ -110,11 +110,7 @@ export function formatNewMetadata(
     tokenId: string,
 ): Metadata {
     const networkCount = getNetworkCount(txnCounts);
-    const beatsPerMinute =
-        getBeatsPerMinute(
-            txnCounts.ethereum.transactionsYesterday,
-            txnCounts.ethereum.transactionsLastWeek,
-        ) || 0;
+    const beatsPerMinute = getBeatsPerMinute(txnCounts);
 
     const metadata: Metadata = {
         name: `${userName}'s Heartbeat`,
@@ -138,7 +134,9 @@ export function formatMetadataWithOldMetadata(
 ): Metadata {
     const networkCount = getNetworkCount(txnCounts);
 
-    const beatsPerMinute = getBeatsPerMinute(txnCounts[0].lastDay, txnCounts[1].lastWeek);
+    debug(txnCounts);
+
+    const beatsPerMinute = getBeatsPerMinute(txnCounts);
 
     const metadata: Metadata = {
         ...oldMetadata,
@@ -254,5 +252,4 @@ export async function updateMetadata(metadata: Metadata, tokenId: string, addres
 
     await ioredisClient.hset(tokenId.toLowerCase(), 'metadata', JSON.stringify(metadata));
     await ioredisClient.hset(address.toLowerCase(), 'metadata', JSON.stringify(metadata));
-    
 }

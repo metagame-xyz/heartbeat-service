@@ -33,17 +33,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         address = addressMap[tokenId.toString()];
     }
 
-    const { statusCode, message, error, result } = await addOrUpdateNft(address, tokenId);
+    try {
+        const result = await addOrUpdateNft(address, tokenId);
 
-    if (statusCode !== 200) {
-        logError(logData, error);
-        return res.status(statusCode).send({ error });
-    } else {
         logSuccess(logData);
-        res.status(statusCode).send({
-            status: statusCode === 200 ? 1 : 0,
-            message,
+        res.status(200).send({
+            message: 'success',
             result,
         });
+    } catch (error) {
+        logError(logData, error);
+        return res.status(500).send({ error });
     }
 }

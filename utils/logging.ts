@@ -3,7 +3,7 @@ import winston, { format } from 'winston';
 
 import { DATADOG_API_KEY } from './constants';
 
-const { combine, printf, colorize } = format;
+const { combine, printf, colorize, errors } = format;
 
 const colors = {
     error: 'red',
@@ -42,7 +42,7 @@ const prodTransports = [datadogTransport];
 
 const isProdEnv = process.env.NODE_ENV === 'production';
 
-export const logger = winston.createLogger({
+export const winstonLogger = winston.createLogger({
     levels: winston.config.syslog.levels,
     format: isProdEnv ? prodFormat : combine(colorize(), prodFormat),
     transports: isProdEnv ? prodTransports : localTransports,
@@ -53,6 +53,8 @@ export const debugLogger = winston.createLogger({
     format: debugFormat,
     transports: isProdEnv ? prodTransports : localTransports,
 });
+
+export const logger = isProdEnv ? winstonLogger : console;
 
 export const debug = (message: any) => {
     debugLogger.debug(message);

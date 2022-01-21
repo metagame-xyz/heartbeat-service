@@ -1,7 +1,4 @@
-import OpenseaForceUpdate from '@api/queues/openseaForceUpdate';
-import ScreenshotQueue from '@api/queues/screenshot';
-
-import { defaultProvider, getUserName, ioredisClient } from '@utils';
+import { getUserName, ioredisClient } from '@utils';
 import {
     formatMetadataWithOldMetadata,
     formatNewMetadata,
@@ -9,18 +6,15 @@ import {
     Metadata,
     TxnCounts,
 } from '@utils/metadata';
-import { forceUpdateOpenSeaMetadata } from '@utils/requests';
-import { activateUrlbox, generateGIFWithUrlbox } from '@utils/urlbox';
+import { generateGIFWithUrlbox } from '@utils/urlbox';
 
-import { addToIPFS } from './ipfs';
-import { LogData, logError, logger, logSuccess } from './logging';
+import { LogData, logError, logSuccess } from './logging';
 
 export type newNftResponse = {
-    statusCode: number;
-    message: string;
-    result?: any;
-    ensName?: string;
-    error: any;
+    tokenId: string;
+    minterAddress: string;
+    userName: string;
+    ensName: string;
 };
 
 export async function addOrUpdateNft(
@@ -41,24 +35,14 @@ export async function addOrUpdateNft(
     /* GET TXN DATA */
     /****************/
     let txnCounts: TxnCounts;
+    let userName: string;
     try {
+        logData.third_party_name = 'getTxnData';
         txnCounts = await getTxnData(address);
-    } catch (error) {
-        logError(logData, error);
-        return { statusCode: 500, error, message: 'Error in getNFTData' };
-    }
 
-    /*********************/
-    /* DRAFT OF METADATA */
-    /*********************/
+        logData.third_party_name = 'ethers getUserName';
+        userName = await getUserName(address);
 
-    // this will log an error if it fails but not stop the rest of this function
-    const userName = await getUserName(address);
-
-    /*********************/
-    /*  SAVE METADATA   */
-    /*********************/
-    try {
         logData.third_party_name = 'redis';
         const oldMetadata: Metadata = JSON.parse(await ioredisClient.hget(tokenId, 'metadata'));
         const firstTime = !oldMetadata;
@@ -70,27 +54,18 @@ export async function addOrUpdateNft(
         await ioredisClient.hset(address, { tokenId, metadata: JSON.stringify(metadata) });
         await ioredisClient.hset(tokenId, { address: address, metadata: JSON.stringify(metadata) });
 
-        /************************/
-        /*     GENERATE GIF     */
-        /************************/
         logData.third_party_name = 'urlbox';
-        await generateGIFWithUrlbox(tokenId, true);
-    } catch (error) {
-        logError(logData, error);
-        return { statusCode: 500, error, message: `screenshot queueing for ${address}` };
-    }
+        generateGIFWithUrlbox(tokenId, true);
 
-    logSuccess(logData);
-
-    return {
-        statusCode: 200,
-        message: 'success',
-        error: null,
-        result: {
+        logSuccess(logData);
+        return {
             tokenId,
             minterAddress: address,
             userName,
             ensName: userName,
-        },
-    };
+        };
+    } catch (error) {
+        logError(logData, error);
+        throw error;
+    }
 }

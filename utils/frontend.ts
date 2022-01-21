@@ -3,6 +3,7 @@ import { IPFS } from 'ipfs-core-types';
 import { create } from 'ipfs-http-client';
 
 import { WEBSITE_URL } from './constants';
+import { TxnCounts } from './metadata';
 
 export function getTruncatedAddress(address: string): string {
     if (address && address.startsWith('0x')) {
@@ -30,8 +31,25 @@ export type EventParams = {
     errorMessage?: string;
 };
 
-export function getBeatsPerMinute(txnsInLastDay: number, txnsInLastWeek: number): number {
-    return txnsInLastDay || Math.round(txnsInLastWeek / 7); // TODO: fix this
+export function getBeatsPerMinute(txnCounts: TxnCounts): number {
+    const ethWeek = txnCounts.ethereum.transactionsLastWeek;
+    const polygonWeek = txnCounts.polygon.transactionsLastWeek;
+    const fantomWeek = txnCounts.fantom.transactionsLastWeek;
+    const avalancheWeek = txnCounts.avalanche.transactionsLastWeek;
+
+    const MAX_BEATS = 144;
+    const sidechainAverage = (polygonWeek + fantomWeek + avalancheWeek) / 3;
+
+    const sidechainMax = 144;
+    const ethMax = 48;
+
+    const sidechainScore = Math.min(1, sidechainAverage / sidechainMax);
+    const ethScore = Math.min(1, ethWeek / ethMax);
+
+    const sidechainBeats = sidechainScore * MAX_BEATS;
+    const ethBeats = ethScore * MAX_BEATS;
+
+    return Math.max(sidechainBeats, ethBeats);
 }
 
 export function createIPFSClient(INFURA_IPFS_PROJECT_ID: string, INFURA_IPFS_SECRET: string): IPFS {
