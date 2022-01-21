@@ -17,12 +17,16 @@ const fetchOptions = {
     body: null,
 };
 
-export const openseaFetchOptions = {
-    ...fetchOptions,
-    headers: {
-        'X-API-KEY': OPENSEA_API_KEY,
-    },
-};
+const isProd = process.env.VERCEL_ENV === 'production';
+
+export const openseaFetchOptions = isProd
+    ? {
+          ...fetchOptions,
+          headers: {
+              'X-API-KEY': OPENSEA_API_KEY,
+          },
+      }
+    : fetchOptions;
 
 export class FetcherError extends Error {
     status: any;
