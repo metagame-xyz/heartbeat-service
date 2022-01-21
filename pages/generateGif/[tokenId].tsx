@@ -53,10 +53,11 @@ function View({
                 wrapperEl.removeChild(wrapperEl.firstChild);
             }
 
-            // const metadata: Metadata = JSON.parse(metadataStr);
+            const metadata: Metadata = JSON.parse(metadataStr);
             // const minterAddress = metadata.address;
 
             const heart = new HeartGrower(wrapperEl);
+            heart.renderHeart(metadata);
             heart.enableIPFSUpload(
                 INFURA_IPFS_PROJECT_ID,
                 INFURA_IPFS_SECRET,

@@ -9,6 +9,7 @@ import THREE, {
     BoxGeometry,
     BoxHelper,
     Color,
+    ColorRepresentation,
     DirectionalLight,
     Event,
     GridHelper,
@@ -40,6 +41,7 @@ import { doneDivClass } from './constants';
 import { addBlobToIPFS, clickableIPFSLink, updateImage } from './frontend';
 import { createIPFSClient } from './frontend';
 import { removeFromIPFS } from './ipfs';
+import { Metadata } from './metadata';
 
 const GIF_OPTIONS = {
     name: 'demo-gif',
@@ -108,8 +110,6 @@ export default class HeartGrower {
 
         this.initControlsPosition();
 
-        this.renderHeart();
-
         this.el.appendChild(this.renderer.domElement);
 
         this.frameCount = 0;
@@ -152,13 +152,25 @@ export default class HeartGrower {
         requestAnimationFrame(this.animate.bind(this));
     }
 
-    renderHeart() {
-        const geometry = new BoxGeometry();
-        const material = new MeshBasicMaterial({ color: 0x00ff00 });
+    renderHeart(metadata: Metadata) {
+        const chance = new Chance(metadata.address);
+
+        const color = chance.color({ format: 'hex' });
+
+        console.log('color:', color);
+        const geometry = new BoxGeometry(1, 1, 1, 3, 3, 3);
+        const material = new MeshBasicMaterial({ color });
         this.cube = new Mesh(geometry, material);
         this.scene.add(this.cube);
-        // this.scene.add(this.heart);
     }
+
+    // renderHeart() {
+    //     const geometry = new BoxGeometry();
+    //     const material = new MeshBasicMaterial({ color });
+    //     this.cube = new Mesh(geometry, material);
+    //     this.scene.add(this.cube);
+    //     // this.scene.add(this.heart);
+    // }
 
     enableIPFSUpload(
         projectId: string,

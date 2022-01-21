@@ -30,10 +30,11 @@ function Heart({
             }
 
             const metadata: Metadata = JSON.parse(metadataStr);
+            console.log(metadata);
             setMetadata(metadata);
 
             const heart = new HeartGrower(wrapperEl);
-
+            heart.renderHeart(metadata);
             // garden.addGUI();
         }
         growHeart();
