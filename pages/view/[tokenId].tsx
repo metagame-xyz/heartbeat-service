@@ -1,10 +1,11 @@
 import { Box } from '@chakra-ui/react';
 import { InferGetServerSidePropsType } from 'next';
-import { useEffect } from 'react';
 
+// import { useEffect } from 'react';
 import { ioredisClient } from '@utils';
-import HeartGrower from '@utils/Heart';
-import { Metadata } from '@utils/metadata';
+
+// import HeartGrower from '@utils/Heart';
+// import { Metadata } from '@utils/metadata';
 
 export const getServerSideProps = async (context) => {
     const { tokenId } = context.query;
