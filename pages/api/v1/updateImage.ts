@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { startOpenseaForceUpdateLoop } from '@api/queues/openseaForceUpdate';
 
 import { isValidEventForwarderSignature } from '@utils';
-import { clickableIPFSLink } from '@utils/frontend';
+import { clickableIPFSLink, UpdateImageBody } from '@utils/frontend';
 import { removeFromIPFS } from '@utils/ipfs';
 import { LogData, logError, logSuccess } from '@utils/logging';
 import { getMetadata, Metadata, updateMetadata } from '@utils/metadata';
@@ -21,13 +21,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(403).send({ error });
     }
 
-    const { tokenId, ipfsUrl } = req.body;
+    const { tokenId, ipfsUrl, secondsElapsed } = req.body as UpdateImageBody;
 
     const logData: LogData = {
         level: 'info',
         function_name: 'updateImage',
         message: `begin`,
         token_id: tokenId,
+        seconds_elapsed: secondsElapsed,
     };
 
     try {
@@ -43,8 +44,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         await updateMetadata(metadata, tokenId, oldMedata.address);
 
-        logData.third_party_name = 'ipfs';
-        await removeFromIPFS(oldMedata.image);
+        if (oldMedata.image.includes('ipfs://')) {
+            logData.third_party_name = 'ipfs';
+            await removeFromIPFS(oldMedata.image);
+        }
 
         logData.third_party_name = 'queue';
         const jobData = await startOpenseaForceUpdateLoop(tokenId, ipfsUrl);

@@ -95,6 +95,7 @@ export type LogData = {
     thrown_error?: any;
     job_data?: any;
     alert?: boolean;
+    seconds_elapsed?: number;
 };
 
 export type LogDataWithLevelAnd = LogData & {

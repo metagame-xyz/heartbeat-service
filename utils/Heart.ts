@@ -2,32 +2,24 @@ import CCapture from 'ccapture.js-npmfixed';
 import Chance from 'chance';
 import { GUI } from 'dat.gui';
 import { IPFS } from 'ipfs-core-types';
-import THREE, {
+import {
     AxesHelper,
-    Box3,
-    Box3Helper,
     BoxGeometry,
     BoxHelper,
     Color,
-    ColorRepresentation,
     DirectionalLight,
     Event,
     GridHelper,
     Group,
     Light,
     LoadingManager,
-    MathUtils,
     Mesh,
     MeshBasicMaterial,
-    MeshStandardMaterial,
     Object3D,
     PerspectiveCamera,
     PMREMGenerator,
     Scene,
-    Sphere,
-    SphereGeometry,
     sRGBEncoding,
-    UnsignedByteType,
     Vector3,
     WebGLRenderer,
 } from 'three';
@@ -40,7 +32,6 @@ import '@utils/gif.worker';
 import { doneDivClass } from './constants';
 import { addBlobToIPFS, clickableIPFSLink, updateImage } from './frontend';
 import { createIPFSClient } from './frontend';
-import { removeFromIPFS } from './ipfs';
 import { Metadata } from './metadata';
 
 const GIF_OPTIONS = {
@@ -88,6 +79,7 @@ export default class HeartGrower {
     IPFSClient: IPFS;
     eventForwardAuthToken: string;
     tokenId: string;
+    startTime: number;
 
     constructor(el: HTMLElement) {
         this.el = el;
@@ -138,10 +130,12 @@ export default class HeartGrower {
                 this.capturer.stop();
                 this.capturer.save(async (blob: Blob) => {
                     const url = await addBlobToIPFS(this.IPFSClient, blob);
+                    const secondsElapsed = (Date.now() - this.startTime) / 1000;
                     const response = await updateImage(
                         this.tokenId,
                         url,
                         this.eventForwardAuthToken,
+                        secondsElapsed,
                     );
                     console.log('url:', clickableIPFSLink(url));
                     this.done();
@@ -178,10 +172,12 @@ export default class HeartGrower {
         secret: string,
         eventForwardAuthToken: string,
         tokenId: string,
+        startTime: number,
     ) {
         this.IPFSClient = createIPFSClient(projectId, secret);
         this.eventForwardAuthToken = eventForwardAuthToken;
         this.tokenId = tokenId;
+        this.startTime = startTime;
     }
 
     startRecording() {

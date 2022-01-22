@@ -48,6 +48,7 @@ function View({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     useEffect(() => {
         async function growHeart() {
+            const startTime = Date.now();
             let wrapperEl = document.getElementById('heart');
             while (wrapperEl.firstChild) {
                 wrapperEl.removeChild(wrapperEl.firstChild);
@@ -63,6 +64,7 @@ function View({
                 INFURA_IPFS_SECRET,
                 EVENT_FORWARDER_AUTH_TOKEN,
                 tokenId,
+                startTime,
             );
 
             await heart.wait();

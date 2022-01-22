@@ -123,14 +123,22 @@ async function fetcher(url: string, options) {
     }
 }
 
+export type UpdateImageBody = {
+    ipfsUrl: string;
+    tokenId: string;
+    secondsElapsed: number;
+};
+
 export async function updateImage(
     tokenId: string,
     ipfsUrl: string,
     EVENT_FORWARDER_AUTH_TOKEN: string,
+    secondsElapsed: number,
 ) {
-    const body = {
+    const body: UpdateImageBody = {
         ipfsUrl,
         tokenId,
+        secondsElapsed,
     };
     const options = updateImageFetchOptions(EVENT_FORWARDER_AUTH_TOKEN, body);
     const url = `https://${WEBSITE_URL}/api/v1/updateImage`;
