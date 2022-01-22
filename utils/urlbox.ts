@@ -24,7 +24,6 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
         unique: tokenId,
         width: 512,
         height: 512,
-        // retina: true,
         gpu: true,
         wait_for: `.${doneDivClass}`,
         fail_if_selector_missing: true,
