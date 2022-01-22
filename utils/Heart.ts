@@ -122,9 +122,10 @@ export default class HeartGrower {
         this.renderer.render(this.scene, this.camera);
         this.controls.update();
 
-        this.cube.rotation.x += 0.05;
-        this.cube.rotation.y += 0.05;
-
+        if (this.cube) {
+            this.cube.rotation.x += 0.05;
+            this.cube.rotation.y += 0.05;
+        }
         const totalFrames = 120;
 
         if (this.capturer) {

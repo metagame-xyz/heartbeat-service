@@ -29,7 +29,7 @@ class MyDocument extends Document {
                     <meta name="twitter:image:alt" content={meta.title} />
                     <meta name="twitter:card" content="summary_large_image" />
                     <meta name="twitter:site" content="@the_metagame" />
-                    {/* <script
+                    <script
                         async
                         src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`}
                     />
@@ -37,7 +37,7 @@ class MyDocument extends Document {
                         dangerouslySetInnerHTML={{
                             __html: `window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '${GOOGLE_ANALYTICS_ID}', {page_path: window.location.pathname,});`,
                         }}
-                    /> */}
+                    />
                 </Head>
                 <body>
                     <Main />

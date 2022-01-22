@@ -38,6 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         logSuccess(logData);
         res.status(200).send({
+            status: 1,
             message: 'success',
             result,
         });
