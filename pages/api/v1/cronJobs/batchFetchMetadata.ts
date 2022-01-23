@@ -10,7 +10,7 @@ import { LogData, logError, logSuccess } from '@utils/logging';
 import heartbeat from '../../../../heartbeat.json';
 
 export default CronJob(
-    'api/v1/cronJob/batchFetchMetadata', // 👈 the route it's reachable on
+    'api/v1/cronJobs/batchFetchMetadata', // 👈 the route it's reachable on
     ['0 3 * * *', 'America/Chicago'], // 👈 the cron schedule
     async () => {
         const logData: LogData = {
