@@ -123,8 +123,7 @@ export default class HeartGrower {
         if (this.capturer) {
             if (this.frameCount < totalFrames) {
                 this.capturer.capture(this.renderer.domElement);
-                // this.frameCount++;
-                console.log('frame:', this.frameCount);
+                // console.log('frame:', this.frameCount);
             }
             if (this.frameCount === totalFrames) {
                 this.capturer.stop();
