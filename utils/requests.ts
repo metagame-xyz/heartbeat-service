@@ -157,7 +157,7 @@ export async function getAllTransactions(
         totalResult.push(...result);
     }
 
-    logSuccess(logData);
+    logSuccess(logData, `success ${network}`);
 
     return totalResult;
 }

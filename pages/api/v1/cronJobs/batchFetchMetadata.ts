@@ -34,11 +34,9 @@ export default CronJob(
 
             logData.third_party_name = 'quirrel';
             const jobDataArr = await updateMetadata.enqueueMany(jobs);
-            logData.job_data = jobDataArr.at(-1);
-            console.log(logData);
+            logData.job_data = jobDataArr[jobDataArr.length - 1];
             logSuccess(logData, `${jobDataArr.length} jobs enqueued`);
         } catch (error) {
-            console.log(logData);
             logError(logData, error);
         }
     },
