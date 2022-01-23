@@ -25,6 +25,7 @@ export async function getTxnData(minterAddress: string): Promise<TxnCounts> {
         try {
             transactions = await getAllTransactions(address, network);
         } catch (error) {
+            error.third_party_name = network;
             throw error;
         }
 

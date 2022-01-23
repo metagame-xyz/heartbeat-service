@@ -1,6 +1,6 @@
 import Urlbox from 'urlbox';
 
-import { logger } from '@utils/logging';
+import { logger, logSuccess } from '@utils/logging';
 
 import {
     doneDivClass,
@@ -41,6 +41,15 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
     };
 
     const forceImgUrl = urlbox.buildUrl(optionsWithForce);
+
+    logSuccess(
+        {
+            level: 'info',
+            token_id: tokenId,
+            function_name: 'generateGIFWithUrlbox',
+        },
+        `forceImgUrl: ${forceImgUrl}`,
+    );
 
     if (timer && process.env.NODE_ENV !== 'production') {
         logger.info(`begin screenshot of ${forceImgUrl}`);
