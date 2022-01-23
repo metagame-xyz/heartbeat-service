@@ -13,10 +13,7 @@ export default CronJob(
     'api/v1/cronJob/batchFetchMetadata', // 👈 the route it's reachable on
     ['0 3 * * *', 'America/Chicago'], // 👈 the cron schedule
     async () => {
-        defaultProvider;
-
         const logData: LogData = {
-            level: 'info',
             function_name: 'BatchFetchMetadata',
         };
 
@@ -26,6 +23,7 @@ export default CronJob(
                 heartbeat.abi,
                 defaultProvider,
             );
+            logData.third_party_name = 'ethers';
             const mintCountBN: BigNumber = await heartbeatContract.mintedCount();
             const mintCount = mintCountBN.toNumber();
 
@@ -34,10 +32,13 @@ export default CronJob(
                 return { payload: { tokenId: id.toString() }, options: { id: id.toString() } };
             });
 
+            logData.third_party_name = 'quirrel';
             const jobDataArr = await updateMetadata.enqueueMany(jobs);
             logData.job_data = jobDataArr.at(-1);
+            console.log(logData);
             logSuccess(logData, `${jobDataArr.length} jobs enqueued`);
         } catch (error) {
+            console.log(logData);
             logError(logData, error);
         }
     },
