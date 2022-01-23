@@ -38,7 +38,7 @@ export async function addOrUpdateNft(
     let userName: string;
     try {
         logData.third_party_name = 'getTxnData';
-        txnCounts = await getTxnData(address);
+        txnCounts = await getTxnData(address, tokenId);
 
         logData.third_party_name = 'ethers getUserName';
         userName = await getUserName(address);

@@ -8,7 +8,7 @@ import { getAllTransactions } from './requests';
 /****************/
 /* GET TXN DATA */
 /****************/
-export async function getTxnData(minterAddress: string): Promise<TxnCounts> {
+export async function getTxnData(minterAddress: string, tokenId = null): Promise<TxnCounts> {
     const address = minterAddress.toLowerCase();
 
     const txnCounts: TxnCounts = {};
@@ -23,7 +23,7 @@ export async function getTxnData(minterAddress: string): Promise<TxnCounts> {
     for (const network of networks) {
         let transactions = [];
         try {
-            transactions = await getAllTransactions(address, network);
+            transactions = await getAllTransactions(address, network, tokenId);
         } catch (error) {
             error.third_party_name = network;
             throw error;

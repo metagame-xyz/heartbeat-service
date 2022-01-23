@@ -118,11 +118,13 @@ async function getSinglePageOfTransactions(
 export async function getAllTransactions(
     address: string,
     network: ProductionNetworks,
+    token_id = null,
 ): Promise<any[]> {
     const logData = {
         wallet_address: address,
         function_name: 'getAllTransactions',
-        third_party_name: network,
+        third_party_name: network as string,
+        token_id,
     };
 
     let page = 1;
