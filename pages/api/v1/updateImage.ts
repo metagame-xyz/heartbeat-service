@@ -5,7 +5,7 @@ import { startOpenseaForceUpdateLoop } from '@api/queues/openseaForceUpdate';
 import { isValidEventForwarderSignature } from '@utils';
 import { clickableIPFSLink, UpdateImageBody } from '@utils/frontend';
 import { removeFromIPFS } from '@utils/ipfs';
-import { LogData, logError, logSuccess } from '@utils/logging';
+import { LogData, logError, logSuccess, logWarning } from '@utils/logging';
 import { getMetadata, Metadata, updateMetadata } from '@utils/metadata';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -44,9 +44,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         await updateMetadata(metadata, tokenId, oldMedata.address);
 
-        if (oldMedata.image.includes('ipfs://')) {
-            logData.third_party_name = 'ipfs';
-            await removeFromIPFS(oldMedata.image);
+        if (metadata.image.includes('ipfs://') && metadata.image !== oldMedata.image) {
+            try {
+                logData.third_party_name = 'ipfs_remove';
+                await removeFromIPFS(metadata.image);
+            } catch (error) {
+                if (error.message.includes('not pinned or pinned indirectly')) {
+                    logWarning(logData, error.message);
+                } else {
+                    throw error;
+                }
+            }
         }
 
         logData.third_party_name = 'queue';

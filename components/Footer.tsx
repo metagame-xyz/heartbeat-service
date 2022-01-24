@@ -23,8 +23,8 @@ export default function Footer(props) {
                             brenner.eth
                         </Link>
                         {' & '}
-                        <Link isExternal href="https://twitter.com/damngrahamm">
-                            damngraham.eth
+                        <Link isExternal href="https://twitter.com/rlostrevino">
+                            @rlostrevino
                         </Link>
                     </Text>
                 </Flex>

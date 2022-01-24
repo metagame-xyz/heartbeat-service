@@ -66,11 +66,12 @@ export const logSuccess = (logData: LogData, message = 'success') => {
     logger.log(logDataCopy);
 };
 
-export const logError = (logData: LogData, error: any) => {
+export const logError = (logData: LogData, error: any, alert = false) => {
     const logDataCopy = {
         ...logData,
         level: 'error',
         message: error?.message || 'error obj had no .message',
+        alert,
     };
     logDataCopy.thrown_error = error;
     logger.log(logDataCopy);
@@ -78,7 +79,6 @@ export const logError = (logData: LogData, error: any) => {
 
 export const logWarning = (logData: LogData, message = 'warning') => {
     const logDataCopy = { ...logData, level: 'warning', message };
-    logDataCopy.alert = true;
     logger.log(logDataCopy);
 };
 

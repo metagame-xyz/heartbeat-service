@@ -25,6 +25,6 @@ a {
     pointer-events: none;
 }
 
-#garden > .gui {
+#heart > .gui {
     pointer-events: all;
 }

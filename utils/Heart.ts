@@ -26,7 +26,6 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-// import '@utils/coi-serviceworker';
 import '@utils/gif.worker';
 
 import { doneDivClass } from './constants';
@@ -115,8 +114,8 @@ export default class HeartGrower {
         this.controls.update();
 
         if (this.cube) {
-            this.cube.rotation.x += 0.05;
-            this.cube.rotation.y += 0.05;
+            this.cube.rotation.x += 0.02;
+            this.cube.rotation.y += 0.02;
         }
         const totalFrames = 120;
 
@@ -203,6 +202,13 @@ export default class HeartGrower {
     initControlsPosition() {
         const intialPosition = new Vector3(0, 20, 40);
         this.camera.position.set(intialPosition.x, intialPosition.y, intialPosition.z);
+
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.1;
+
+        this.controls.enableZoom = false;
+        this.controls.enablePan = false;
+
         // this.controlsDestination = new Vector3(0, 0, 0);
         // this.controls.object.position.set(intialPosition.x, intialPosition.y, intialPosition.z);
         // this.controls.target.set(-1, 3, 6);

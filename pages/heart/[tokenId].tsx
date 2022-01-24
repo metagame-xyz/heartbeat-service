@@ -1,4 +1,4 @@
-import { Box, Center, SimpleGrid, Stack, Wrap, WrapItem } from '@chakra-ui/react';
+import { AspectRatio, Box, Center, SimpleGrid, Stack, Wrap, WrapItem } from '@chakra-ui/react';
 import { InferGetServerSidePropsType } from 'next';
 import { useEffect, useState } from 'react';
 
@@ -21,7 +21,8 @@ function Heart({
     tokenId,
     metadata: metadataStr,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [metadata, setMetadata] = useState<Metadata>();
+    const [metadata, setMetadata] = useState<Metadata | null>(JSON.parse(metadataStr));
+    // const [attributes, setAttributes] = useState({});
     useEffect(() => {
         async function growHeart() {
             let wrapperEl = document.getElementById('heart');
@@ -30,35 +31,56 @@ function Heart({
             }
 
             const metadata: Metadata = JSON.parse(metadataStr);
-            console.log(metadata);
             setMetadata(metadata);
+            console.log(metadata);
 
             const heart = new HeartGrower(wrapperEl);
             heart.renderHeart(metadata);
             // garden.addGUI();
+
+            // const metadataArray = Object.entries(metadata);
         }
         growHeart();
     }, []);
 
-    // const attributes = (
-    //     <>
-    //         {Object.entries(metadata).map(([key, value]) => {
-    //             return (
-    //                 <h4 key={key}>
-    //                     {key} : {value}
-    //                 </h4>
-    //             );
-    //         })}
-    //     </>
-    // );
-
+    const keysToKeep = [
+        'name',
+        'description',
+        'address',
+        // 'txnCounts',
+        'networkCounts',
+        'beatsPerMinute',
+    ];
+    const attributes = (metadata) => {
+        return (
+            <>
+                {Object.entries(metadata)
+                    .filter(([v, k]) => keysToKeep.includes(v))
+                    .map(([key, value]) => {
+                        console.log('key', key);
+                        console.log('value', value);
+                        return (
+                            <>
+                                <p key={key}>
+                                    {key}: {value}
+                                </p>
+                            </>
+                        );
+                    })}
+            </>
+        );
+    };
     return (
-        <Box align="center" p="16px">
-            <SimpleGrid minChildWidth="600px" spacing={4} align="center">
-                <Box alignSelf="center" id="heart" bgColor="grey" width="" h="400px"></Box>
-                <Box id="not-heart" bgColor="grey" width="400px" h="400px">
-                    {/* {attributes} */}
-                </Box>
+        <Box align="center" p="16px" minH="calc(100vh - 146px)">
+            <SimpleGrid minChildWidth={[200, 400, 400, 400]} spacing={4}>
+                <AspectRatio ratio={1}>
+                    <Box alignSelf="center" id="heart" bgColor="grey" w="auto"></Box>
+                </AspectRatio>
+                <AspectRatio ratio={1}>
+                    <Box id="not-heart" bgColor="#a0aec0">
+                        <Box>{attributes(metadata)}</Box>
+                    </Box>
+                </AspectRatio>
             </SimpleGrid>
         </Box>
     );

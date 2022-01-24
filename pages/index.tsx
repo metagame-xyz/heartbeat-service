@@ -15,7 +15,7 @@ import { ioredisClient } from '@utils';
 import { blackholeAddress, CONTRACT_ADDRESS, networkStrings, WEBSITE_URL } from '@utils/constants';
 import { copy } from '@utils/content';
 import { debug, event } from '@utils/frontend';
-import HeartGenerator from '@utils/Heart';
+import HeartGrower from '@utils/Heart';
 import { Metadata } from '@utils/metadata';
 
 import heartbeat from '../heartbeat.json';
@@ -195,19 +195,16 @@ function Home({ metadata: metadataStr }) {
                 return false;
             }
 
-            let heartEl = document.getElementById('garden');
-            while (heartEl.firstChild) {
-                heartEl.removeChild(heartEl.firstChild);
+            let wrapperEl = document.getElementById('heart');
+            while (wrapperEl.firstChild) {
+                wrapperEl.removeChild(wrapperEl.firstChild);
             }
 
             const metadata: Metadata = JSON.parse(metadataStr);
-            // const minterAddress = metadata.address;
-            const garden = new HeartGenerator(heartEl);
-            garden.initDevHelper();
 
-            garden.done();
-
-            // garden.addGUI();
+            const heart = new HeartGrower(wrapperEl);
+            heart.renderHeart(metadata);
+            // heart.addGUI();
         }
         createHeart();
     }, []);
@@ -228,7 +225,7 @@ function Home({ metadata: metadataStr }) {
                     <Box
                         alignSelf="center"
                         mx="auto"
-                        id="garden"
+                        id="heart"
                         bgColor="grey"
                         maxWidth="1066px"
                         maxHeight="800px"
