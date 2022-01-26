@@ -9,7 +9,7 @@ const timeParamMax = {
 
 export type Parameters = {
     speed: number;
-    strength: number;
+    spikes: number;
     // spikes: number;
     intensity: number;
     contrast: number;
@@ -58,7 +58,7 @@ export function getParametersFromTxnCounts(txnCounts: TxnCounts) {
         intensity: generateParamValue(txnCounts, 'day'),
         speed: generateParamValue(txnCounts, 'week'),
         contrast: generateParamValue(txnCounts, 'month'),
-        strength: generateParamValue(txnCounts, 'total', true),
+        spikes: generateParamValue(txnCounts, 'total', true),
         // spikes: generateParamValue(txnCounts, 'week'),
         avalancheActivity: generateActivityValue(txnCounts.avalanche),
         fantomActivity: generateActivityValue(txnCounts.fantom),
