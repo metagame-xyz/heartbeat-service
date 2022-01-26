@@ -203,7 +203,7 @@ function Home({ metadata: metadataStr }) {
             const metadata: Metadata = JSON.parse(metadataStr);
 
             const heart = new HeartGrower(wrapperEl);
-            heart.renderHeart(metadata);
+            heart.renderHeart({ address: 'asdf' });
             // heart.addGUI();
         }
         createHeart();

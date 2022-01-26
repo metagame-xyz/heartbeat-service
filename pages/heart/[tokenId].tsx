@@ -2,6 +2,8 @@ import { AspectRatio, Box, Center, SimpleGrid, Stack, Wrap, WrapItem } from '@ch
 import { InferGetServerSidePropsType } from 'next';
 import { useEffect, useState } from 'react';
 
+import Heart from '@components/Heart';
+
 import { ioredisClient } from '@utils';
 import HeartGrower from '@utils/Heart';
 import { Metadata } from '@utils/metadata';
@@ -17,7 +19,7 @@ export const getServerSideProps = async (context) => {
     };
 };
 
-function Heart({
+function HeartPage({
     tokenId,
     metadata: metadataStr,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -86,4 +88,4 @@ function Heart({
     );
 }
 
-export default Heart;
+export default HeartPage;

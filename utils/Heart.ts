@@ -180,7 +180,11 @@ export default class HeartGrower {
 
     startRecording() {
         console.log('start recording');
-        this.capturer = new CCapture({ format: 'gif', workersPath: '../gif.worker' });
+        this.capturer = new CCapture({
+            format: 'gif',
+            workersPath: '../gif.worker',
+            transparent: 0xcccccc,
+        });
         this.capturer.start();
     }
 
