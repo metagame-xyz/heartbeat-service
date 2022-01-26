@@ -60,6 +60,6 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
         return data;
     }
 
-    await fetch(forceImgUrl);
-    return true;
+    const data = await fetch(forceImgUrl);
+    return data;
 }
