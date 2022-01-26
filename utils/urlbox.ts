@@ -42,6 +42,8 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
 
     const forceImgUrl = urlbox.buildUrl(optionsWithForce);
 
+
+
     logSuccess(
         {
             level: 'info',
