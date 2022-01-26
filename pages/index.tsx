@@ -6,7 +6,6 @@ import { BigNumber, Contract } from 'ethers';
 import Head from 'next/head';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
-import Heart from '../components/heart/index.jsx';
 
 import { useEthereum, wrongNetworkToast } from '@providers/EthereumProvider';
 
@@ -17,13 +16,16 @@ import { blackholeAddress, CONTRACT_ADDRESS, networkStrings, WEBSITE_URL } from 
 import { copy } from '@utils/content';
 import { debug, event } from '@utils/frontend';
 import { Metadata } from '@utils/metadata';
+import { getParametersFromTxnCounts } from '@utils/parameters';
 
+import Heart from '../components/heart/index.jsx';
 import heartbeat from '../heartbeat.json';
-import heartbeatImage from '../images/example-token-garden.png';
-import { getParametersFromTxnCounts } from '@utils/parameters.ts';
 
 export const getServerSideProps = async () => {
-    const metadata = await ioredisClient.hget('0xaa5146397cffac091eb64b21b7950f332eccfd00', 'metadata');
+    const metadata = await ioredisClient.hget(
+        '0xaa5146397cffac091eb64b21b7950f332eccfd00',
+        'metadata',
+    );
     return {
         props: {
             metadata: JSON.parse(metadata),
@@ -58,6 +60,8 @@ function gardenLink(tokenId: number): string {
 function Home({ metadata }) {
     const { provider, signer, userAddress, userName, eventParams, openWeb3Modal, toast } =
         useEthereum();
+
+    console.log(metadata);
 
     const heartbeatContract = new Contract(CONTRACT_ADDRESS, heartbeat.abi, provider);
 
@@ -196,11 +200,12 @@ function Home({ metadata }) {
                 <Text fontSize={[16, 22, 30]} fontWeight="light" maxW={['container.md']} pb={4}>
                     {copy.heroSubheading}
                 </Text>
-                <div style={{
-                    aspectRatio: '1/1',
-                    width: '80%',
-                    maxWidth: '800px'
-                }}>
+                <div
+                    style={{
+                        aspectRatio: '1/1',
+                        width: '80%',
+                        maxWidth: '800px',
+                    }}>
                     <Heart
                         address={metadata.address}
                         record={false}

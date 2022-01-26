@@ -34,6 +34,8 @@ function getMax(txnCounts: TxnCounts, timeFrame: TimeFrames) {
         network === 'ethereum' ? vals[wordMap[timeFrame]] : vals[wordMap[timeFrame]] / 3,
     );
 
+    // console.log(`${timeFrame} vals`, vals);
+
     return Math.max(...vals);
 }
 
@@ -43,14 +45,18 @@ function generateParamValue(txnCounts: TxnCounts, timeFrame: TimeFrames, log = f
     if (log) {
         count = Math.log(count) / Math.log(timeParamMax.total);
     }
-    return Math.max(1, count / timeParamMax[timeFrame]);
+    const percent = count / timeParamMax[timeFrame];
+    // console.log(`${timeFrame} percent`, percent);
+    const min = Math.min(1, percent);
+    console.log(`${timeFrame} min`, min);
+    return min;
 }
 
 function generateActivityValue(SingleNetworkTxnCounts: SingleNetworkTxnCounts, ethereum = false) {
     const count = SingleNetworkTxnCounts.transactionsLastMonth;
     const normalizedCount = ethereum ? count : count / 3;
 
-    return Math.max(1, normalizedCount / timeParamMax.month);
+    return Math.min(1, normalizedCount / timeParamMax.month);
 }
 
 export function getParametersFromTxnCounts(txnCounts: TxnCounts) {
