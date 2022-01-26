@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import Web3 from 'web3';
 
-import noise from '../../utils/noise';
+import noise from '@utils/noise';
 
 const web3 = new Web3(Web3.givenProvider);
 
@@ -186,19 +186,9 @@ const Model = ({ color, colorContrast, record, onLoop, ...props }) => {
     const uColorContrast = useMemo(() => new THREE.Color(colorContrast), [colorContrast]);
     const { mixer } = useAnimations([]);
 
-    useEffect(() => {
-        if (record) {
-            const action = mixer.clipAction(animationClip, blobMaterial.current);
-            mixer.addEventListener('loop', onLoop);
-            action.play();
-        }
-    }, [record]);
-
     useFrame(
         ({ gl }, timeElapsed) => {
-            if (!record) {
-                blobMaterial.current.time += timeElapsed;
-            }
+            blobMaterial.current.time += timeElapsed;
         },
         [record],
     );
@@ -219,19 +209,20 @@ const Model = ({ color, colorContrast, record, onLoop, ...props }) => {
 export const BaseHeart = (props) => {
     const gl = useRef();
     const capturer = useMemo(() => {
-        if (!props.record && typeof window === 'undefined') return null;
+        if (!props.record || typeof window === 'undefined') return null;
         const CCapture = require('./ccapture.js');
         const c = new CCapture({
             format: 'gif',
             quality: 100,
             framerate: 60,
-            workersPath: '../..',
         });
         return c;
     }, [props.record]);
     const duration = 100;
-    const captured = useRef(false);
+    const [isCaptured, setIsCaptured] = useState(false);
     const capturing = useRef(false);
+    const captured = useRef(false);
+    const frame = useRef(0);
     const loop = useCallback(() => {
         if (!capturing.current && !captured.current) {
             capturing.current = true;
@@ -242,14 +233,32 @@ export const BaseHeart = (props) => {
             capturer.capture(gl.current.domElement);
         }
 
+        if (frame.current > 120 && !captured.current) {
+            capturing.current = false;
+            captured.current = true;
+            capturer.stop();
+            capturer.save(async (blob) => {
+                await props.onSaveGif(blob);
+                // const fileURL = window.URL.createObjectURL(blob);
+                // const tempLink = document.createElement('a');
+                // tempLink.href = fileURL;
+                // tempLink.setAttribute('download', `test.gif`);
+                // tempLink.click();
+                const div = document.createElement('div');
+                document.body.appendChild(div);
+                div.classList.add('done');
+            });
+        }
+
+        frame.current += 1;
+
         requestAnimationFrame(loop);
     }, []);
 
     const bind = useCallback(
         (context) => {
             if (props.record) {
-                context.gl.setSize(200, 200);
-                context.gl.setClearColor('#00FF00');
+                context.gl.setSize(800, 800);
                 gl.current = context.gl;
                 requestAnimationFrame(loop);
             }
@@ -258,32 +267,18 @@ export const BaseHeart = (props) => {
     );
 
     return (
-        <Canvas
-            gl={{
-                preserveDrawingBuffer: true,
-            }}
-            onCreated={bind}
-            dpr={[1, 2]}
-            camera={{ fov: 60, position: [-3, 2, -3] }}>
-            <Model
-                {...props}
-                onLoop={() => {
-                    if (props.record && capturing.current) {
-                        capturing.current = false;
-                        captured.current = true;
-                        capturer.stop();
-                        capturer.save((blob) => {
-                            const fileURL = window.URL.createObjectURL(blob);
-                            const tempLink = document.createElement('a');
-                            tempLink.href = fileURL;
-                            tempLink.setAttribute('download', `test.gif`);
-                            tempLink.click();
-                        });
-                    }
+        <>
+            <Canvas
+                gl={{
+                    preserveDrawingBuffer: true,
                 }}
-            />
-            <OrbitControls enableZoom={false} />
-        </Canvas>
+                onCreated={bind}
+                dpr={[1, 2]}
+                camera={{ fov: 60, position: [-3, 2, -3] }}>
+                <Model {...props} />
+                <OrbitControls enableZoom={false} />
+            </Canvas>
+        </>
     );
 };
 
@@ -350,9 +345,9 @@ const interpolators = {
     fantomActivity: lerp(0, 4),
 };
 
-const Heart = ({ address, record, attributes }) => {
+const Heart = ({ address, record, attributes, onSaveGif }) => {
     const [h, s, l] = useMemo(() => generateColor(address), [address]);
-    const color = toString(attributes.speed ? [h, s, l] : [h, 0, l]);
+    const color = toString(attributes.contrast ? [h, s, l] : [h, 0, l]);
     const colorContrast = useMemo(
         () => lerpColor('#262626', '#f3f4f6', attributes.ethereumActivity),
         [attributes.ethereumActivity],
@@ -375,9 +370,14 @@ const Heart = ({ address, record, attributes }) => {
             amplitude={1.15}
             frequency={1.4}
             record={record}
+            onSaveGif={onSaveGif}
             {...interpolatedAttributes}
         />
     );
+};
+Heart.defaultProps = {
+    onSaveGif: null,
+    record: false,
 };
 
 export default Heart;
