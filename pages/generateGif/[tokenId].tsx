@@ -6,11 +6,9 @@ import Heart from '@components/heart';
 
 import { ioredisClient } from '@utils';
 import {
-    EVENT_FORWARDER_AUTH_TOKEN,
-    EVENT_FORWARDER_AUTH_TOKEN_HEADER,
-    INFURA_IPFS_PROJECT_ID,
-    INFURA_IPFS_PROJECT_ID_HEADER,
-    INFURA_IPFS_SECRET,
+    // EVENT_FORWARDER_AUTH_TOKEN,
+    EVENT_FORWARDER_AUTH_TOKEN_HEADER, // INFURA_IPFS_PROJECT_ID,
+    INFURA_IPFS_PROJECT_ID_HEADER, // INFURA_IPFS_SECRET,
     INFURA_IPFS_SECRET_HEADER,
 } from '@utils/constants';
 import { addBlobToIPFS, clickableIPFSLink, createIPFSClient, updateImage } from '@utils/frontend';
@@ -23,9 +21,9 @@ export const getServerSideProps = async ({ query, params, req, res }) => {
     console.log(tokenId);
     console.log('params', params);
     console.log('query', query);
-    // const INFURA_IPFS_PROJECT_ID = req.headers[INFURA_IPFS_PROJECT_ID_HEADER];
-    // const INFURA_IPFS_SECRET = req.headers[INFURA_IPFS_SECRET_HEADER];
-    // const EVENT_FORWARDER_AUTH_TOKEN = req.headers[EVENT_FORWARDER_AUTH_TOKEN_HEADER];
+    const INFURA_IPFS_PROJECT_ID = req.headers[INFURA_IPFS_PROJECT_ID_HEADER];
+    const INFURA_IPFS_SECRET = req.headers[INFURA_IPFS_SECRET_HEADER];
+    const EVENT_FORWARDER_AUTH_TOKEN = req.headers[EVENT_FORWARDER_AUTH_TOKEN_HEADER];
 
     if (!(INFURA_IPFS_PROJECT_ID && INFURA_IPFS_SECRET)) {
         return {
@@ -98,7 +96,7 @@ function View({
     const metadata = JSON.parse(metadataStr);
 
     return (
-        <Box h="100vh" w="100vw">
+        <Box h="800px" w="800px">
             <Heart
                 address={metadata.address}
                 record={true}
