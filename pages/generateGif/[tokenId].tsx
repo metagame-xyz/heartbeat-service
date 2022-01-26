@@ -87,7 +87,7 @@ function View({
         const url = await addBlobToIPFS(IPFSClient, blob);
         const secondsElapsed = (Date.now() - this.startTime) / 1000;
         const response = await updateImage(
-            this.tokenId,
+            tokenId,
             url,
             EVENT_FORWARDER_AUTH_TOKEN,
             secondsElapsed,
