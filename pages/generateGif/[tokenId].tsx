@@ -95,12 +95,13 @@ function View({
     const metadata = JSON.parse(metadataStr);
 
     return (
-        <Box h="100px" w="100px">
+        <Box h="400px" w="400px">
             <Heart
                 address={metadata.address}
                 record={true}
                 attributes={getParametersFromTxnCounts(metadata.txnCounts)}
                 onSaveGif={onSaveGif}
+                frameCount={60}
             />
         </Box>
     );

@@ -233,7 +233,7 @@ export const BaseHeart = (props) => {
             capturer.capture(gl.current.domElement);
         }
 
-        if (frame.current > 10 && !captured.current) {
+        if (frame.current > props.frameCount && !captured.current) {
             capturing.current = false;
             captured.current = true;
             capturer.stop();
@@ -345,7 +345,7 @@ const interpolators = {
     fantomActivity: lerp(0, 4),
 };
 
-const Heart = ({ address, record, attributes, onSaveGif }) => {
+const Heart = ({ address, record, attributes, onSaveGif, frameCount }) => {
     const [h, s, l] = useMemo(() => generateColor(address), [address]);
     const color = toString(attributes.contrast ? [h, s, l] : [h, 0, l]);
     const colorContrast = useMemo(
@@ -371,6 +371,7 @@ const Heart = ({ address, record, attributes, onSaveGif }) => {
             frequency={1.4}
             record={record}
             onSaveGif={onSaveGif}
+            frameCount={frameCount}
             {...interpolatedAttributes}
         />
     );
