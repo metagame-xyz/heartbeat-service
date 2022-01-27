@@ -12,6 +12,7 @@ import { logger } from '@utils/logging';
 import {
     ALCHEMY_NOTIFY_TOKEN,
     ALCHEMY_PROJECT_ID,
+    ETHERSCAN_API_KEY,
     EVENT_FORWARDER_AUTH_TOKEN,
     INFURA_PROJECT_ID,
     networkStrings,
@@ -23,6 +24,7 @@ import {
 // const slackClient = new WebClient(SLACK_API_TOKEN);
 
 export const defaultProvider = getDefaultProvider(networkStrings.ethers, {
+    etherscan: ETHERSCAN_API_KEY,
     infura: INFURA_PROJECT_ID,
     alchemy: ALCHEMY_PROJECT_ID,
     pocket: {
@@ -32,6 +34,7 @@ export const defaultProvider = getDefaultProvider(networkStrings.ethers, {
 });
 
 export const defaultMainnetProvider = getDefaultProvider('homestead', {
+    etherscan: ETHERSCAN_API_KEY,
     infura: INFURA_PROJECT_ID,
     alchemy: ALCHEMY_PROJECT_ID,
     pocket: {
@@ -91,11 +94,6 @@ export const formatDateObjToTime = (dateObj: Record<string, number>): string => 
 
 export const getUserName = async (address: string, provider = defaultMainnetProvider) => {
     let ensName = null;
-    try {
-        ensName = await provider.lookupAddress(address);
-    } catch (error) {
-        logger.error({ error });
-        logger.error({ message: 'ensName lookup failed' });
-    }
+    ensName = await provider.lookupAddress(address);
     return ensName || address.substr(0, 6);
 };
