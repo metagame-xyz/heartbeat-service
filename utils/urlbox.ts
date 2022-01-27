@@ -26,6 +26,7 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
         height: 512,
         gpu: true,
         wait_for: `.${doneDivClass}`,
+        wait_timeout: 60_000,
         fail_if_selector_missing: true,
         header: [
             `${INFURA_IPFS_PROJECT_ID_HEADER}=${INFURA_IPFS_PROJECT_ID}`,
@@ -41,8 +42,6 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
     };
 
     const forceImgUrl = urlbox.buildUrl(optionsWithForce);
-
-
 
     logSuccess(
         {
