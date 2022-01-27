@@ -36,7 +36,7 @@ function About({ heading, text }) {
             <Heading as="h2" fontSize="24px">
                 {heading}
             </Heading>
-            <Text align={['center', 'center', 'center', 'left']}>{text}</Text>
+            <Text align="center">{text}</Text>
         </VStack>
     );
 }
