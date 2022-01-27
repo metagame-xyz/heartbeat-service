@@ -50,8 +50,8 @@ const toastErrorData = (title: string, description: string) => ({
     isClosable: true,
 });
 
-function gardenLink(tokenId: number): string {
-    return `https://${WEBSITE_URL}/garden/${tokenId}?showToast=true`;
+function heartbeatShowerLink(tokenId: number): string {
+    return `https://${WEBSITE_URL}/heart/${tokenId}`;
 }
 
 function Home({ metadata }) {
@@ -250,8 +250,8 @@ function Home({ metadata }) {
                             mt={2}
                             size="lg"
                             rightIcon={<ExternalLinkIcon />}
-                            onClick={() => window.open(gardenLink(userTokenId))}>
-                            View your Garden
+                            onClick={() => window.open(heartbeatShowerLink(userTokenId))}>
+                            View your Heartbeat
                         </Button>
                     </Box>
                 )}

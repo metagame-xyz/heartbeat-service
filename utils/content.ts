@@ -23,7 +23,7 @@ export const copy = {
     heading1: 'Living, Breathing',
     text1: 'Every night, your heartbeat is updated using your recent on-chain activity.',
     heading2: 'Multi-chain',
-    text2: 'Activity is tracked arcoss Ethereum, Polygon, Fantom, and Avalanche.',
+    text2: 'Activity is tracked across Ethereum, Polygon, Fantom, and Avalanche.',
     heading3: 'Earned Attributes',
     text3: 'The layers, speed, colors, and spikes are each based on a different length of time. What can you do to make yours more unique?',
     bottomSectonHeading: 'The Metagame',
