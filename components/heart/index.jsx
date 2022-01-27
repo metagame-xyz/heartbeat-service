@@ -381,7 +381,7 @@ const Heart = ({ address, record, attributes, onSaveGif, frameCount }) => {
 Heart.defaultProps = {
     onSaveGif: null,
     record: false,
-    frameCount: 60,
+    frameCount: 120,
 };
 
 export default Heart;
