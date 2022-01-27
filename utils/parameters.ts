@@ -4,7 +4,7 @@ const timeParamMax = {
     day: 12,
     week: 72,
     month: 144,
-    total: 20736, //log144, 144**2, so that log144(x) = 2
+    total: 1000, //log144, 144**2, so that log144(x) = 2
 };
 
 export type Parameters = {
@@ -43,7 +43,7 @@ function generateParamValue(txnCounts: TxnCounts, timeFrame: TimeFrames, log = f
     let count = getMax(txnCounts, timeFrame);
 
     if (log) {
-        count = Math.log(count) / Math.log(timeParamMax.total);
+        count = Math.log(count) / Math.log(Math.sqrt(timeParamMax.total));
     }
     const percent = count / timeParamMax[timeFrame];
     // console.log(`${timeFrame} percent`, percent);
@@ -64,7 +64,7 @@ export function getParametersFromTxnCounts(txnCounts: TxnCounts) {
         intensity: generateParamValue(txnCounts, 'day'),
         speed: generateParamValue(txnCounts, 'week'),
         contrast: generateParamValue(txnCounts, 'month'),
-        spikes: generateParamValue(txnCounts, 'total', true),
+        spikes: generateParamValue(txnCounts, 'total'),
         // spikes: generateParamValue(txnCounts, 'week'),
         avalancheActivity: generateActivityValue(txnCounts.avalanche),
         fantomActivity: generateActivityValue(txnCounts.fantom),
