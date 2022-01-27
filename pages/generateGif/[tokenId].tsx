@@ -101,7 +101,7 @@ function View({
                 record={true}
                 attributes={getParametersFromTxnCounts(metadata.txnCounts)}
                 onSaveGif={onSaveGif}
-                frameCount={60}
+                frameCount={120}
             />
         </Box>
     );
