@@ -4,7 +4,6 @@ import { InferGetServerSidePropsType } from 'next';
 import Heart from '@components/heart';
 
 import { ioredisClient } from '@utils';
-// import HeartGrower from '@utils/Heart';
 import { Metadata } from '@utils/metadata';
 import { getParametersFromTxnCounts } from '@utils/parameters';
 
@@ -24,24 +23,6 @@ export const getServerSideProps = async (context) => {
 };
 
 function View({ metadataArr }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    // useEffect(() => {
-    //     async function growHeart() {
-    //         let wrapperEl = document.getElementById('heart');
-    //         while (wrapperEl.firstChild) {
-    //             wrapperEl.removeChild(wrapperEl.firstChild);
-    //         }
-
-    //         const metadata: Metadata = JSON.parse(metadataStr);
-    //         // const minterAddress = metadata.address;
-
-    //         const heart = new HeartGrower(wrapperEl);
-    //         heart.renderHeart(metadata);
-
-    //         // garden.addGUI();
-    //     }
-    //     growHeart();
-    // }, []);
-
     const parsed: Metadata[] = metadataArr.map((metadata) => {
         return JSON.parse(metadata);
     });
@@ -52,7 +33,7 @@ function View({ metadataArr }: InferGetServerSidePropsType<typeof getServerSideP
     // sorted.forEach((metadata) => {
     //     console.log(metadata.txnCounts.total);
     // });
-    const top = sorted.slice(-15)
+    const top = sorted.slice(0, 10);
 
     const many = top.map((metadata, index) => {
         const size = '350px';

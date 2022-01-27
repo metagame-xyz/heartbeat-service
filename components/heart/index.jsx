@@ -255,6 +255,7 @@ export const BaseHeart = (props) => {
     const bind = useCallback(
         (context) => {
             if (props.record) {
+                context.gl.setClearColor(0x00ff00);
                 // context.gl.setSize(800, 800);
                 gl.current = context.gl;
                 requestAnimationFrame(loop);
