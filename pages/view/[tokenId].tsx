@@ -4,7 +4,6 @@ import { InferGetServerSidePropsType } from 'next';
 import { useEffect } from 'react';
 
 import { ioredisClient } from '@utils';
-// import HeartGrower from '@utils/Heart';
 import { Metadata } from '@utils/metadata';
 import { getParametersFromTxnCounts } from '@utils/parameters';
 
@@ -54,14 +53,14 @@ function View({
     const metadata = JSON.parse(metadataStr);
 
     return (
-        <div style={{ height: '350px', width: '350px' }}>
+        <Box h="100vh" w="100vw">
             <Heart
                 address={metadata.address}
                 attributes={getParametersFromTxnCounts(metadata.txnCounts)}
-                onSaveGif={onSaveGif}
-                record={true}
+                // onSaveGif={onSaveGif}
+                // record={true}
             />
-        </div>
+        </Box>
     );
 }
 

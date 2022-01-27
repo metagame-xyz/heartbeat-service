@@ -4,7 +4,7 @@ const timeParamMax = {
     day: 12,
     week: 72,
     month: 144,
-    total: 1000, //log144, 144**2, so that log144(x) = 2
+    total: 12 ** 3, //log144, 144**2, so that log144(x) = 2
 };
 
 export type Parameters = {
@@ -39,11 +39,16 @@ function getMax(txnCounts: TxnCounts, timeFrame: TimeFrames) {
     return Math.max(...vals);
 }
 
-function generateParamValue(txnCounts: TxnCounts, timeFrame: TimeFrames, log = false) {
+function easeOut(n, max) {
+    const x = n / max;
+    return x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+}
+
+function generateParamValue(txnCounts: TxnCounts, timeFrame: TimeFrames, useEaseOut = false) {
     let count = getMax(txnCounts, timeFrame);
 
-    if (log) {
-        count = Math.log(count) / Math.log(Math.sqrt(timeParamMax.total));
+    if (useEaseOut) {
+        return easeOut(count, timeParamMax[timeFrame]);
     }
     const percent = count / timeParamMax[timeFrame];
     // console.log(`${timeFrame} percent`, percent);

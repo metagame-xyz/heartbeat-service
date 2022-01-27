@@ -1,6 +1,6 @@
 import Urlbox from 'urlbox';
 
-import { logger, logSuccess } from '@utils/logging';
+import { LogData, logError, logger, logSuccess } from '@utils/logging';
 
 import {
     doneDivClass,
@@ -19,9 +19,9 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
     const url = `https://${env}.themetagame.xyz/generateGif/${tokenId}`;
     const loggerUrl = `https://${env}.themetagame.xyz/api/v1/webhooks/urlboxLogger`;
 
-    const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
-    const baseOptions = {
-        url,
+    // const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
+    const baseParams = {
+        url: url,
         unique: tokenId,
         width: 512,
         height: 512,
@@ -38,22 +38,42 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
     };
 
     // force and wait for the image to load
-    const optionsWithForce = {
-        ...baseOptions,
+    const paramsWithForce = {
+        ...baseParams,
         force: true,
     };
 
-    const forceImgUrl = urlbox.buildUrl(optionsWithForce);
-
-    logSuccess(
-        {
-            level: 'info',
-            token_id: tokenId,
-            function_name: 'generateGIFWithUrlbox',
+    const urlboxOptions = {
+        method: 'POST',
+        body: JSON.stringify(paramsWithForce),
+        headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${URL_BOX_API_SECRET}`,
         },
-        `forceImgUrl: ${forceImgUrl}`,
-    );
+    };
 
+    const urlboxPostUrl = `https://api.urlbox.io/v1/render`;
+
+    const logData: LogData = {
+        level: 'info',
+        token_id: tokenId,
+        function_name: 'generateGIFWithUrlbox',
+    };
+    let response;
+    try {
+        response = await fetch(urlboxPostUrl, urlboxOptions);
+        const data = await response.json();
+        // console.log(data);
+        // console.log(response.headers);
+        logData.extra = data;
+        logSuccess(logData);
+        return true;
+    } catch (error) {
+        logError(logData, error);
+        throw error;
+    }
+
+    // const forceImgUrl = urlbox.buildUrl(paramsWithForce);
     // if (timer && process.env.NODE_ENV !== 'production') {
     //     logger.info(`begin screenshot of ${forceImgUrl}`);
     //     let start = performance.now();
@@ -63,6 +83,6 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
     //     return data;
     // }
 
-    const data = await fetch(forceImgUrl);
-    return data;
+    // const data = await fetch(forceImgUrl, options);
+    // return data;
 }

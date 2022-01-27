@@ -1,4 +1,4 @@
-import { Box, SimpleGrid } from '@chakra-ui/react';
+import { Box, Center, SimpleGrid } from '@chakra-ui/react';
 import { InferGetServerSidePropsType } from 'next';
 
 import Heart from '@components/heart';
@@ -11,7 +11,7 @@ import { getParametersFromTxnCounts } from '@utils/parameters';
 export const getServerSideProps = async (context) => {
     const metadataArr = [];
 
-    for (let i = 1; i <= 30; i++) {
+    for (let i = 1; i <= 70; i++) {
         const metadata = await ioredisClient.hget(i.toString(), 'metadata');
 
         metadataArr.push(metadata);
@@ -52,7 +52,7 @@ function View({ metadataArr }: InferGetServerSidePropsType<typeof getServerSideP
     // sorted.forEach((metadata) => {
     //     console.log(metadata.txnCounts.total);
     // });
-    const top = sorted.slice(0, 10);
+    const top = sorted.slice(10, 20);
 
     const many = top.map((metadata, index) => {
         const size = '350px';
@@ -62,12 +62,13 @@ function View({ metadataArr }: InferGetServerSidePropsType<typeof getServerSideP
                     address={metadata.address}
                     attributes={getParametersFromTxnCounts(metadata.txnCounts)}
                 />
+                <Center>{metadata.txnCounts.ethereum.totalTransactions}</Center>
             </Box>
         );
     });
 
     return (
-        <SimpleGrid columns={5} spacing={0}>
+        <SimpleGrid columns={5} spacing={6} py={8}>
             {many}
         </SimpleGrid>
     );
