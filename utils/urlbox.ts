@@ -13,6 +13,7 @@ import {
     URL_BOX_API_SECRET,
     URLBOX_API_KEY,
 } from './constants';
+import { fetcher } from './requests';
 
 export async function generateGIFWithUrlbox(tokenId: string, timer = false): Promise<any> {
     const env = process.env.VERCEL_ENV === 'production' ? 'heartbeat' : 'heartbeat-dev';
@@ -61,11 +62,10 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
     };
     let response;
     try {
-        response = await fetch(urlboxPostUrl, urlboxOptions);
-        const data = await response.json();
+        response = await fetcher(urlboxPostUrl, urlboxOptions);
         // console.log(data);
         // console.log(response.headers);
-        logData.extra = data;
+        logData.extra = response;
         logSuccess(logData);
         return true;
     } catch (error) {
