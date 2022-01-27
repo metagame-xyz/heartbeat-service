@@ -63,7 +63,7 @@ export async function addOrUpdateNft(
         await ioredisClient.hset(tokenId, { address: address, metadata: JSON.stringify(metadata) });
 
         logData.third_party_name = 'urlbox';
-        generateGIFWithUrlbox(tokenId);
+        await generateGIFWithUrlbox(tokenId);
 
         logSuccess(logData);
         return {
