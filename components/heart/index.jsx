@@ -358,7 +358,7 @@ const Heart = ({ address, record, attributes, onSaveGif, frameCount }) => {
         [attributes],
     );
 
-    console.log({ address, interpolatedAttributes });
+    // console.log({ address, interpolatedAttributes });
 
     return (
         <BaseHeart

@@ -48,7 +48,7 @@ function generateParamValue(txnCounts: TxnCounts, timeFrame: TimeFrames, log = f
     const percent = count / timeParamMax[timeFrame];
     // console.log(`${timeFrame} percent`, percent);
     const min = Math.min(1, percent);
-    console.log(`${timeFrame} min`, min);
+    // console.log(`${timeFrame} min`, min);
     return min;
 }
 
