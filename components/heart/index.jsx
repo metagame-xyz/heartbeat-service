@@ -233,7 +233,7 @@ export const BaseHeart = (props) => {
             capturer.capture(gl.current.domElement);
         }
 
-        if (frame.current > 120 && !captured.current) {
+        if (frame.current > 10 && !captured.current) {
             capturing.current = false;
             captured.current = true;
             capturer.stop();
@@ -258,7 +258,7 @@ export const BaseHeart = (props) => {
     const bind = useCallback(
         (context) => {
             if (props.record) {
-                context.gl.setSize(800, 800);
+                // context.gl.setSize(800, 800);
                 gl.current = context.gl;
                 requestAnimationFrame(loop);
             }
