@@ -94,8 +94,10 @@ function View({
 
     const metadata = JSON.parse(metadataStr);
 
+    const size = '350px';
+
     return (
-        <Box h="200px" w="200px">
+        <Box h={size} w={size}>
             <Heart
                 address={metadata.address}
                 record={true}

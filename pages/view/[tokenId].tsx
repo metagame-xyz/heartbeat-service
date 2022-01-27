@@ -1,4 +1,5 @@
 import { Box } from '@chakra-ui/react';
+import Chance from 'chance';
 import { InferGetServerSidePropsType } from 'next';
 import { useEffect } from 'react';
 
@@ -42,13 +43,23 @@ function View({
     //     growHeart();
     // }, []);
 
+    async function onSaveGif(blob, _) {
+        const fileURL = window.URL.createObjectURL(blob);
+        const tempLink = document.createElement('a');
+        tempLink.href = fileURL;
+        tempLink.setAttribute('download', `test-${new Chance().name()}.gif`);
+        tempLink.click();
+    }
+
     const metadata = JSON.parse(metadataStr);
 
     return (
-        <div style={{ height: '100vh', width: '100vw' }}>
+        <div style={{ height: '350px', width: '350px' }}>
             <Heart
                 address={metadata.address}
                 attributes={getParametersFromTxnCounts(metadata.txnCounts)}
+                onSaveGif={onSaveGif}
+                record={true}
             />
         </div>
     );

@@ -489,7 +489,7 @@
             workers: settings.workers,
             quality: settings.quality,
             workerScript,
-            // transparent: 'rgba(0,0,0,0)',
+            transparent: 'rgba(0,0,0,0)',
         });
 
         this.encoder.on(

@@ -213,8 +213,8 @@ export const BaseHeart = (props) => {
         const CCapture = require('./ccapture.js');
         const c = new CCapture({
             format: 'gif',
-            quality: 100,
-            framerate: 60,
+            quality: 80,
+            framerate: 30,
         });
         return c;
     }, [props.record]);
@@ -241,11 +241,6 @@ export const BaseHeart = (props) => {
             capturer.stop();
             capturer.save(async (blob) => {
                 await props.onSaveGif(blob, startTime.current);
-                // const fileURL = window.URL.createObjectURL(blob);
-                // const tempLink = document.createElement('a');
-                // tempLink.href = fileURL;
-                // tempLink.setAttribute('download', `test.gif`);
-                // tempLink.click();
                 const div = document.createElement('div');
                 document.body.appendChild(div);
                 div.classList.add('done');
@@ -339,7 +334,7 @@ const generateColor = (address) => {
 };
 
 const interpolators = {
-    spikes: lerp(1, 4.25),
+    spikes: lerp(2, 4.25),
     speed: lerp(0, 1),
     intensity: lerp(1, 2),
     polygonActivity: lerp(0, 4),
