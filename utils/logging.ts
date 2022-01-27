@@ -96,6 +96,7 @@ export type LogData = {
     job_data?: any;
     alert?: boolean;
     seconds_elapsed?: number;
+    extra?: any;
 };
 
 export type LogDataWithLevelAnd = LogData & {

@@ -17,6 +17,7 @@ import {
 export async function generateGIFWithUrlbox(tokenId: string, timer = false): Promise<any> {
     const env = process.env.VERCEL_ENV === 'production' ? 'heartbeat' : 'heartbeat-dev';
     const url = `https://${env}.themetagame.xyz/generateGif/${tokenId}`;
+    const loggerUrl = `https://${env}.themetagame.xyz/api/v1/webhooks/urlboxLogger`;
 
     const urlbox = Urlbox(URLBOX_API_KEY, URL_BOX_API_SECRET);
     const baseOptions = {
@@ -33,6 +34,7 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
             `${INFURA_IPFS_SECRET_HEADER}=${INFURA_IPFS_SECRET}`,
             `${EVENT_FORWARDER_AUTH_TOKEN_HEADER}=${EVENT_FORWARDER_AUTH_TOKEN}`,
         ],
+        webhook_url: loggerUrl,
     };
 
     // force and wait for the image to load
@@ -52,14 +54,14 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
         `forceImgUrl: ${forceImgUrl}`,
     );
 
-    if (timer && process.env.NODE_ENV !== 'production') {
-        logger.info(`begin screenshot of ${forceImgUrl}`);
-        let start = performance.now();
-        const data = await fetch(forceImgUrl);
-        let end = performance.now();
-        logger.info(`fetching image took ${(end - start) / 1000} seconds`);
-        return data;
-    }
+    // if (timer && process.env.NODE_ENV !== 'production') {
+    //     logger.info(`begin screenshot of ${forceImgUrl}`);
+    //     let start = performance.now();
+    //     const data = await fetch(forceImgUrl);
+    //     let end = performance.now();
+    //     logger.info(`fetching image took ${(end - start) / 1000} seconds`);
+    //     return data;
+    // }
 
     const data = await fetch(forceImgUrl);
     return data;
