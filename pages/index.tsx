@@ -205,7 +205,6 @@ function Home({ metadata }) {
                     }}>
                     <Heart
                         address={metadata.address}
-                        record={true}
                         attributes={getParametersFromTxnCounts(metadata.txnCounts)}
                     />
                 </div>

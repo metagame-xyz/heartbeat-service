@@ -335,7 +335,7 @@ const generateColor = (address) => {
 
 const interpolators = {
     spikes: lerp(1.2, 4.25),
-    speed: lerp(0, 1),
+    speed: lerp(0, 0.7),
     intensity: lerp(1, 2),
     polygonActivity: lerp(0, 4),
     avalancheActivity: lerp(0, 4),

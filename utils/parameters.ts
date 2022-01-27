@@ -39,16 +39,16 @@ function getMax(txnCounts: TxnCounts, timeFrame: TimeFrames) {
     return Math.max(...vals);
 }
 
-function easeOut(n, max) {
+function easeOut(n, max, stength) {
     const x = n / max;
-    return x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+    return x >= 1 ? 1 : 1 - Math.pow(2, -1 * stength * x);
 }
 
-function generateParamValue(txnCounts: TxnCounts, timeFrame: TimeFrames, useEaseOut = false) {
+function generateParamValue(txnCounts: TxnCounts, timeFrame: TimeFrames, strength = 0) {
     let count = getMax(txnCounts, timeFrame);
 
-    if (useEaseOut) {
-        return easeOut(count, timeParamMax[timeFrame]);
+    if (strength) {
+        return easeOut(count, timeParamMax[timeFrame], strength);
     }
     const percent = count / timeParamMax[timeFrame];
     // console.log(`${timeFrame} percent`, percent);
@@ -67,9 +67,9 @@ function generateActivityValue(SingleNetworkTxnCounts: SingleNetworkTxnCounts, e
 export function getParametersFromTxnCounts(txnCounts: TxnCounts) {
     const parameters: Parameters = {
         intensity: generateParamValue(txnCounts, 'day'),
-        speed: generateParamValue(txnCounts, 'week'),
+        speed: generateParamValue(txnCounts, 'week', 5),
         contrast: generateParamValue(txnCounts, 'month'),
-        spikes: generateParamValue(txnCounts, 'total'),
+        spikes: generateParamValue(txnCounts, 'total', 10),
         // spikes: generateParamValue(txnCounts, 'week'),
         avalancheActivity: generateActivityValue(txnCounts.avalanche),
         fantomActivity: generateActivityValue(txnCounts.fantom),

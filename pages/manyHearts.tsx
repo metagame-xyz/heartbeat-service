@@ -52,7 +52,7 @@ function View({ metadataArr }: InferGetServerSidePropsType<typeof getServerSideP
     // sorted.forEach((metadata) => {
     //     console.log(metadata.txnCounts.total);
     // });
-    const top = sorted.slice(10, 20);
+    const top = sorted.slice(0, 10);
 
     const many = top.map((metadata, index) => {
         const size = '350px';
