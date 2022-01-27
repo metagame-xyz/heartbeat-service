@@ -60,7 +60,7 @@ class BlobMaterial extends THREE.ShaderMaterial {
         vNormal = normal;
         
         float t = uTime * uSpeed;
-        float distortion = pnoise((normal + t) * uNoiseDensity, vec3(10.0)) * (uNoiseDensity * .15);
+        float distortion = pnoise((normal + t) * uNoiseDensity, vec3(10.0)) * uNoiseStrength;
 
         vec3 pos = position + (normal * distortion);
         float angle = sin(uv.y * uFrequency + t) * uAmplitude;
@@ -334,7 +334,7 @@ const generateColor = (address) => {
 };
 
 const interpolators = {
-    spikes: lerp(1.2, 4.25),
+    spikes: lerp(5, 8.00),
     speed: lerp(0, 0.7),
     intensity: lerp(1, 2),
     polygonActivity: lerp(0, 4),
@@ -358,7 +358,7 @@ const Heart = ({ address, record, attributes, onSaveGif, frameCount }) => {
         [attributes],
     );
 
-    // console.log({ address, interpolatedAttributes });
+    interpolatedAttributes.noiseStrength = lerp(.1, .6)(attributes.spikes)
 
     return (
         <BaseHeart

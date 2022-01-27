@@ -74,7 +74,7 @@ export function getParametersFromTxnCounts(txnCounts: TxnCounts) {
         avalancheActivity: generateActivityValue(txnCounts.avalanche),
         fantomActivity: generateActivityValue(txnCounts.fantom),
         polygonActivity: generateActivityValue(txnCounts.polygon),
-        ethereumActivity: generateActivityValue(txnCounts.ethereum, true),
+        ethereumActivity:  easeOut(txnCounts.ethereum.transactionsLastMonth, timeParamMax.month, 3),
     };
 
     return parameters;
