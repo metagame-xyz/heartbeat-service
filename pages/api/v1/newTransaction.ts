@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const result = await addOrUpdateNft(address, tokenId);
+        const result = await addOrUpdateNft(address, tokenId, true);
 
         logSuccess(logData);
         res.status(200).send({

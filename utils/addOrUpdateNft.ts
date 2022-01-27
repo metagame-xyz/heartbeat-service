@@ -20,6 +20,7 @@ export type newNftResponse = {
 export async function addOrUpdateNft(
     minterAddress: string,
     tokenId: string,
+    forceCount = false,
 ): Promise<newNftResponse> {
     const address = minterAddress.toLowerCase();
 
@@ -50,6 +51,13 @@ export async function addOrUpdateNft(
         let metadata = firstTime
             ? formatNewMetadata(address, txnCounts, userName, tokenId)
             : formatMetadataWithOldMetadata(oldMetadata, txnCounts, userName);
+
+        if (forceCount) {
+            metadata.txnCounts.ethereum.transactionsYesterday += 1;
+            metadata.txnCounts.ethereum.transactionsLastWeek += 1;
+            metadata.txnCounts.ethereum.transactionsLastMonth += 1;
+            metadata.txnCounts.ethereum.totalTransactions += 1;
+        }
 
         await ioredisClient.hset(address, { tokenId, metadata: JSON.stringify(metadata) });
         await ioredisClient.hset(tokenId, { address: address, metadata: JSON.stringify(metadata) });
