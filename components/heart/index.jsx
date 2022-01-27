@@ -223,9 +223,11 @@ export const BaseHeart = (props) => {
     const capturing = useRef(false);
     const captured = useRef(false);
     const frame = useRef(0);
+    const startTime = useRef(null);
     const loop = useCallback(() => {
         if (!capturing.current && !captured.current) {
             capturing.current = true;
+            startTime.current = Date.now();
             capturer.start();
         }
 
@@ -238,7 +240,7 @@ export const BaseHeart = (props) => {
             captured.current = true;
             capturer.stop();
             capturer.save(async (blob) => {
-                await props.onSaveGif(blob);
+                await props.onSaveGif(blob, startTime.current);
                 // const fileURL = window.URL.createObjectURL(blob);
                 // const tempLink = document.createElement('a');
                 // tempLink.href = fileURL;

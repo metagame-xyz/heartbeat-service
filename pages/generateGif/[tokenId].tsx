@@ -78,11 +78,11 @@ function View({
     //     }
     //     growHeart();
     // }, []);
-    async function onSaveGif(blob) {
+    async function onSaveGif(blob, startTime) {
         const IPFSClient = createIPFSClient(INFURA_IPFS_PROJECT_ID, INFURA_IPFS_SECRET);
 
         const url = await addBlobToIPFS(IPFSClient, blob);
-        const secondsElapsed = (Date.now() - this.startTime) / 1000;
+        const secondsElapsed = (Date.now() - startTime) / 1000;
         const response = await updateImage(
             tokenId,
             url,
