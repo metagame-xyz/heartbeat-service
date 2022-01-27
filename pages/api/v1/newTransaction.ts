@@ -6,6 +6,7 @@ import { LogData, logError, logSuccess } from '@utils/logging';
 import { addressMap } from '@utils/testAddresses';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    console.log('tokenId:', req.query.tokenId);
     if (req.method !== 'POST') {
         return res.status(404).send({});
     }
