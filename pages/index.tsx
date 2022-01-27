@@ -22,7 +22,7 @@ import Heart from '../components/heart/index.jsx';
 import heartbeat from '../heartbeat.json';
 
 export const getServerSideProps = async () => {
-    const metadata = await ioredisClient.hget('2', 'metadata');
+    const metadata = await ioredisClient.hget('1', 'metadata');
     return {
         props: {
             metadata: JSON.parse(metadata),
