@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { LogData, logSuccess } from '@utils/logging';
+import { LogData, logError, logSuccess, logWarning } from '@utils/logging';
+import { generateGIFWithUrlbox, getTokenIdByRenderId } from '@utils/urlbox';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
@@ -14,14 +15,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //     // logger.error({ error }); TODO
     //     return res.status(403).send({ error });
     // }
-    const body = req.body;
+    const { meta, event, result, error, renderId } = req.body;
 
     const logData: LogData = {
         level: 'info',
         function_name: 'urlboxLogger',
-        extra: body,
+        extra: req.body,
     };
 
-    logSuccess(logData);
-    return res.status(200).send({});
+    const timeElapsed = new Date(meta.endTime).getTime() - new Date(meta.startTime).getTime();
+    logData.seconds_elapsed = timeElapsed / 1000;
+
+    let tokenId;
+    try {
+        tokenId = await getTokenIdByRenderId(renderId);
+        logData.token_id = tokenId;
+    } catch (error) {
+        logError(logData, error);
+    }
+
+    if (error) {
+        await generateGIFWithUrlbox(tokenId);
+        logError(logData, error);
+    } else {
+        logSuccess(logData);
+    }
+
+    return res.send({});
 }

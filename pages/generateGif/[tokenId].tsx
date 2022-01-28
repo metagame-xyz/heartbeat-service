@@ -12,7 +12,6 @@ import {
     INFURA_IPFS_SECRET_HEADER,
 } from '@utils/constants';
 import { addBlobToIPFS, clickableIPFSLink, createIPFSClient, updateImage } from '@utils/frontend';
-import HeartGrower from '@utils/Heart';
 import { Metadata } from '@utils/metadata';
 import { getParametersFromTxnCounts } from '@utils/parameters';
 
@@ -89,6 +88,14 @@ function View({
         );
         console.log('url:', clickableIPFSLink(url));
     }
+
+    // async function onSaveGif(blob, _) {
+    //     const fileURL = window.URL.createObjectURL(blob);
+    //     const tempLink = document.createElement('a');
+    //     tempLink.href = fileURL;
+    //     tempLink.setAttribute('download', `test.gif`);
+    //     tempLink.click();
+    // }
 
     const metadata = JSON.parse(metadataStr);
 

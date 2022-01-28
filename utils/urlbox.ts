@@ -1,6 +1,5 @@
-import Urlbox from 'urlbox';
-
-import { LogData, logError, logger, logSuccess } from '@utils/logging';
+import { ioredisClient } from '@utils';
+import { LogData, logError, logSuccess } from '@utils/logging';
 
 import {
     doneDivClass,
@@ -11,9 +10,22 @@ import {
     INFURA_IPFS_SECRET,
     INFURA_IPFS_SECRET_HEADER,
     URL_BOX_API_SECRET,
-    URLBOX_API_KEY,
 } from './constants';
 import { fetcher } from './requests';
+
+export async function setTokenIdByRenderId(renderId: string, tokenId: string): Promise<void> {
+    await ioredisClient.hset(renderId, 'tokenId', tokenId);
+}
+
+export async function getTokenIdByRenderId(renderId: string): Promise<string> {
+    const tokenId = await ioredisClient.hget(renderId, 'tokenId');
+
+    if (!tokenId) {
+        throw new Error(`tokenId for renderId ${renderId} not found`);
+    }
+
+    return tokenId.toString();
+}
 
 export async function generateGIFWithUrlbox(tokenId: string, timer = false): Promise<any> {
     const env = process.env.VERCEL_ENV === 'production' ? 'heartbeat' : 'heartbeat-dev';
@@ -63,6 +75,8 @@ export async function generateGIFWithUrlbox(tokenId: string, timer = false): Pro
     let response;
     try {
         response = await fetcher(urlboxPostUrl, urlboxOptions);
+        const renderId = response.renderId;
+        await setTokenIdByRenderId(renderId, tokenId);
         // console.log(data);
         // console.log(response.headers);
         logData.extra = response;

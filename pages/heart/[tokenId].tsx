@@ -68,7 +68,6 @@ function HeartPage({
             </>
         );
     };
-
     const size = ['80vw'];
     return (
         <Box align="center" p="16px" minH="calc(100vh - 146px)" w="auto">
@@ -76,8 +75,6 @@ function HeartPage({
                 <Heart
                     address={metadata.address}
                     attributes={getParametersFromTxnCounts(metadata.txnCounts)}
-                    // onSaveGif={onSaveGif}
-                    // record={true}
                 />
             </Box>
             <Box>
