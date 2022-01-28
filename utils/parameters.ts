@@ -58,10 +58,10 @@ function generateParamValue(txnCounts: TxnCounts, timeFrame: TimeFrames, strengt
 }
 
 function generateActivityValue(SingleNetworkTxnCounts: SingleNetworkTxnCounts, ethereum = false) {
-    const count = SingleNetworkTxnCounts.transactionsLastMonth;
+    const count = SingleNetworkTxnCounts.transactionsLastWeek;
     const normalizedCount = ethereum ? count : count / 3;
 
-    return Math.min(1, normalizedCount / timeParamMax.month);
+    return Math.min(1, normalizedCount / timeParamMax.week);
 }
 
 export function getParametersFromTxnCounts(txnCounts: TxnCounts) {
@@ -74,7 +74,7 @@ export function getParametersFromTxnCounts(txnCounts: TxnCounts) {
         avalancheActivity: generateActivityValue(txnCounts.avalanche),
         fantomActivity: generateActivityValue(txnCounts.fantom),
         polygonActivity: generateActivityValue(txnCounts.polygon),
-        ethereumActivity:  easeOut(txnCounts.ethereum.transactionsLastMonth, timeParamMax.month, 3),
+        ethereumActivity: easeOut(txnCounts.ethereum.transactionsLastMonth, timeParamMax.month, 3),
     };
 
     return parameters;

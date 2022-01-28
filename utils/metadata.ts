@@ -18,7 +18,7 @@ export async function getTxnData(minterAddress: string, tokenId = null): Promise
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).getTime();
     const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).getTime();
 
-    const networks: ProductionNetworks[] = ['ethereum', 'polygon', 'fantom', 'avalanche'];
+    const networks: ProductionNetworks[] = ['ethereum', 'polygon', 'fantom'];
 
     for (const network of networks) {
         let transactions = [];
@@ -59,6 +59,13 @@ export async function getTxnData(minterAddress: string, tokenId = null): Promise
             transactionsLastMonth: txnsInLastMonth,
         };
     }
+
+    txnCounts.avalanche = {
+        totalTransactions: 0,
+        transactionsYesterday: 0,
+        transactionsLastWeek: 0,
+        transactionsLastMonth: 0,
+    };
 
     return txnCounts;
 }

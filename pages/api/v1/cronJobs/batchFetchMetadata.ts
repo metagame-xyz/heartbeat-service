@@ -29,7 +29,10 @@ export default CronJob(
 
             // array of tokenIds to update metadata for [1... mintCount]
             const jobs = [...Array(mintCount + 1).keys()].slice(1).map((id) => {
-                return { payload: { tokenId: id.toString() }, options: { id: id.toString() } };
+                return {
+                    payload: { tokenId: id.toString() },
+                    options: { id: id.toString(), delay: `${id * 60}s` },
+                };
             });
 
             logData.third_party_name = 'quirrel';
