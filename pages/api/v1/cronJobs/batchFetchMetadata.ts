@@ -9,6 +9,8 @@ import { LogData, logError, logSuccess } from '@utils/logging';
 
 import heartbeat from '../../../../heartbeat.json';
 
+const jobSpacingInSeconds = 30;
+
 export default CronJob(
     'api/v1/cronJobs/batchFetchMetadata', // 👈 the route it's reachable on
     ['0 3 * * *', 'America/Chicago'], // 👈 the cron schedule
@@ -31,7 +33,7 @@ export default CronJob(
             const jobs = [...Array(mintCount + 1).keys()].slice(1).map((id) => {
                 return {
                     payload: { tokenId: id.toString() },
-                    options: { id: id.toString(), delay: `${id * 60}s` },
+                    options: { id: id.toString(), delay: `${id * jobSpacingInSeconds}s` },
                 };
             });
 
