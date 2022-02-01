@@ -9,7 +9,7 @@ import { LogData, logError, logSuccess } from '@utils/logging';
 
 import heartbeat from '../../../../heartbeat.json';
 
-const jobSpacingInSeconds = 30;
+const jobSpacingInSeconds = 20;
 
 export default CronJob(
     'api/v1/cronJobs/batchFetchMetadata', // 👈 the route it's reachable on
