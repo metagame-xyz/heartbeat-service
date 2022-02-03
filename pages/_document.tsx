@@ -13,9 +13,9 @@ class MyDocument extends Document {
         return (
             <Html>
                 <Head>
-                    <meta content={meta.description} name="description" />
-                    <meta property="og:url" content={WEBSITE_URL} />
                     <link rel="canonical" href={WEBSITE_URL} />
+                    <meta name="description" content={meta.description} />
+                    <meta property="og:url" content={WEBSITE_URL} />
                     <meta property="og:site_name" content={meta.title} />
 
                     <meta property="og:title" content={meta.title} />

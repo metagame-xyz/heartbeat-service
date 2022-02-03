@@ -1,22 +1,13 @@
 import { ExternalLinkIcon } from '@chakra-ui/icons';
-import {
-    AspectRatio,
-    Box,
-    Button,
-    Center,
-    SimpleGrid,
-    Stack,
-    Wrap,
-    WrapItem,
-} from '@chakra-ui/react';
+import { Box, Button } from '@chakra-ui/react';
 import { InferGetServerSidePropsType } from 'next';
-import { useEffect, useState } from 'react';
+import Head from 'next/head';
 
 import Heart from '@components/heart';
 
 import { ioredisClient } from '@utils';
 import { CONTRACT_ADDRESS } from '@utils/constants';
-import HeartGrower from '@utils/Heart';
+import { clickableIPFSLink } from '@utils/frontend';
 import { Metadata } from '@utils/metadata';
 import { getParametersFromTxnCounts } from '@utils/parameters';
 
@@ -48,8 +39,8 @@ function HeartPage({
         return `https://opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId}`;
     };
 
-    const metadata = JSON.parse(metadataStr);
-    const attributes = (metadata) => {
+    const metadata: Metadata = JSON.parse(metadataStr);
+    const attributes = (metadata: Metadata) => {
         return (
             <>
                 {Object.entries(metadata)
@@ -71,6 +62,16 @@ function HeartPage({
     const size = ['80vw'];
     return (
         <Box align="center" p="16px" minH="calc(100vh - 146px)" w="auto">
+            <Head>
+                <title>{metadata.name}</title>
+                <meta property="og:title" content={metadata.name} />
+                <meta property="og:description" content={metadata.description} />
+                <meta property="og:image" content={clickableIPFSLink(metadata.image)} />
+                <meta name="twitter:title" content={metadata.name} />
+                <meta name="twitter:description" content={metadata.description} />
+                <meta name="twitter:image" content={clickableIPFSLink(metadata.image)} />
+                <meta name="twitter:image:alt" content={metadata.name} />
+            </Head>
             <Box w={size} h={size} maxW="800px" maxH="800px">
                 <Heart
                     address={metadata.address}
