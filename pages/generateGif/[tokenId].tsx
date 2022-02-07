@@ -21,12 +21,6 @@ export const getServerSideProps = async ({ query, params, req, res }) => {
     const INFURA_IPFS_SECRET = req.headers[INFURA_IPFS_SECRET_HEADER];
     const EVENT_FORWARDER_AUTH_TOKEN = req.headers[EVENT_FORWARDER_AUTH_TOKEN_HEADER];
 
-    if (!(INFURA_IPFS_PROJECT_ID && INFURA_IPFS_SECRET)) {
-        return {
-            notFound: true,
-        };
-    }
-
     const metadataStr = await ioredisClient.hget(tokenId, 'metadata');
     return {
         props: {
@@ -46,35 +40,10 @@ function View({
     INFURA_IPFS_SECRET,
     EVENT_FORWARDER_AUTH_TOKEN,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    // useEffect(() => {
-    //     async function growHeart() {
-    //         const startTime = Date.now();
-    //         let wrapperEl = document.getElementById('heart');
-    //         while (wrapperEl.firstChild) {
-    //             wrapperEl.removeChild(wrapperEl.firstChild);
-    //         }
+    if (!(INFURA_IPFS_PROJECT_ID && INFURA_IPFS_SECRET)) {
+        return <div></div>;
+    }
 
-    //         const metadata: Metadata = JSON.parse(metadataStr);
-    //         // const minterAddress = metadata.address;
-
-    //         const heart = new HeartGrower(wrapperEl);
-    //         heart.renderHeart(metadata);
-    //         heart.enableIPFSUpload(
-    //             INFURA_IPFS_PROJECT_ID,
-    //             INFURA_IPFS_SECRET,
-    //             EVENT_FORWARDER_AUTH_TOKEN,
-    //             tokenId,
-    //             startTime,
-    //         );
-
-    //         await heart.wait();
-
-    //         heart.startRecording();
-
-    //         // garden.addGUI();
-    //     }
-    //     growHeart();
-    // }, []);
     async function onSaveGif(blob, startTime) {
         const IPFSClient = createIPFSClient(INFURA_IPFS_PROJECT_ID, INFURA_IPFS_SECRET);
 
