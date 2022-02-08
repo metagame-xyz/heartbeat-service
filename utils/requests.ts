@@ -128,7 +128,7 @@ export async function getAllTransactions(
 
     let totalResult = [];
 
-    while (eventsInLastPage === 1000) {
+    while (eventsInLastPage === 1000 && page <= 10) {
         let status, message, result;
         try {
             ({ status, message, result } = await getSinglePageOfTransactions(
