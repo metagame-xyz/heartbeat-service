@@ -26,6 +26,6 @@ export const copy = {
     text2: 'Activity is tracked across Ethereum, Polygon, Fantom, and Avalanche.',
     heading3: 'Earned Attributes',
     text3: 'The layers, speed, colors, and spikes are each based on a different length of time. What can you do to make yours more unique?',
-    bottomSectonHeading: 'The Metagame',
+    bottomSectonHeading: 'Metagame',
     bottomSectionText: `Heartbeat is the third and final NFT of Metagame's Phase 1. Phase 2 will be an infinite series of achievements you earn by playing a game many of us are already playing whether we know it or not: The Metagame. These earned achievements will allow access to private spaces gated by shared experiences. Each achievement will contribute to leveling up your character. Follow along: `,
 };

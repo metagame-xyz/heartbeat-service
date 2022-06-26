@@ -36,7 +36,7 @@ export default function Footer(props) {
                     <TwelveCircles boxSize={8} color="white" />
                     {/* pt=1 cuz this font sits too high */}
                     <Center fontFamily="courier prime" pt={1} fontSize={['sm', 'md', 'xl', 'xl']}>
-                        The Metagame
+                        Metagame
                     </Center>
                 </Stack>
                 <Stack
