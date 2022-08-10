@@ -58,7 +58,7 @@ function Home({ metadata }) {
     const { provider, signer, userAddress, userName, eventParams, openWeb3Modal, toast } =
         useEthereum();
 
-    console.log(metadata);
+    console.log('address', userAddress);
 
     const heartbeatContract = new Contract(CONTRACT_ADDRESS, heartbeat.abi, provider);
 
@@ -97,19 +97,19 @@ function Home({ metadata }) {
     }, [userAddress]);
 
     // Mint Count
-    useEffect(() => {
-        async function getMintedCount() {
-            try {
-                console.log('getting mint count');
-                const mintCount: BigNumber = await heartbeatContract.mintedCount();
-                setMintCount(mintCount.toNumber());
-            } catch (error) {
-                debug({ error });
-            }
-        }
-        const interval = setInterval(getMintedCount, 4000);
-        return () => clearInterval(interval);
-    }, []);
+    // useEffect(() => {
+    //     async function getMintedCount() {
+    //         try {
+    //             console.log('getting mint count');
+    //             const mintCount: BigNumber = await heartbeatContract.mintedCount();
+    //             setMintCount(mintCount.toNumber());
+    //         } catch (error) {
+    //             debug({ error });
+    //         }
+    //     }
+    //     const interval = setInterval(getMintedCount, 4000);
+    //     return () => clearInterval(interval);
+    // }, []);
 
     const mint = async () => {
         event('Mint Button Clicked', eventParams);
@@ -203,10 +203,10 @@ function Home({ metadata }) {
                         width: '80%',
                         maxWidth: '800px',
                     }}>
-                    <Heart
+                    {/* <Heart
                         address={metadata.address}
                         attributes={getParametersFromTxnCounts(metadata.txnCounts)}
-                    />
+                    /> */}
                 </div>
             </Box>
 
