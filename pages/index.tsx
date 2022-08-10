@@ -1,15 +1,20 @@
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { Box, Button, Heading, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react';
+import { datadogRum } from '@datadog/browser-rum';
 import { parseEther } from '@ethersproject/units';
+import axios from 'axios';
 import { getGPUTier } from 'detect-gpu';
-import { BigNumber, Contract } from 'ethers';
+import { BigNumber, Contract, ethers } from 'ethers';
+import { AddressZ } from 'evm-translator/lib/interfaces/utils';
 import Head from 'next/head';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
+import { useAccount, useEnsName, useNetwork, useProvider, useSigner } from 'wagmi';
 
 import { useEthereum, wrongNetworkToast } from '@providers/EthereumProvider';
 
 import { maxW } from '@components/Layout';
+import { MintStatus } from '@components/MintButton.jsx';
 
 import { ioredisClient } from '@utils';
 import { blackholeAddress, CONTRACT_ADDRESS, networkStrings, WEBSITE_URL } from '@utils/constants';
@@ -55,18 +60,33 @@ function heartbeatShowerLink(tokenId: number): string {
 }
 
 function Home({ metadata }) {
-    const { provider, signer, userAddress, userName, eventParams, openWeb3Modal, toast } =
-        useEthereum();
-
-    console.log('address', userAddress);
-
-    const heartbeatContract = new Contract(CONTRACT_ADDRESS, heartbeat.abi, provider);
+    const {
+        address: uncleanAddress,
+        isConnecting,
+        isDisconnected,
+    } = useAccount({ onDisconnect: datadogRum.removeUser });
+    const address = uncleanAddress ? AddressZ.parse(uncleanAddress) : uncleanAddress;
 
     let [minted, setMinted] = useState(false);
     let [minting, setMinting] = useState(false);
-    let [userTokenId, setUserTokenId] = useState<number>(null);
 
     let [mintCount, setMintCount] = useState<number>(null);
+
+    const provider = useProvider();
+
+    const { data: signer } = useSigner();
+    const contract = new ethers.Contract(LOGBOOK_CONTRACT_ADDRESS, logbookAbi, provider);
+    const contractWithSigner = contract.connect(signer);
+
+    const [expandedSignature, setExpandedSignature] = useState({ v: null, r: null, s: null });
+    const [contentContainer, setContentContainer] = useState<HTMLElement | null>(null);
+    const [mintStatus, setMintStatus] = useState<MintStatus>(MintStatus.unknown);
+
+    const [userTokenId, setUserTokenId] = useState<number>(null);
+
+    const [showMetabotModal, setShowMetabotModal] = useState(false);
+    const [showProcessingModal, setShowProcessingModal] = useState(false);
+    const [showMintedModal, setShowMintedModal] = useState(false);
 
     let [hasGPU, setHasGPU] = useState<boolean>(true);
 
@@ -74,27 +94,55 @@ function Home({ metadata }) {
         async function getUserMintedTokenId() {
             // userAddress has changed. TokenId defaults to null
             let tokenId = null;
+            let allowlist = false;
+            let signature = { v: null, r: null, s: null };
+            let errorCode = null;
+            let localMintStatus = MintStatus.loading;
+            setMintStatus(localMintStatus);
+
             try {
-                if (userAddress) {
-                    const filter = heartbeatContract.filters.Transfer(
-                        blackholeAddress,
-                        userAddress,
-                    );
-                    const [event] = await heartbeatContract.queryFilter(filter); // get first event, should only be one
+                if (address) {
+                    console.log('address', address);
+                    const filter = contract.filters.Transfer(blackholeAddress, address);
+                    const [event] = await contract.queryFilter(filter); // get first event, should only be one
                     if (event) {
                         tokenId = event.args[2].toNumber();
+                        localMintStatus = MintStatus.minted;
                     }
                 }
+
+                if (address && localMintStatus !== MintStatus.minted) {
+                    ({ allowlist, signature, errorCode } = await axios
+                        .get(`/api/premintCheck/${address}`)
+                        .then((res) => res.data));
+
+                    if (errorCode === 1) {
+                        localMintStatus = MintStatus.metabot;
+                        setShowMetabotModal(true);
+                    } else if (errorCode === 2) {
+                        localMintStatus = MintStatus.processing;
+                        setShowProcessingModal(true);
+                    } else {
+                        localMintStatus = MintStatus.can_mint;
+                    }
+                }
+
+                if (!address) {
+                    localMintStatus = MintStatus.unknown;
+                }
+
+                console.log('tokenId', tokenId);
             } catch (error) {
-                toast(toastErrorData('Get User Minted Token Error', JSON.stringify(error)));
-                debug({ error });
+                console.error(error);
+                // toast(toastErrorData('Get User Minted Token Error', JSON.stringify(error)))
             } finally {
-                // set it either to null, or to the userAddres's tokenId
                 setUserTokenId(tokenId);
+                setExpandedSignature(signature);
+                setMintStatus(localMintStatus);
             }
         }
         getUserMintedTokenId();
-    }, [userAddress]);
+    }, [address, chain?.id]);
 
     // Mint Count
     // useEffect(() => {
