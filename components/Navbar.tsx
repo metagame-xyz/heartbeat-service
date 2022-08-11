@@ -45,26 +45,6 @@ function Navbar(props) {
                     <Twitter />
                     <Opensea />
                     <Etherscan />
-                    {userName ? (
-                        <Box bgColor="brand.700" color="white" px={4} py={3} borderRadius="full">
-                            <HStack>
-                                {avatarUrl && <Avatar size="xs" src={`${avatarUrl}`} />}
-                                <Text>{userName}</Text>
-                            </HStack>
-                        </Box>
-                    ) : (
-                        <Button
-                            onClick={() => openWeb3Modal('Navbar')}
-                            fontWeight="normal"
-                            colorScheme="brand"
-                            bg="brand.700"
-                            size="lg"
-                            boxShadow="lg"
-                            fontSize="2xl"
-                            borderRadius="full">
-                            Connect
-                        </Button>
-                    )}
                 </HStack>
             </HStack>
         </Flex>

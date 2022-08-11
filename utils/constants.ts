@@ -18,11 +18,18 @@ export const POCKET_NETWORK_API_KEY = process.env.POCKET_NETWORK_API_KEY;
 export const POCKET_NETWORK_ID = process.env.POCKET_NETWORK_ID;
 export const ALCHEMY_NOTIFY_TOKEN = process.env.ALCHEMY_NOTIFY_TOKEN;
 export const OPENSEA_API_KEY = process.env.OPENSEA_API_KEY;
+
 export const DATADOG_API_KEY = process.env.DATADOG_API_KEY;
+export const DATADOG_RUM_APPLICATION_ID = process.env.NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID;
+export const DATADOG_RUM_CLIENT_TOKEN = process.env.NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN;
+export const DATADOG_RUM_ENV = process.env.NEXT_PUBLIC_DATADOG_RUM_ENV;
+
+export const METABOT_BASE_API_URL = process.env.NEXT_PUBLIC_METABOT_BASE_API_URL;
 export const SLACK_API_TOKEN = process.env.SLACK_API_TOKEN;
 
 /* Frontend Constants */
-export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS.toLowerCase();
+export const CONTRACT_ADDRESS =
+    process.env.NEXT_PUBLIC_NOMAD_WHITEHAT_CONTRACT_ADDRESS.toLowerCase();
 export const NETWORK = process.env.NEXT_PUBLIC_NETWORK.toLowerCase();
 export const INFURA_PROJECT_ID = process.env.NEXT_PUBLIC_INFURA_PROJECT_ID;
 export const ALCHEMY_PROJECT_ID = process.env.NEXT_PUBLIC_ALCHEMY_PROJECT_ID;
