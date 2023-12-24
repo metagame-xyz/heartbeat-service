@@ -12,7 +12,7 @@ export default function Layout(props) {
     return (
         <Flex direction="column" width="100%" {...props}>
             <Navbar maxW={maxW} />
-            <Box width="100%" justify="center">
+            <Box width="100%" justifyContent="center">
                 {props.children}
             </Box>
             <Spacer />
