@@ -32,7 +32,6 @@
         "ethers": "^5.5.1",
         "framer-motion": "^4",
         "gif.js.optimized": "^1.0.1",
-        "gifencoder": "^2.0.1",
         "glsl-blend-soft-light": "^1.0.5",
         "glsl-film-grain": "^1.0.4",
         "glslify-bundle": "^5.1.1",
